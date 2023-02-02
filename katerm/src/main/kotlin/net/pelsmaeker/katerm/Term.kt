@@ -14,8 +14,10 @@ sealed interface Term {
 
 /** A constructor application term. */
 interface ApplTerm : Term {
+    /** The type of the term. */
+    override val type: ApplTermType
     /** The constructor name. */
-    val op: String
+    val op: String get() = type.op
     /** The term arguments. */
     val args: List<Term>
 
@@ -27,14 +29,23 @@ sealed interface ValueTerm<T>: Term {
 }
 
 interface IntTerm : ValueTerm<Int> {
+    /** The type of the term. */
+    override val type: IntTermType get() = IntTermType
+
     override val value: Int
 }
 
 interface StringTerm : ValueTerm<String> {
+    /** The type of the term. */
+    override val type: StringTermType get() = StringTermType
+
     override val value: String
 }
 
 interface BlobTerm : ValueTerm<Any> {
+    /** The type of the term. */
+    override val type: BlobTermType get() = BlobTermType
+
     override val value: Any
 }
 
@@ -46,6 +57,8 @@ sealed interface ListTerm : Term {
     val size: Int?
     /** The elements in the list. */
     val elements: List<Term>
+    /** The type of the term. */
+    override val type: ListTermType
 }
 
 /** A non-empty list term. */
@@ -54,15 +67,34 @@ interface ConsTerm : ListTerm {
     val head: Term
     /** The tail of the list, which may be a variable. */
     val tail: ListTerm
+    override val minSize: Int get() = 1 + tail.minSize
+    override val size: Int? get() = tail.size?.let { 1 + it }
+    override val elements: List<Term> get() = listOf(head) + tail.elements  // TODO: Optimize
 }
 
 /** An empty list term. */
 interface NilTerm : ListTerm {
+    override val minSize: Int get() = 0
+    override val size: Int? get() = 0
+    override val elements: List<Term> get() = emptyList()
+}
 
+/** A list term variable. */
+interface ListTermVar: ListTerm {
+    /** The resource; or `null`. */
+    val resource: String?
+    /** The unique name. */
+    val name: String
+    /** The type of the variable. */
+    override val type: ListTermType
+
+    override val minSize: Int get() = 0
+    override val size: Int? get() = null
+    override val elements: List<Term> get() = emptyList() // TODO: This property should not exist?
 }
 
 /** A term variable. */
-interface TermVar: Term, ListTerm {
+interface TermVar: Term {
     /** The resource; or `null`. */
     val resource: String?
     /** The unique name. */
@@ -70,6 +102,7 @@ interface TermVar: Term, ListTerm {
     /** The type of the variable. */
     override val type: TermType
 }
+
 
 /**
  * Holds term attachments.
@@ -86,4 +119,13 @@ interface TermAttachments {
      * @return the attachment, if found; otherwise, `null`
      */
     operator fun <T> get(key: Class<T>): T?
+
+    companion object {
+        fun empty(): TermAttachments = EmptyTermAttachments
+    }
+
+    private object EmptyTermAttachments: TermAttachments {
+        override fun isEmpty(): Boolean = true
+        override fun <T> get(key: Class<T>): T? = null
+    }
 }

@@ -13,7 +13,7 @@ sealed interface TermType {
         fun getSupertypeOf(t1: TermType, t2: TermType): TermType = when {
             t1 isSubtypeOf t2 -> t2
             t2 isSubtypeOf t1 -> t1
-            else -> AnyType
+            else -> AnyTermType
         }
 
         fun getSupertypeOf(vararg types: TermType): TermType = getSupertypeOf(types.toList())
@@ -22,7 +22,7 @@ sealed interface TermType {
         fun getSubtypeOf(t1: TermType, t2: TermType): TermType = when {
             t1 isSupertypeOf t2 -> t2
             t2 isSupertypeOf t1 -> t1
-            else -> NoType
+            else -> NoTermType
         }
 
         fun getSubtypeOf(vararg types: TermType): TermType = getSubtypeOf(types.toList())
@@ -34,7 +34,7 @@ sealed interface TermType {
 fun Term.isAssignableTo(other: TermType): Boolean = this.type isSupertypeOf other
 
 /** Any type (top). */
-object AnyType: TermType {
+object AnyTermType: TermType {
     override val hashString: String get() = "⊤"
 
     override infix fun isSubtypeOf(other: TermType): Boolean = false
@@ -43,69 +43,69 @@ object AnyType: TermType {
 }
 
 /** No type (bottom). */
-object NoType: TermType {
+object NoTermType: TermType {
     override val hashString: String get() = "⊥"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
 
     override fun toString(): String = "nothing"
 }
 
 /** The type of a constructor application. */
-data class ApplType(
+data class ApplTermType(
     /** The constructor name. */
     val op: String,
     /** The covariant types of the term parameters. */
-    val parameterTypes: List<TermType>
+    val paramTypes: List<TermType>
 ): TermType {
     /** The arity. */
-    val arity: Int get() = parameterTypes.size
+    val arity: Int get() = paramTypes.size
 
-    override val hashString: String get() = "A$op/${parameterTypes.joinToString("")};"
+    override val hashString: String get() = "A$op/${paramTypes.joinToString("")};"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType ||
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType ||
             // Is covariance correct here?
-            (other is ApplType && op == other.op && (parameterTypes zip other.parameterTypes).all { (a, b) -> a isSubtypeOf b })
+            (other is ApplTermType && op == other.op && (paramTypes zip other.paramTypes).all { (a, b) -> a isSubtypeOf b })
 
-    override fun toString(): String = "$op(${parameterTypes.joinToString()})"
+    override fun toString(): String = "$op(${paramTypes.joinToString()})"
 }
 
 /** The type of an integer term. */
-object IntType: TermType {
+object IntTermType: TermType {
     override val hashString: String get() = "I"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
 
     override fun toString(): String = "int"
 }
 
 /** The type of a string term. */
-object StringType: TermType {
+object StringTermType: TermType {
     override val hashString: String get() = "S"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
 
     override fun toString(): String = "string"
 }
 
 /** The type of a blob term. */
-object BlobType: TermType {
+object BlobTermType: TermType {
     override val hashString: String get() = "B"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
 
     override fun toString(): String = "blob"
 }
 
 /** The type of a list term. */
-data class ListType(
+data class ListTermType(
     /** The covariant type of elements in the list. */
     val elementType: TermType,
 ): TermType {
     override val hashString: String get() = "L$elementType;"
 
-    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyType ||
-            (other is ListType && elementType isSubtypeOf other.elementType)
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType ||
+            (other is ListTermType && elementType isSubtypeOf other.elementType)
 
     override fun toString(): String = "list<$elementType>"
 }
