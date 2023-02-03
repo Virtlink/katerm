@@ -4,65 +4,237 @@ package net.pelsmaeker.katerm
  * Builds terms.
  */
 interface TermBuilder {
-    fun intTerm(value: Int): IntTerm
 
-    fun stringTerm(value: String): StringTerm
+    /**
+     * Creates a copy of the specified term with the specified new attachments.
+     *
+     * @param term the term to copy
+     * @param newAttachments the new attachments of the term
+     * @return the copy of the term, but with the new attachments
+     */
+    fun withAttachments(term: Term, newAttachments: TermAttachments): Term
 
-    fun blobTerm(value: Any): BlobTerm
+    /////////
+    // Int //
+    /////////
 
-    fun applTerm(op: String, vararg args: Term): ApplTerm = applTerm(op, args.toList())
-    fun applTerm(op: String, args: List<Term>): ApplTerm = applTerm(ApplTermType(op, args.map { it.type }), args)
-    fun applTerm(type: ApplTermType, vararg args: Term): ApplTerm = applTerm(type, args.toList())
-    fun applTerm(type: ApplTermType, args: List<Term>): ApplTerm
+    /**
+     * Creates a new integer term with the specified value and no attachments.
+     *
+     * @param value the value of the term
+     * @return the created term
+     */
+    fun createInt(value: Int): IntTerm = createInt(value, TermAttachments.empty())
 
-    fun listTerm(vararg elements: Term): ListTerm = listTerm(elements.toList())
-    fun listTerm(elements: List<Term>): ListTerm = listTerm(ListTermType(TermType.getSupertypeOf(elements.map { it.type} )), elements)
-    fun listTerm(type: ListTermType, vararg elements: Term): ListTerm = listTerm(elements.toList())
-    fun listTerm(type: ListTermType, elements: List<Term>): ListTerm
+    /**
+     * Creates a new integer term with the specified value and attachments.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createInt(value: Int, attachments: TermAttachments): IntTerm
 
-    fun termVar(type: TermType, name: String, resource: String?): TermVar
-    fun listTermVar(type: ListTermType, name: String, resource: String?): ListTermVar
+    /**
+     * Create a copy of the specified integer term with the specified new value
+     * and the same attachments.
+     *
+     * @param newValue the new value of the term
+     * @return the copy of the term, but with the new value
+     */
+    fun replaceInt(term: IntTerm, newValue: Int): IntTerm
+
+    ////////////
+    // String //
+    ////////////
+
+    /**
+     * Creates a new string term with the specified value and no attachments.
+     *
+     * @param value the value of the term
+     * @return the created term
+     */
+    fun createString(value: String): StringTerm = createString(value, TermAttachments.empty())
+
+    /**
+     * Creates a new string term with the specified value and attachments.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createString(value: String, attachments: TermAttachments): StringTerm
+
+    /**
+     * Create a copy of the specified string term with the specified new value
+     * and the same attachments.
+     *
+     * @param newValue the new value of the term
+     * @return the copy of the term, but with the new value
+     */
+    fun replaceString(term: StringTerm, newValue: String): StringTerm
+
+    //////////
+    // Blob //
+    //////////
+
+    /**
+     * Creates a new blob term with the specified value and no attachments.
+     *
+     * @param value the value of the term
+     * @return the created term
+     */
+    fun createBlob(value: Any): BlobTerm = createBlob(value, TermAttachments.empty())
+
+    /**
+     * Creates a new blob term with the specified value and attachments.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createBlob(value: Any, attachments: TermAttachments): BlobTerm
+
+    /**
+     * Create a copy of the specified blob term with the specified new value
+     * and the same attachments.
+     *
+     * @param newValue the new value of the term
+     * @return the copy of the term, but with the new value
+     */
+    fun replaceBlob(term: BlobTerm, newValue: Any): BlobTerm
+
+    //////////
+    // Appl //
+    //////////
+
+    fun createAppl(op: String, vararg args: Term): ApplTerm = createAppl(op, args.asList())
+    fun createAppl(type: ApplTermType, vararg args: Term): ApplTerm = createAppl(type, args.asList())
+
+    fun createAppl(op: String, args: List<Term>): ApplTerm = createAppl(ApplTermType(op, args.map { it.type }), args, TermAttachments.empty())
+    fun createAppl(type: ApplTermType, args: List<Term>): ApplTerm = createAppl(type, args, TermAttachments.empty())
+
+    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm = createAppl(ApplTermType(op, args.map { it.type }), args, attachments)
+    fun createAppl(type: ApplTermType, args: List<Term>, attachments: TermAttachments): ApplTerm
+
+    fun replaceAppl(term: ApplTerm, vararg newArgs: Term): ApplTerm = replaceAppl(term, newArgs.asList())
+    fun replaceAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm
+
+    //////////
+    // List //
+    //////////
+
+    fun createList(vararg elements: Term): ListTerm = createList(elements.asList())
+    fun createList(type: ListTermType, vararg elements: Term): ListTerm = createList(elements.asList())
+
+    fun createList(elements: List<Term>): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.type} )), elements, TermAttachments.empty())
+    fun createList(type: ListTermType, elements: List<Term>): ListTerm = createList(type, elements, TermAttachments.empty())
+
+    fun createList(elements: List<Term>, attachments: TermAttachments): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.type} )), elements, attachments)
+    fun createList(type: ListTermType, elements: List<Term>, attachments: TermAttachments): ListTerm
+
+    fun replaceList(term: ListTerm, vararg newElements: Term): ListTerm = replaceList(term, newElements.asList())
+    fun replaceList(term: ListTerm, newElements: List<Term>): ListTerm
+
+    /////////
+    // Var //
+    /////////
+
+    fun createVar(type: TermType, name: String, resource: String? = null): TermVar = createVar(type, name, resource, TermAttachments.empty())
+    fun createVar(type: TermType, name: String, resource: String? = null, attachments: TermAttachments): TermVar
+
+    /////////////
+    // ListVar //
+    /////////////
+
+    fun createListVar(type: ListTermType, name: String, resource: String? = null): ListTermVar = createListVar(type, name, resource, TermAttachments.empty())
+    fun createListVar(type: ListTermType, name: String, resource: String? = null, attachments: TermAttachments): ListTermVar
+
 }
 
 class DefaultTermBuilder(
-    private val customBuilders: Map<String, (String, List<Term>) -> ApplTerm> = emptyMap(),
+    private val customBuilders: Map<String, (ApplTermType, List<Term>, TermAttachments) -> ApplTerm> = emptyMap(),
 ): TermBuilder {
 
-    override fun intTerm(value: Int): IntTerm {
-        return IntTermImpl(value)
+    override fun withAttachments(term: Term, newAttachments: TermAttachments): Term {
+        if (term.attachments == newAttachments) return term
+        return when (term) {
+            is IntTerm -> createInt(term.value, newAttachments)
+            is StringTerm -> createString(term.value, newAttachments)
+            is BlobTerm -> createBlob(term.value, newAttachments)
+            is ApplTerm -> createAppl(term.type, term.args, newAttachments)
+            is ListTermVar -> createListVar(term.type, term.name, term.resource, newAttachments)
+            is TermVar -> createVar(term.type, term.name, term.resource, newAttachments)
+            is ListTerm -> createList(term.type, term.elements, newAttachments)
+            else -> throw IllegalArgumentException("Unknown term type: $term")
+        }
     }
 
-    override fun stringTerm(value: String): StringTerm {
-        return StringTermImpl(value)
+    override fun createInt(value: Int, attachments: TermAttachments): IntTerm {
+        return IntTermImpl(value, attachments)
     }
 
-    override fun blobTerm(value: Any): BlobTerm {
-        return BlobTermImpl(value)
+    override fun replaceInt(term: IntTerm, newValue: Int): IntTerm {
+        if (term.value == newValue) return term
+        return createInt(newValue, term.attachments)
     }
 
-    override fun applTerm(type: ApplTermType, args: List<Term>): ApplTerm {
+    override fun createString(value: String, attachments: TermAttachments): StringTerm {
+        return StringTermImpl(value, attachments)
+    }
+
+    override fun replaceString(term: StringTerm, newValue: String): StringTerm {
+        if (term.value == newValue) return term
+        return createString(newValue, term.attachments)
+    }
+
+    override fun createBlob(value: Any, attachments: TermAttachments): BlobTerm {
+        return BlobTermImpl(value, attachments)
+    }
+
+    override fun replaceBlob(term: BlobTerm, newValue: Any): BlobTerm {
+        if (term.value === newValue) return term
+        return createBlob(newValue, term.attachments)
+    }
+
+    override fun createAppl(type: ApplTermType, args: List<Term>, attachments: TermAttachments): ApplTerm {
         require((args zip type.paramTypes).all { (te, ty) -> te.isAssignableTo(ty) }) { "Arguments do not match parameter types." }
 
-        val customBuilder = customBuilders[type.hashString]
-        return customBuilder?.let { it(type.op, args) } ?: ApplTermImpl(type, args)
+        val customBuilder = customBuilders[type.hashString] ?: ::ApplTermImpl
+        return customBuilder(type, args, attachments)
     }
 
-    override fun listTerm(type: ListTermType, elements: List<Term>): ListTerm {
+    override fun replaceAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
+        if (term.args == newArgs) return term
+        return createAppl(term.type, newArgs, term.attachments)
+    }
+
+    override fun createList(type: ListTermType, elements: List<Term>, attachments: TermAttachments): ListTerm {
         require(elements.all { it.isAssignableTo(type.elementType) }) { "Elements do not match list type." }
 
         return if (elements.isNotEmpty()) {
-            ConsTermImpl(type, elements.first(), listTerm(type, elements.drop(1)))  // TODO: Optimize
+            ConsTermImpl(type, elements.first(), createList(type, elements.drop(1)))  // TODO: Optimize
         } else {
             NilTermImpl()
         }
     }
 
-    override fun termVar(type: TermType, name: String, resource: String?): TermVar {
-        return TermVarImpl(type, name, resource)
+    override fun replaceList(term: ListTerm, newElements: List<Term>): ListTerm {
+        if (term.elements == newElements) return term
+        return createList(term.type, newElements, term.attachments)
     }
 
-    override fun listTermVar(type: ListTermType, name: String, resource: String?): ListTermVar {
-        return ListTermVarImpl(type, name, resource)
+    override fun createVar(type: TermType, name: String, resource: String?, attachments: TermAttachments): TermVar {
+        return TermVarImpl(type, name, resource, attachments)
+    }
+
+    override fun createListVar(
+        type: ListTermType,
+        name: String,
+        resource: String?,
+        attachments: TermAttachments,
+    ): ListTermVar {
+        return ListTermVarImpl(type, name, resource, attachments)
     }
 
     private abstract class TermImpl: Term
@@ -72,8 +244,21 @@ class DefaultTermBuilder(
         override val args: List<Term>,
         override val attachments: TermAttachments = TermAttachments.empty()
     ) : ApplTerm, TermImpl() {
+
         init {
             require((args zip type.paramTypes).all { (te, ty) -> te.isAssignableTo(ty) }) { "Arguments do not match parameter types." }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return super.equals(other)
+        }
+
+        override fun hashCode(): Int {
+            return super.hashCode()
+        }
+
+        override fun toString(): String {
+            return "${type.op}(${args.joinToString(", ")})"
         }
     }
 

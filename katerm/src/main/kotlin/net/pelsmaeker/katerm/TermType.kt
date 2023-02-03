@@ -53,13 +53,19 @@ object NoTermType: TermType {
 
 /** The type of a constructor application. */
 data class ApplTermType(
-    /** The constructor name. */
+    /** The constructor name; or an empty string for a tuple. */
     val op: String,
     /** The covariant types of the term parameters. */
     val paramTypes: List<TermType>
 ): TermType {
     /** The arity. */
     val arity: Int get() = paramTypes.size
+    /** Whether this is a tuple type. */
+    val isTuple: Boolean get() = op.isEmpty()
+
+    init {
+        require(op.isEmpty() || Regex("""[\w._\-+]+""").matches(op)) { "Invalid constructor name: $op" }
+    }
 
     override val hashString: String get() = "A$op/${paramTypes.joinToString("")};"
 
