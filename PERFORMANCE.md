@@ -10,3 +10,5 @@ Then we can test the following:
 - should we allow in-place mutation? (ideally not)
 - what is the performance impact of having custom builder lookup
 - what is the performance benefit of strongly-typed Appl types
+- the performance of calculating the hash at constructor time vs lazy vs always
+- the performance of having separate implementations for the most common arities of ApplTerm

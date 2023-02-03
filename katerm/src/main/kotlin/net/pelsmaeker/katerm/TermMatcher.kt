@@ -4,6 +4,11 @@ package net.pelsmaeker.katerm
  * Matches terms.
  */
 fun interface Matcher<in I: Term, out O: Term> {
+    /**
+     * Applies the matcher to the specified term
+     *
+     * @return the result of the match, or `null` if the term does not match
+     */
     fun match(term: I): O?
 
 
