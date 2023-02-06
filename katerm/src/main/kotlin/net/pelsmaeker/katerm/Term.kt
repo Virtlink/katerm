@@ -13,23 +13,27 @@ interface Term {
     /** A list of subterms. */
     val subterms: List<Term>
 
+    /**
+     * Accepts a term visitor.
+     *
+     * @param visitor the visitor to accept
+     * @return the result returned by the visitor
+     */
     fun <R> accept(visitor: TermVisitor<R>): R
 
     /**
-     * Determines whether this term and its subterms are equivalent to the given term and its subterms.
+     * Accepts a term visitor.
      *
-     * While [equals] checks that this term and the specified term have the same class,
-     * this method merely checks that this term and the specified term represent the same value,
-     * regardless of which implementation represents them.
-     *
-     * Note that the attachments are not checked by this method.
+     * @param visitor the visitor to accept
+     * @param arg the argument to pass to the visitor
+     * @return the result returned by the visitor
      */
-    infix fun matches(that: Term): Boolean
+    fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
 
     /**
-     * Determines whether this term and its subterms are the same type and represent the same value
-     * as the given term and it subterms. Even when this method returns `false`, [matches] may still
-     * return `true`.
+     * Determines whether this term and its subterms represent the same value
+     * as the given term and it subterms, regardless of the actual implementations
+     * of the terms and its subterms.
      *
      * Note that attachments are also checked by this method.
      *
@@ -49,21 +53,7 @@ interface ApplTerm : Term {
     override val subterms: List<Term> get() = args
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
-
-    override infix fun matches(that: Term): Boolean {
-        // Note that it does _not_ make sense to do a hashcode check here,
-        // even if we know these classes implement the same class.
-        // This is because some subterms might still match while having
-        // different implementations/hashcodes, causing the super terms to
-        // also have different hashcodes.
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is ApplTerm) return false         // Must be same interface
-
-        // @formatter:off
-        return this.type == that.type               // Same type, constructor and arity
-            && (this.args zip that.args).all { (a, b) -> a matches b }
-        // @formatter:on
-    }
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 }
 
 /** A term with an associated value and no subterms. */
@@ -79,13 +69,7 @@ interface IntTerm : ValueTerm<Int> {
     override val type: IntTermType get() = IntTermType
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
-
-    override infix fun matches(that: Term): Boolean {
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is IntTerm) return false         // Must be same interface
-
-        return this.value == that.value
-    }
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
 }
 
 interface StringTerm : ValueTerm<String> {
@@ -93,13 +77,7 @@ interface StringTerm : ValueTerm<String> {
     override val type: StringTermType get() = StringTermType
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
-
-    override infix fun matches(that: Term): Boolean {
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is StringTerm) return false         // Must be same interface
-
-        return this.value == that.value
-    }
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
 interface BlobTerm : ValueTerm<Any> {
@@ -107,13 +85,7 @@ interface BlobTerm : ValueTerm<Any> {
     override val type: BlobTermType get() = BlobTermType
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitBlob(this)
-
-    override infix fun matches(that: Term): Boolean {
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is BlobTerm) return false         // Must be same interface
-
-        return this.value == that.value
-    }
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitBlob(this, arg)
 }
 
 /** A list term. */
@@ -129,60 +101,24 @@ interface ListTerm : Term {
     override val subterms: List<Term> get() = elements
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
 
-    override infix fun matches(that: Term): Boolean {
-        // Note that it does _not_ make sense to do a hashcode check here,
-        // even if we know these classes implement the same class.
-        // This is because some subterms might still match while having
-        // different implementations/hashcodes, causing the super terms to
-        // also have different hashcodes.
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is ListTerm) return false         // Must be same interface
+    /**
+     * Accepts a list term visitor.
+     *
+     * @param visitor the visitor to accept
+     * @return the result returned by the visitor
+     */
+    fun <R> accept(visitor: ListTermVisitor<R>): R
 
-        // @formatter:off
-        return this.size == that.size
-            && this.type == that.type
-            && (this.elements zip that.elements).all { (a, b) -> a matches b }
-        // @formatter:on
-    }
-}
-
-/** A non-empty list term. */
-interface ConsTerm : ListTerm {
-    /** The head of the list. */
-    val head: Term
-    /** The tail of the list, which may be a variable. */
-    val tail: ListTerm
-
-    override val minSize: Int get() = 1 + tail.minSize
-    override val size: Int? get() = tail.size?.let { 1 + it }
-    override val elements: List<Term> get() = listOf(head) + tail.elements  // TODO: Optimize
-    // TODO: Visitor
-    // TODO: Matches
-}
-
-/** An empty list term. */
-interface NilTerm : ListTerm {
-    override val minSize: Int get() = 0
-    override val size: Int? get() = 0
-    override val elements: List<Term> get() = emptyList()
-    // TODO: Visitor
-    // TODO: Matches
-}
-
-/** A list term variable. */
-interface ListTermVar: ListTerm {
-    /** The resource; or `null`. */
-    val resource: String?
-    /** The unique name. */
-    val name: String
-
-    override val type: ListTermType
-    override val minSize: Int get() = 0
-    override val size: Int? get() = null
-    override val elements: List<Term> get() = emptyList() // TODO: This property should not exist?
-    // TODO: Visitor
-    // TODO: Matches
+    /**
+     * Accepts a list term visitor.
+     *
+     * @param visitor the visitor to accept
+     * @param arg the argument to pass to the visitor
+     * @return the result returned by the visitor
+     */
+    fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R
 }
 
 /** A term variable. */
@@ -196,41 +132,48 @@ interface TermVar: Term {
     override val subterms: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
+}
 
-    override infix fun matches(that: Term): Boolean {
-        if (this === that) return true              // Quick test: identity equality
-        if (that !is TermVar) return false          // Must be same interface
+/** A term list variable. */
+interface ListTermVar: TermVar, ListTerm {
+    override val type: ListTermType
+    override val subterms: List<Term> get() = emptyList()
 
-        // @formatter:off
-        return this.name == that.name
-            && this.resource == that.resource
-        // @formatter:on
-    }
+    override val minSize: Int get() = 0
+    override val size: Int? get() = null
+    override val elements: List<Term> get() = emptyList()
+
+    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
+
+    override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitListVar(this)
+    override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitListVar(this, arg)
+}
+
+/** A non-empty list term. */
+interface ConsTerm : ListTerm {
+    /** The head of the list. */
+    val head: Term
+    /** The tail of the list, which may be a variable. */
+    val tail: ListTerm
+
+    override val minSize: Int get() = 1 + tail.minSize
+    override val size: Int? get() = tail.size?.let { 1 + it }
+    override val elements: List<Term> get() = listOf(head) + tail.elements  // TODO: Optimize
+
+    override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitCons(this)
+    override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitCons(this, arg)
+}
+
+/** An empty list term. */
+interface NilTerm : ListTerm {
+    override val minSize: Int get() = 0
+    override val size: Int? get() = 0
+    override val elements: List<Term> get() = emptyList()
+
+    override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitNil(this)
+    override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitNil(this, arg)
 }
 
 
-/**
- * Holds term attachments.
- */
-interface TermAttachments {
-    /** Whether the set of attachments is empty. */
-    fun isEmpty(): Boolean
-    /** Whether the set of attachments is not empty. */
-    fun isNotEmpty(): Boolean = !isEmpty()
-    /**
-     * Gets the attachment with the specified key.
-     *
-     * @param key the key, the class of the attachment
-     * @return the attachment, if found; otherwise, `null`
-     */
-    operator fun <T> get(key: Class<T>): T?
-
-    companion object {
-        fun empty(): TermAttachments = EmptyTermAttachments
-    }
-
-    private object EmptyTermAttachments: TermAttachments {
-        override fun isEmpty(): Boolean = true
-        override fun <T> get(key: Class<T>): T? = null
-    }
-}

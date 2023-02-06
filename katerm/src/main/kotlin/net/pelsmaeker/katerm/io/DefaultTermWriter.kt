@@ -68,16 +68,6 @@ class DefaultTermWriter(
             write(']'.code)
         }
 
-        override fun visitCons(term: ConsTerm) = writer.run {
-            // TODO: Do we visit cons?
-            TODO("Not yet implemented")
-        }
-
-        override fun visitNil(term: NilTerm) = writer.run {
-            // TODO: Do we visit Nil?
-            TODO("Not yet implemented")
-        }
-
         override fun visitVar(term: TermVar) = writer.run {
             // Print something like "?x@resource", or "?x" if there is no resource.
             write('?'.code)
@@ -86,11 +76,6 @@ class DefaultTermWriter(
                 write('@'.code)
                 write(it)
             } ?: Unit
-        }
-
-        override fun visitListVar(term: ListTermVar) = writer.run {
-            // TODO: How to print a list variable?
-            TODO("Not yet implemented")
         }
 
         // TODO: Optimize to write the escaped string immediately to the writer
