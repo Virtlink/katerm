@@ -88,11 +88,16 @@ class DefaultTermBuilder(
         return ListTermVarImpl(type, name, resource, attachments)
     }
 
+    // The classes here are private to prevent them from being instantiated or used outside of this class.
+    // Instead, the base interfaces should be used.
+
+    /** Base class for this term implementation. */
     private abstract class TermImpl: Term {
         companion object {
             private val printer = DefaultTermWriter()
         }
 
+        /** An eager hash code calculation. */
         protected abstract val hash: Int
 
         override fun hashCode(): Int = hash
@@ -102,6 +107,7 @@ class DefaultTermBuilder(
         }
     }
 
+    /** Constructor application term. */
     private class ApplTermImpl(
         override val type: ApplTermType,
         override val args: List<Term>,
@@ -113,9 +119,9 @@ class DefaultTermBuilder(
         }
 
         override fun equals(that: Any?): Boolean {
-            if (this === that) return true              // Identity equality
-            if (that !is ApplTermImpl) return false     // Must be the exact same type (otherwise hash calculations may be different)
-            if (this.hash != that.hash) return false    // Hashes must match (but this does not guarantee that the terms are equal)
+            if (this === that) return true                                      // Identity equality
+            if (that !is ApplTerm) return false                                 // Not an ApplTerm
+            if (that is ApplTermImpl && this.hash != that.hash) return false    // If they use the same implementation, their hashes must be equal
 
             // Check that the term and all its subterms are truly equal
             // @formatter:off
@@ -125,15 +131,15 @@ class DefaultTermBuilder(
             // @formatter:on
         }
 
+        // Note that the attachments are part of the hash
         override val hash: Int = Objects.hash(type, args, attachments)
     }
 
-    private abstract class ValueTermImpl<T>: ValueTerm<T>, TermImpl()
-
+    /** Integer term. */
     private class IntTermImpl(
         override val value: Int,
         override val attachments: TermAttachments = TermAttachments.empty()
-    ) : IntTerm, ValueTermImpl<Int>() {
+    ) : IntTerm, TermImpl() {
         override val type: IntTermType get() = IntTermType
 
         override fun equals(that: Any?): Boolean {
@@ -151,10 +157,11 @@ class DefaultTermBuilder(
         override val hash: Int = Objects.hash(value, attachments)
     }
 
+    /** String term. */
     private class StringTermImpl(
         override val value: String,
         override val attachments: TermAttachments = TermAttachments.empty()
-    ) : StringTerm, ValueTermImpl<String>() {
+    ) : StringTerm, TermImpl() {
         override val type: StringTermType get() = StringTermType
 
         override fun equals(that: Any?): Boolean {
@@ -172,10 +179,12 @@ class DefaultTermBuilder(
         override val hash: Int = Objects.hash(value, attachments)
     }
 
+    /** Blob term. */
+    // TODO: We should probably not support this? Instead, users can create an implementation of `ApplTerm`.
     private class BlobTermImpl(
         override val value: Any,
         override val attachments: TermAttachments = TermAttachments.empty()
-    ) : BlobTerm, ValueTermImpl<Any>() {
+    ) : BlobTerm, TermImpl() {
         override val type: BlobTermType get() = BlobTermType
 
         override fun equals(that: Any?): Boolean {
@@ -193,47 +202,7 @@ class DefaultTermBuilder(
         override val hash: Int = Objects.hash(value, attachments)
     }
 
-    private abstract class ListTermImpl: ListTerm, TermImpl() {
-
-        override fun equals(that: Any?): Boolean {
-            if (this === that) return true              // Identity equality
-            if (that !is ListTermImpl) return false     // Must be the exact same type (otherwise hash calculations may be different)
-            if (this.hash != that.hash) return false    // Hashes must match (but this does not guarantee that the terms are equal)
-
-            // Check that the term and all its subterms are truly equal
-            // @formatter:off
-            return this.elements == that.elements
-                && this.attachments == that.attachments
-            // @formatter:on
-        }
-
-        override val hash: Int = Objects.hash(elements, attachments)
-    }
-
-    private class ConsTermImpl(
-        override val type: ListTermType,
-        override val head: Term,
-        override val tail: ListTerm,
-        override val attachments: TermAttachments = TermAttachments.empty(),
-    ) : ConsTerm, ListTermImpl() {
-        init {
-            require(head.isAssignableTo(tail.type.elementType)) { "Head does not match list type." }
-        }
-    }
-
-    private class NilTermImpl(
-        override val attachments: TermAttachments = TermAttachments.empty(),
-    ) : NilTerm, ListTermImpl() {
-        override val type: ListTermType get() = ListTermType(NoTermType)
-    }
-
-    private class ListTermVarImpl(
-        override val type: ListTermType,
-        override val name: String,
-        override val resource: String?,
-        override val attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTermVar, ListTermImpl()
-
+    /** A term variable. */
     private class TermVarImpl(
         override val type: TermType,
         override val name: String,
@@ -258,5 +227,49 @@ class DefaultTermBuilder(
         override val hash: Int = Objects.hash(type, name, resource, attachments)
     }
 
+    /** Base class for list terms. */
+    private abstract class ListTermImpl: ListTerm, TermImpl() {
+
+        override fun equals(that: Any?): Boolean {
+            if (this === that) return true              // Identity equality
+            if (that !is ListTermImpl) return false     // Must be the exact same type (otherwise hash calculations may be different)
+            if (this.hash != that.hash) return false    // Hashes must match (but this does not guarantee that the terms are equal)
+
+            // Check that the term and all its subterms are truly equal
+            // @formatter:off
+            return this.elements == that.elements
+                && this.attachments == that.attachments
+            // @formatter:on
+        }
+
+        override val hash: Int = Objects.hash(elements, attachments)
+    }
+
+    /** List cons term (a list head with a tail). */
+    private class ConsTermImpl(
+        override val type: ListTermType,
+        override val head: Term,
+        override val tail: ListTerm,
+        override val attachments: TermAttachments = TermAttachments.empty(),
+    ) : ConsTerm, ListTermImpl() {
+        init {
+            require(head.isAssignableTo(tail.type.elementType)) { "Head does not match list type." }
+        }
+    }
+
+    /** List nil term (an empty list). */
+    private class NilTermImpl(
+        override val attachments: TermAttachments = TermAttachments.empty(),
+    ) : NilTerm, ListTermImpl() {
+        override val type: ListTermType get() = ListTermType(NoTermType)
+    }
+
+    /** A term variable as a list tail. */
+    private class ListTermVarImpl(
+        override val type: ListTermType,
+        override val name: String,
+        override val resource: String?,
+        override val attachments: TermAttachments = TermAttachments.empty(),
+    ) : ListTermVar, ListTermImpl()
 
 }

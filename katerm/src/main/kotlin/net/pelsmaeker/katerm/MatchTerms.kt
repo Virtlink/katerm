@@ -6,7 +6,9 @@ package net.pelsmaeker.katerm
  * Any term variables in the pattern are returned as part of the match result,
  * with the term they were matched against. If the match fails, this method returns `null`.
  *
- * Note that the attachments are not checked by this method.
+ * If the term is matched against itself, all variables will be associated with themselves.
+ *
+ * Note that the term attachments are not checked by this method.
  *
  * @param pattern the pattern to match against
  * @return the result of the match; or `null` if the match failed

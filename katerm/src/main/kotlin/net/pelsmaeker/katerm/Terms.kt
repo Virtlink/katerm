@@ -56,33 +56,34 @@ interface ApplTerm : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 }
 
-/** A term with an associated value and no subterms. */
-interface ValueTerm<T>: Term {
+/** An integer term. */
+interface IntTerm : Term {
     /** The value of the term. */
-    val value: T
-
-    override val subterms: List<Term> get() = emptyList()
-}
-
-interface IntTerm : ValueTerm<Int> {
-    override val value: Int
+    val value: Int
     override val type: IntTermType get() = IntTermType
+    override val subterms: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
 }
 
-interface StringTerm : ValueTerm<String> {
-    override val value: String
+/** A string term. */
+interface StringTerm : Term {
+    /** The value of the term. */
+    val value: String
     override val type: StringTermType get() = StringTermType
+    override val subterms: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
-interface BlobTerm : ValueTerm<Any> {
-    override val value: Any
+/** A blob term. */
+interface BlobTerm : Term {
+    /** The value of the term. */
+    val value: Any
     override val type: BlobTermType get() = BlobTermType
+    override val subterms: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitBlob(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitBlob(this, arg)
