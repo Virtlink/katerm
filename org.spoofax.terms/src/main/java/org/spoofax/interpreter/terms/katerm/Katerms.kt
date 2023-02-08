@@ -3,7 +3,6 @@ package org.spoofax.interpreter.terms.katerm
 typealias KTerm = net.pelsmaeker.katerm.Term
 typealias KApplTerm = net.pelsmaeker.katerm.ApplTerm
 typealias KIntTerm = net.pelsmaeker.katerm.IntTerm
-typealias KValueTerm<T> = net.pelsmaeker.katerm.ValueTerm<T>
 typealias KStringTerm = net.pelsmaeker.katerm.StringTerm
 typealias KBlobTerm = net.pelsmaeker.katerm.BlobTerm
 typealias KListTerm = net.pelsmaeker.katerm.ListTerm
