@@ -8,4 +8,6 @@ plugins {
 dependencies {
     // Testing
     testImplementation  (libs.kotest)
+    testImplementation  (libs.jmh)
+    testImplementation  (libs.jmh.generator)
 }

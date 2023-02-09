@@ -11,6 +11,7 @@ jsr305                          = "3.0.2"           # https://mvnrepository.com/
 # Testing
 junit                           = "5.9.1"           # https://junit.org
 kotest                          = "5.5.4"           # https://kotest.io/
+jmh                             = "1.36"            # https://github.com/openjdk/jmh
 
 
 [plugins]
@@ -29,3 +30,5 @@ junit                           = { module = "org.junit.jupiter:junit-jupiter", 
 kotest                          = { module = "io.kotest:kotest-runner-junit5",                              version.ref = "kotest" }
 kotest-assertions               = { module = "io.kotest:kotest-assertions-core",                            version.ref = "kotest" }
 kotest-property                 = { module = "io.kotest:kotest-property",                                   version.ref = "kotest" }
+jmh                             = { module = "org.openjdk.jmh:jmh-core",                                    version.ref = "jmh" }
+jmh-generator                   = { module = "org.openjdk.jmh:jmh-generator-annprocess",                    version.ref = "jmh" }
