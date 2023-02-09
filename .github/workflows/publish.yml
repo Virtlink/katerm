@@ -1,4 +1,4 @@
-name: Publish to Maven Central
+name: Publish
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publish to Maven Central
+    name: Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
