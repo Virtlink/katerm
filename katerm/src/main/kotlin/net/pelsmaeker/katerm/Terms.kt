@@ -39,7 +39,7 @@ interface Term {
      *
      * This method may be used in tests to assert equality.
      */
-    override fun equals(that: Any?): Boolean
+    override fun equals(other: Any?): Boolean
 }
 
 /** A constructor application term. */
@@ -91,12 +91,14 @@ interface BlobTerm : Term {
 
 /** A list term. */
 interface ListTerm : Term {
-    /** The minimum number of elements in the list. */
+    /** The minimum number of elements in the list. This is the number of elements in [elements]. */
     val minSize: Int
     /** The number of elements in the list; or `null` if the list ends with a variable. */
     val size: Int?
-    /** The elements in the list. */
+    /** The elements in the list. If the list ends with a variable, it is not included here. */
     val elements: List<Term>
+    /** The trailing variable of the list; or `null` if the list does not have a trailing variable. */
+    val trailingVar: ListTermVar?
 
     override val type: ListTermType
     override val subterms: List<Term> get() = elements
@@ -144,6 +146,7 @@ interface ListTermVar: TermVar, ListTerm {
     override val minSize: Int get() = 0
     override val size: Int? get() = null
     override val elements: List<Term> get() = emptyList()
+    override val trailingVar: ListTermVar? get() = this
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
@@ -159,8 +162,6 @@ interface ConsTerm : ListTerm {
     /** The tail of the list, which may be a variable. */
     val tail: ListTerm
 
-    override val minSize: Int get() = 1 + tail.minSize
-    override val size: Int? get() = tail.size?.let { 1 + it }
     override val elements: List<Term> get() = listOf(head) + tail.elements  // TODO: Optimize
 
     override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitCons(this)
@@ -172,6 +173,7 @@ interface NilTerm : ListTerm {
     override val minSize: Int get() = 0
     override val size: Int? get() = 0
     override val elements: List<Term> get() = emptyList()
+    override val trailingVar: ListTermVar? get() = null
 
     override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitNil(this)
     override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitNil(this, arg)
