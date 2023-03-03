@@ -11,15 +11,15 @@ typealias ApplTermBuilder = (ApplTermType, List<Term>, TermAttachments) -> ApplT
 open class DefaultTermBuilder: TermBuilder {
 
     override fun withAttachments(term: Term, newAttachments: TermAttachments): Term {
-        if (term.attachments == newAttachments) return term
+        if (term.termAttachments == newAttachments) return term
         return when (term) {
             is IntTerm -> createInt(term.value, newAttachments)
             is StringTerm -> createString(term.value, newAttachments)
             is BlobTerm -> createBlob(term.value, newAttachments)
-            is ApplTerm -> createAppl(term.type, term.args, newAttachments)
-            is ListTermVar -> createListVar(term.type, term.name, term.resource, newAttachments)
-            is TermVar -> createVar(term.type, term.name, term.resource, newAttachments)
-            is ListTerm -> createList(term.type, term.elements, newAttachments)
+            is ApplTerm -> createAppl(term.termType, term.termArgs, newAttachments)
+            is ListTermVar -> createListVar(term.termType, term.name, term.resource, newAttachments)
+            is TermVar -> createVar(term.termType, term.name, term.resource, newAttachments)
+            is ListTerm -> createList(term.termType, term.elements, newAttachments)
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
@@ -30,7 +30,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     override fun replaceInt(term: IntTerm, newValue: Int): IntTerm {
         if (term.value == newValue) return term
-        return createInt(newValue, term.attachments)
+        return createInt(newValue, term.termAttachments)
     }
 
     override fun createString(value: String, attachments: TermAttachments): StringTerm {
@@ -39,7 +39,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     override fun replaceString(term: StringTerm, newValue: String): StringTerm {
         if (term.value == newValue) return term
-        return createString(newValue, term.attachments)
+        return createString(newValue, term.termAttachments)
     }
 
     override fun createBlob(value: Any, attachments: TermAttachments): BlobTerm {
@@ -48,7 +48,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     override fun replaceBlob(term: BlobTerm, newValue: Any): BlobTerm {
         if (term.value === newValue) return term
-        return createBlob(newValue, term.attachments)
+        return createBlob(newValue, term.termAttachments)
     }
 
     override fun createAppl(type: ApplTermType, args: List<Term>, attachments: TermAttachments): ApplTerm {
@@ -64,13 +64,13 @@ open class DefaultTermBuilder: TermBuilder {
      * @param type the type of the term to build
      * @return the builder to use
      */
-    open fun getApplBuilder(type: ApplTermType): ApplTermBuilder {
+    protected open fun getApplBuilder(type: ApplTermType): ApplTermBuilder {
         return ::ApplTermImpl
     }
 
     override fun replaceAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
-        if (term.args == newArgs) return term
-        return createAppl(term.type, newArgs, term.attachments)
+        if (term.termArgs == newArgs) return term
+        return createAppl(term.termType, newArgs, term.termAttachments)
     }
 
     override fun createList(type: ListTermType, elements: List<Term>, attachments: TermAttachments): ListTerm {
@@ -85,7 +85,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     override fun replaceList(term: ListTerm, newElements: List<Term>): ListTerm {
         if (term.elements == newElements) return term
-        return createList(term.type, newElements, term.attachments)
+        return createList(term.termType, newElements, term.termAttachments)
     }
 
     override fun createVar(type: TermType, name: String, resource: String?, attachments: TermAttachments): TermVar {
@@ -106,7 +106,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** Base class for this term implementation. */
     protected abstract class TermImpl(
-        override val attachments: TermAttachments
+        override val termAttachments: TermAttachments
     ): Term {
         companion object {
             /** The default term writer used for [toString]. */
@@ -165,7 +165,7 @@ open class DefaultTermBuilder: TermBuilder {
         attachments: TermAttachments,
     ) : ApplTerm, TermImpl(attachments) {
 
-        abstract override val args: List<Term>
+        abstract override val termArgs: List<Term>
 
         final override fun equals(other: Any?): Boolean {
             if (this === other) return true                // Identity equality
@@ -195,25 +195,25 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** Constructor application term. */
     protected class ApplTermImpl(
-        override val type: ApplTermType,
-        override val args: List<Term>,
+        override val termType: ApplTermType,
+        override val termArgs: List<Term>,
         attachments: TermAttachments = TermAttachments.empty()
     ) : ApplTerm, ApplTermImplBase(attachments) {
 
         init {
-            require((args zip type.paramTypes).all { (te, ty) -> te.isAssignableTo(ty) }) { "Arguments do not match parameter types." }
+            require((termArgs zip termType.paramTypes).all { (te, ty) -> te.isAssignableTo(ty) }) { "Arguments do not match parameter types." }
         }
 
         override fun equals(that: ApplTerm): Boolean {
             // @formatter:off
-            return this.type == that.type
-                && this.args == that.args
-                && this.attachments == that.attachments
+            return this.termType == that.termType
+                && this.termArgs == that.termArgs
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
         // Note that the attachments are part of the hash
-        override val hash: Int = Objects.hash(type, args, attachments)
+        override val hash: Int = Objects.hash(termType, termArgs, attachments)
     }
 
     /** Integer term. */
@@ -221,7 +221,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val value: Int,
         attachments: TermAttachments = TermAttachments.empty()
     ) : IntTerm, TermImpl(attachments) {
-        override val type: IntTermType get() = IntTermType
+        override val termType: IntTermType get() = IntTermType
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                 // Identity equality
@@ -231,7 +231,7 @@ open class DefaultTermBuilder: TermBuilder {
             // @formatter:off
             return maybeEqual(other)
                 && this.value == that.value
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
@@ -243,7 +243,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val value: String,
         attachments: TermAttachments = TermAttachments.empty()
     ) : StringTerm, TermImpl(attachments) {
-        override val type: StringTermType get() = StringTermType
+        override val termType: StringTermType get() = StringTermType
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                 // Identity equality
@@ -253,7 +253,7 @@ open class DefaultTermBuilder: TermBuilder {
             // @formatter:off
             return maybeEqual(other)
                 && this.value == that.value
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
@@ -266,7 +266,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val value: Any,
         attachments: TermAttachments = TermAttachments.empty()
     ) : BlobTerm, TermImpl(attachments) {
-        override val type: BlobTermType get() = BlobTermType
+        override val termType: BlobTermType get() = BlobTermType
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                 // Identity equality
@@ -276,7 +276,7 @@ open class DefaultTermBuilder: TermBuilder {
             // @formatter:off
             return maybeEqual(other)
                 && this.value == that.value
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
@@ -285,7 +285,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** A term variable. */
     protected class TermVarImpl(
-        override val type: TermType,
+        override val termType: TermType,
         override val name: String,
         override val resource: String?,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -298,14 +298,14 @@ open class DefaultTermBuilder: TermBuilder {
             // Check that the term and all its subterms are truly equal
             // @formatter:off
             return maybeEqual(other)
-                && this.type == that.type
+                && this.termType == that.termType
                 && this.name == that.name
                 && this.resource == that.resource
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
-        override val hash: Int = Objects.hash(type, name, resource, attachments)
+        override val hash: Int = Objects.hash(termType, name, resource, attachments)
     }
 
     /** Base class for list terms. */
@@ -324,16 +324,16 @@ open class DefaultTermBuilder: TermBuilder {
                 && this.size == that.size
                 && this.elements == that.elements
                 && this.trailingVar == that.trailingVar
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
-        override val hash: Int = Objects.hash(type, elements, trailingVar, attachments)
+        override val hash: Int = Objects.hash(termType, elements, trailingVar, attachments)
     }
 
     /** List cons term (a list head with a tail). */
     protected class ConsTermImpl(
-        override val type: ListTermType,
+        override val termType: ListTermType,
         override val head: Term,
         override val tail: ListTerm,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -344,7 +344,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val trailingVar: ListTermVar? get() = tail.trailingVar
 
         init {
-            require(head.isAssignableTo(tail.type.elementType)) { "Head does not match list type." }
+            require(head.isAssignableTo(tail.termType.elementType)) { "Head does not match list type." }
         }
 
     }
@@ -353,7 +353,7 @@ open class DefaultTermBuilder: TermBuilder {
     protected class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : NilTerm, ListTermImpl(attachments) {
-        override val type: ListTermType get() = ListTermType(NoTermType)
+        override val termType: ListTermType get() = ListTermType(NoTermType)
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                 // Identity equality
@@ -363,7 +363,7 @@ open class DefaultTermBuilder: TermBuilder {
             // @formatter:off
             return maybeEqual(other)
                 && that.size == 0
-                && this.attachments == that.attachments
+                && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
@@ -372,7 +372,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** A term variable as a list tail. */
     protected class ListTermVarImpl(
-        override val type: ListTermType,
+        override val termType: ListTermType,
         override val name: String,
         override val resource: String?,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -389,11 +389,11 @@ open class DefaultTermBuilder: TermBuilder {
                     && this.size == that.size
                     && this.elements == that.elements
                     && this.trailingVar == that.trailingVar
-                    && this.attachments == that.attachments
+                    && this.termAttachments == that.termAttachments
             // @formatter:on
         }
 
-        override val hash: Int = Objects.hash(type, name, resource, attachments)
+        override val hash: Int = Objects.hash(termType, name, resource, attachments)
     }
 
 }

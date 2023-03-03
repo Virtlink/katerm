@@ -56,9 +56,9 @@ class DefaultTermWriter(
         }
 
         override fun visitAppl(term: ApplTerm) = writer.run {
-            write(term.op)
+            write(term.termOp)
             write('('.code)
-            writeSubtermList(term.args)
+            writeSubtermList(term.termArgs)
             write(')'.code)
         }
 

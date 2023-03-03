@@ -47,7 +47,7 @@ private class MatcherVisitor(
     override fun visitAppl(term: ApplTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is ApplTerm -> acceptAll(term.args, pattern.args)
+        pattern is ApplTerm -> acceptAll(term.termArgs, pattern.termArgs)
         else -> false
     }
 

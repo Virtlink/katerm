@@ -7,11 +7,11 @@ package net.pelsmaeker.katerm
  */
 interface Term {
     /** The type of term. */
-    val type: TermType
+    val termType: TermType
     /** The attachments of the term. */
-    val attachments: TermAttachments
-    /** A list of subterms. */
-    val subterms: List<Term>
+    val termAttachments: TermAttachments
+    /** A list of child terms of the term. */
+    val termChildren: List<Term>
 
     /**
      * Accepts a term visitor.
@@ -45,12 +45,12 @@ interface Term {
 /** A constructor application term. */
 interface ApplTerm : Term {
     /** The constructor name. */
-    val op: String get() = type.op
+    val termOp: String get() = termType.op
     /** The term arguments. */
-    val args: List<Term>
+    val termArgs: List<Term>
 
-    override val type: ApplTermType
-    override val subterms: List<Term> get() = args
+    override val termType: ApplTermType
+    override val termChildren: List<Term> get() = termArgs
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
@@ -60,8 +60,8 @@ interface ApplTerm : Term {
 interface IntTerm : Term {
     /** The value of the term. */
     val value: Int
-    override val type: IntTermType get() = IntTermType
-    override val subterms: List<Term> get() = emptyList()
+    override val termType: IntTermType get() = IntTermType
+    override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
@@ -71,8 +71,8 @@ interface IntTerm : Term {
 interface StringTerm : Term {
     /** The value of the term. */
     val value: String
-    override val type: StringTermType get() = StringTermType
-    override val subterms: List<Term> get() = emptyList()
+    override val termType: StringTermType get() = StringTermType
+    override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
@@ -82,8 +82,8 @@ interface StringTerm : Term {
 interface BlobTerm : Term {
     /** The value of the term. */
     val value: Any
-    override val type: BlobTermType get() = BlobTermType
-    override val subterms: List<Term> get() = emptyList()
+    override val termType: BlobTermType get() = BlobTermType
+    override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitBlob(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitBlob(this, arg)
@@ -100,8 +100,8 @@ interface ListTerm : Term {
     /** The trailing variable of the list; or `null` if the list does not have a trailing variable. */
     val trailingVar: ListTermVar?
 
-    override val type: ListTermType
-    override val subterms: List<Term> get() = elements
+    override val termType: ListTermType
+    override val termChildren: List<Term> get() = elements
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
@@ -131,8 +131,8 @@ interface TermVar: Term {
     /** The unique name. */
     val name: String
 
-    override val type: TermType
-    override val subterms: List<Term> get() = emptyList()
+    override val termType: TermType
+    override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
@@ -140,8 +140,8 @@ interface TermVar: Term {
 
 /** A term list variable. */
 interface ListTermVar: TermVar, ListTerm {
-    override val type: ListTermType
-    override val subterms: List<Term> get() = emptyList()
+    override val termType: ListTermType
+    override val termChildren: List<Term> get() = emptyList()
 
     override val minSize: Int get() = 0
     override val size: Int? get() = null

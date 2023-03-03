@@ -31,7 +31,7 @@ sealed interface TermType {
 }
 
 
-fun Term.isAssignableTo(other: TermType): Boolean = this.type isSupertypeOf other
+fun Term.isAssignableTo(other: TermType): Boolean = this.termType isSupertypeOf other
 
 /** Any type (top). */
 object AnyTermType: TermType {

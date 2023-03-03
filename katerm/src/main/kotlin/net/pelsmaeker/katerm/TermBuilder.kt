@@ -111,10 +111,10 @@ interface TermBuilder {
     fun createAppl(op: String, vararg args: Term): ApplTerm = createAppl(op, args.asList())
     fun createAppl(type: ApplTermType, vararg args: Term): ApplTerm = createAppl(type, args.asList())
 
-    fun createAppl(op: String, args: List<Term>): ApplTerm = createAppl(ApplTermType(op, args.map { it.type }), args, TermAttachments.empty())
+    fun createAppl(op: String, args: List<Term>): ApplTerm = createAppl(ApplTermType(op, args.map { it.termType }), args, TermAttachments.empty())
     fun createAppl(type: ApplTermType, args: List<Term>): ApplTerm = createAppl(type, args, TermAttachments.empty())
 
-    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm = createAppl(ApplTermType(op, args.map { it.type }), args, attachments)
+    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm = createAppl(ApplTermType(op, args.map { it.termType }), args, attachments)
     fun createAppl(type: ApplTermType, args: List<Term>, attachments: TermAttachments): ApplTerm
 
     fun replaceAppl(term: ApplTerm, vararg newArgs: Term): ApplTerm = replaceAppl(term, newArgs.asList())
@@ -127,10 +127,10 @@ interface TermBuilder {
     fun createList(vararg elements: Term): ListTerm = createList(elements.asList())
     fun createList(type: ListTermType, vararg elements: Term): ListTerm = createList(elements.asList())
 
-    fun createList(elements: List<Term>): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.type} )), elements, TermAttachments.empty())
+    fun createList(elements: List<Term>): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.termType} )), elements, TermAttachments.empty())
     fun createList(type: ListTermType, elements: List<Term>): ListTerm = createList(type, elements, TermAttachments.empty())
 
-    fun createList(elements: List<Term>, attachments: TermAttachments): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.type} )), elements, attachments)
+    fun createList(elements: List<Term>, attachments: TermAttachments): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.termType} )), elements, attachments)
     fun createList(type: ListTermType, elements: List<Term>, attachments: TermAttachments): ListTerm
 
     fun replaceList(term: ListTerm, vararg newElements: Term): ListTerm = replaceList(term, newElements.asList())
