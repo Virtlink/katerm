@@ -23,10 +23,18 @@ fun Term.match(pattern: Term): MatchResult? {
 private class MatcherVisitor(
     private val associations: MutableMap<TermVar, Term>
 ): TermVisitor1<Term, Boolean>, ListTermVisitor1<Term, Boolean> {
+
     override fun visitInt(term: IntTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
         pattern is IntTerm -> true
+        else -> false
+    }
+
+    override fun visitReal(term: RealTerm, pattern: Term): Boolean = when {
+        term === pattern -> associateSelf(term)
+        pattern is TermVar -> associate(term, pattern)
+        pattern is RealTerm -> true
         else -> false
     }
 

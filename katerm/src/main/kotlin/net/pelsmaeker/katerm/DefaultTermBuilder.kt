@@ -33,6 +33,15 @@ open class DefaultTermBuilder: TermBuilder {
         return createInt(newValue, term.termAttachments)
     }
 
+    override fun createReal(value: Double, attachments: TermAttachments): RealTerm {
+        return RealTermImpl(value, attachments)
+    }
+
+    override fun replaceReal(term: RealTerm, newValue: Double): RealTerm {
+        if (term.value == newValue) return term
+        return createReal(newValue, term.termAttachments)
+    }
+
     override fun createString(value: String, attachments: TermAttachments): StringTerm {
         return StringTermImpl(value, attachments)
     }
@@ -161,6 +170,7 @@ open class DefaultTermBuilder: TermBuilder {
 
 
     /** Constructor application term base class. */
+    @Suppress("EqualsOrHashCode")
     protected abstract class ApplTermImplBase(
         attachments: TermAttachments,
     ) : ApplTerm, TermImpl(attachments) {
@@ -170,7 +180,7 @@ open class DefaultTermBuilder: TermBuilder {
         final override fun equals(other: Any?): Boolean {
             if (this === other) return true                // Identity equality
             val that = other as? ApplTerm ?: return false  // Not an ApplTerm
-            return maybeEqual(other) && equals(that)
+            return maybeEqual(other) && equalsAppl(that)
         }
 
         /**
@@ -184,7 +194,7 @@ open class DefaultTermBuilder: TermBuilder {
          * @param that the term to check
          * @return `true` is this term is equal to the specified term; otherwise, `false`
          */
-        protected abstract fun equals(that: ApplTerm): Boolean
+        protected abstract fun equalsAppl(that: ApplTerm): Boolean
 
         /**
          * Implement this property to perform a custom hash code calculation.
@@ -204,7 +214,7 @@ open class DefaultTermBuilder: TermBuilder {
             require((termArgs zip termType.paramTypes).all { (te, ty) -> te.isAssignableTo(ty) }) { "Arguments do not match parameter types." }
         }
 
-        override fun equals(that: ApplTerm): Boolean {
+        override fun equalsAppl(that: ApplTerm): Boolean {
             // @formatter:off
             return this.termType == that.termType
                 && this.termArgs == that.termArgs
@@ -216,7 +226,8 @@ open class DefaultTermBuilder: TermBuilder {
         override val hash: Int = Objects.hash(termType, termArgs, attachments)
     }
 
-    /** Integer term. */
+    /** Integer value term. */
+    @Suppress("EqualsOrHashCode")
     protected class IntTermImpl(
         override val value: Int,
         attachments: TermAttachments = TermAttachments.empty()
@@ -238,7 +249,31 @@ open class DefaultTermBuilder: TermBuilder {
         override val hash: Int = Objects.hash(value, attachments)
     }
 
+    /** Real value term. */
+    @Suppress("EqualsOrHashCode")
+    protected class RealTermImpl(
+        override val value: Double,
+        attachments: TermAttachments = TermAttachments.empty()
+    ) : RealTerm, TermImpl(attachments) {
+        override val termType: RealTermType get() = RealTermType
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true                 // Identity equality
+            val that = other as? RealTerm ?: return false   // Not a RealTerm
+
+            // Check that the term and all its subterms are truly equal
+            // @formatter:off
+            return maybeEqual(other)
+                && this.value == that.value
+                && this.termAttachments == that.termAttachments
+            // @formatter:on
+        }
+
+        override val hash: Int = Objects.hash(value, attachments)
+    }
+
     /** String term. */
+    @Suppress("EqualsOrHashCode")
     protected class StringTermImpl(
         override val value: String,
         attachments: TermAttachments = TermAttachments.empty()
@@ -262,6 +297,7 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** Blob term. */
     // TODO: We should probably not support this? Instead, users can create an implementation of `ApplTerm`.
+    @Suppress("EqualsOrHashCode")
     protected class BlobTermImpl(
         override val value: Any,
         attachments: TermAttachments = TermAttachments.empty()
@@ -284,6 +320,7 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** A term variable. */
+    @Suppress("EqualsOrHashCode")
     protected class TermVarImpl(
         override val termType: TermType,
         override val name: String,
@@ -309,6 +346,7 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** Base class for list terms. */
+    @Suppress("EqualsOrHashCode")
     protected sealed class ListTermImpl(
         attachments: TermAttachments,
     ): ListTerm, TermImpl(attachments) {
@@ -350,6 +388,7 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** List nil term (an empty list). */
+    @Suppress("EqualsOrHashCode")
     protected class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : NilTerm, ListTermImpl(attachments) {
@@ -371,6 +410,7 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** A term variable as a list tail. */
+    @Suppress("EqualsOrHashCode")
     protected class ListTermVarImpl(
         override val termType: ListTermType,
         override val name: String,

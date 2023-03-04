@@ -7,6 +7,8 @@ interface TermVisitor<R> {
 
     fun visitInt(term: IntTerm): R
 
+    fun visitReal(term: RealTerm): R
+
     fun visitString(term: StringTerm): R
 
     fun visitBlob(term: BlobTerm): R
@@ -25,6 +27,8 @@ interface TermVisitor<R> {
 interface TermVisitor1<A, R> {
 
     fun visitInt(term: IntTerm, arg: A): R
+
+    fun visitReal(term: RealTerm, arg: A): R
 
     fun visitString(term: StringTerm, arg: A): R
 

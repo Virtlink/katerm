@@ -38,6 +38,11 @@ class DefaultTermWriter(
             write(term.value.toString())
         }
 
+        override fun visitReal(term: RealTerm) = writer.run {
+            // Print the real value.
+            write(term.value.toString())
+        }
+
         override fun visitString(term: StringTerm) = writer.run {
             // Print the escaped string.
             write('"'.code)

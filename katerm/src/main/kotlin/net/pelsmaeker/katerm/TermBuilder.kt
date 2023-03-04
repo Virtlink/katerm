@@ -19,7 +19,7 @@ interface TermBuilder {
     /////////
 
     /**
-     * Creates a new integer term with the specified value and no attachments.
+     * Creates a new integer value term with the specified value and no attachments.
      *
      * @param value the value of the term
      * @return the created term
@@ -27,7 +27,7 @@ interface TermBuilder {
     fun createInt(value: Int): IntTerm = createInt(value, TermAttachments.empty())
 
     /**
-     * Creates a new integer term with the specified value and attachments.
+     * Creates a new integer value term with the specified value and attachments.
      *
      * @param value the value of the term
      * @param attachments the attachments of the term
@@ -36,13 +36,43 @@ interface TermBuilder {
     fun createInt(value: Int, attachments: TermAttachments): IntTerm
 
     /**
-     * Create a copy of the specified integer term with the specified new value
+     * Create a copy of the specified integer value term with the specified new value
      * and the same attachments.
      *
      * @param newValue the new value of the term
      * @return the copy of the term, but with the new value
      */
     fun replaceInt(term: IntTerm, newValue: Int): IntTerm
+
+    /////////
+    // Real //
+    /////////
+
+    /**
+     * Creates a new real value term with the specified value and no attachments.
+     *
+     * @param value the value of the term
+     * @return the created term
+     */
+    fun createReal(value: Double): RealTerm = createReal(value, TermAttachments.empty())
+
+    /**
+     * Creates a new real value term with the specified value and attachments.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createReal(value: Double, attachments: TermAttachments): RealTerm
+
+    /**
+     * Create a copy of the specified real value term with the specified new value
+     * and the same attachments.
+     *
+     * @param newValue the new value of the term
+     * @return the copy of the term, but with the new value
+     */
+    fun replaceReal(term: RealTerm, newValue: Double): RealTerm
 
     ////////////
     // String //

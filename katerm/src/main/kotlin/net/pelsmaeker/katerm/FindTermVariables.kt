@@ -20,6 +20,10 @@ private class TermVariableVisitor(
         // Nothing to do.
     }
 
+    override fun visitReal(term: RealTerm) {
+        // Nothing to do.
+    }
+
     override fun visitString(term: StringTerm) {
         // Nothing to do.
     }

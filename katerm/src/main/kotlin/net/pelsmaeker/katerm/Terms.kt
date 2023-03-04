@@ -56,7 +56,7 @@ interface ApplTerm : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 }
 
-/** An integer term. */
+/** An integer number term. */
 interface IntTerm : Term {
     /** The value of the term. */
     val value: Int
@@ -65,6 +65,17 @@ interface IntTerm : Term {
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
+}
+
+/** A real number term. */
+interface RealTerm : Term {
+    /** The value of the term. */
+    val value: Double
+    override val termType: RealTermType get() = RealTermType
+    override val termChildren: List<Term> get() = emptyList()
+
+    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
 }
 
 /** A string term. */

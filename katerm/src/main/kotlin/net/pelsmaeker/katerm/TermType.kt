@@ -76,13 +76,22 @@ data class ApplTermType(
     override fun toString(): String = "$op(${paramTypes.joinToString()})"
 }
 
-/** The type of an integer term. */
+/** The type of an integer value term. */
 object IntTermType: TermType {
     override val hashString: String get() = "I"
 
     override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
 
     override fun toString(): String = "int"
+}
+
+/** The type of a real value term. */
+object RealTermType: TermType {
+    override val hashString: String get() = "R"
+
+    override infix fun isSubtypeOf(other: TermType): Boolean = other is AnyTermType
+
+    override fun toString(): String = "real"
 }
 
 /** The type of a string term. */
