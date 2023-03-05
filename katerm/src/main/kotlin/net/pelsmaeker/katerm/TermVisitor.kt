@@ -11,8 +11,6 @@ interface TermVisitor<R> {
 
     fun visitString(term: StringTerm): R
 
-    fun visitBlob(term: BlobTerm): R
-
     fun visitAppl(term: ApplTerm): R
 
     fun visitList(term: ListTerm): R
@@ -31,8 +29,6 @@ interface TermVisitor1<A, R> {
     fun visitReal(term: RealTerm, arg: A): R
 
     fun visitString(term: StringTerm, arg: A): R
-
-    fun visitBlob(term: BlobTerm, arg: A): R
 
     fun visitAppl(term: ApplTerm, arg: A): R
 

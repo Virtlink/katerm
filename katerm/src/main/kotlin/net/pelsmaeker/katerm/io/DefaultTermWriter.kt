@@ -50,15 +50,15 @@ class DefaultTermWriter(
             write('"'.code)
         }
 
-        override fun visitBlob(term: BlobTerm) = writer.run {
-            // Print something like "<blob(java.lang.String@12ab34)>"
-            val value = term.value
-            write("<blob(")
-            write(value::class.java.name)
-            write('@'.code)
-            write(term.value.hashCode().toString(16))
-            write(")>")
-        }
+//        override fun visitBlob(term: BlobTerm) = writer.run {
+//            // Print something like "<blob(java.lang.String@12ab34)>"
+//            val value = term.value
+//            write("<blob(")
+//            write(value::class.java.name)
+//            write('@'.code)
+//            write(term.value.hashCode().toString(16))
+//            write(")>")
+//        }
 
         override fun visitAppl(term: ApplTerm) = writer.run {
             write(term.termOp)

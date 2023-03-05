@@ -28,10 +28,6 @@ private class TermVariableVisitor(
         // Nothing to do.
     }
 
-    override fun visitBlob(term: BlobTerm) {
-        // Nothing to do.
-    }
-
     override fun visitAppl(term: ApplTerm) {
         // Visit arguments.
         term.termArgs.forEach { it.accept(this) }

@@ -44,14 +44,7 @@ private class MatcherVisitor(
         pattern is StringTerm -> true
         else -> false
     }
-
-    override fun visitBlob(term: BlobTerm, pattern: Term): Boolean = when {
-        term === pattern -> associateSelf(term)
-        pattern is TermVar -> associate(term, pattern)
-        pattern is BlobTerm -> true
-        else -> false
-    }
-
+    
     override fun visitAppl(term: ApplTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)

@@ -89,16 +89,15 @@ interface StringTerm : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
-/** A blob term. */
-interface BlobTerm : Term {
-    /** The value of the term. */
-    val value: Any
-    override val termType: BlobTermType get() = BlobTermType
-    override val termChildren: List<Term> get() = emptyList()
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitBlob(this)
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitBlob(this, arg)
-}
+///** A blob term. */
+//interface BlobTerm : ValueTerm<Any> {
+//    override val value: Any
+//    override val termChildren: List<Term> get() = emptyList()
+//    override val termSeparators: List<String>? get() = null // TODO: Allow separators
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitBlob(this)
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitBlob(this, arg)
+//}
 
 /** A list term. */
 interface ListTerm : Term {

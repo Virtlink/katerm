@@ -104,9 +104,7 @@ interface TermBuilder {
      */
     fun replaceString(term: StringTerm, newValue: String): StringTerm
 
-    //////////
-    // Blob //
-    //////////
+
 
     /**
      * Creates a new blob term with the specified value and no attachments.
@@ -123,16 +121,80 @@ interface TermBuilder {
      * @param attachments the attachments of the term
      * @return the created term
      */
-    fun createBlob(value: Any, attachments: TermAttachments): BlobTerm
+    fun <T> createValue(value: T, attachments: TermAttachments): ValueTerm<T> =
+        createValue(value, attachments, null)
 
     /**
-     * Create a copy of the specified blob term with the specified new value
-     * and the same attachments.
+     * Creates a new value term with the specified value and separators, and no attachments.
      *
+     * @param value the value of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun <T> createValue(value: T, separators: List<String>?): ValueTerm<T> =
+        createValue(value, TermAttachments.empty(), separators)
+
+    /**
+     * Creates a new value term with the specified value, attachments, and separators.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun <T> createValue(value: T, attachments: TermAttachments, separators: List<String>?): ValueTerm<T>
+
+    /**
+     * Create a copy of the specified value term with the specified new value
+     * and the same attachments and separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
      * @param newValue the new value of the term
      * @return the copy of the term, but with the new value
      */
-    fun replaceBlob(term: BlobTerm, newValue: Any): BlobTerm
+    fun <T> replaceValue(term: ValueTerm<T>, newValue: T): ValueTerm<T>
+
+//    //////////
+//    // Blob //
+//    //////////
+//
+//    /**
+//     * Creates a new blob term with the specified value and no attachments or separators.
+//     *
+//     * Blobs cannot have separators.
+//     *
+//     * @param value the value of the term
+//     * @return the created term
+//     */
+//    fun createBlob(value: Any): BlobTerm =
+//        createBlob(value, TermAttachments.empty())
+//
+//    /**
+//     * Creates a new blob term with the specified value and attachments, and no separators.
+//     *
+//     * Blobs cannot have separators.
+//     *
+//     * @param value the value of the term
+//     * @param attachments the attachments of the term
+//     * @return the created term
+//     */
+//    fun createBlob(value: Any, attachments: TermAttachments): BlobTerm
+//
+//    /**
+//     * Create a copy of the specified blob term with the specified new value
+//     * and the same attachments, and no separators.
+//     *
+//     * Blobs cannot have separators.
+//     *
+//     * Calling this method can be efficient than deconstructing and rebuilding a term.
+//     *
+//     * @param term the term to copy
+//     * @param newValue the new value of the term
+//     * @return the copy of the term, but with the new value
+//     */
+//    fun replaceBlob(term: BlobTerm, newValue: Any): BlobTerm
 
     //////////
     // Appl //
