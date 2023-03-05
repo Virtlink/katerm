@@ -35,18 +35,18 @@ class DefaultTermWriter(
 
         override fun visitInt(term: IntTerm) = writer.run {
             // Print the integer value.
-            write(term.value.toString())
+            write(term.termValue.toString())
         }
 
         override fun visitReal(term: RealTerm) = writer.run {
             // Print the real value.
-            write(term.value.toString())
+            write(term.termValue.toString())
         }
 
         override fun visitString(term: StringTerm) = writer.run {
             // Print the escaped string.
             write('"'.code)
-            write(escape(term.value))
+            write(escape(term.termValue))
             write('"'.code)
         }
 
@@ -77,10 +77,6 @@ class DefaultTermWriter(
             // Print something like "?x@resource", or "?x" if there is no resource.
             write('?'.code)
             write(term.name)
-            term.resource?.let {
-                write('@'.code)
-                write(it)
-            } ?: Unit
         }
 
         // TODO: Optimize to write the escaped string immediately to the writer

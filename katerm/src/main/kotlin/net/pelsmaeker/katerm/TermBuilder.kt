@@ -2,11 +2,15 @@ package net.pelsmaeker.katerm
 
 /**
  * Builds terms.
+ *
+ * Some types of terms don't accept separators because they cannot be pretty-printed.
  */
 interface TermBuilder {
 
     /**
      * Creates a copy of the specified term with the specified new attachments.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
      *
      * @param term the term to copy
      * @param newAttachments the new attachments of the term
@@ -14,31 +18,67 @@ interface TermBuilder {
      */
     fun withAttachments(term: Term, newAttachments: TermAttachments): Term
 
+    /**
+     * Creates a copy of the specified term with the specified new separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newSeparators the new separators of the term; or `null` to use (or reset to) the default separators
+     * @return the copy of the term, but with the new separators
+     */
+    fun withSeparators(term: Term, newSeparators: List<String>?): Term
+
     /////////
     // Int //
     /////////
 
     /**
-     * Creates a new integer value term with the specified value and no attachments.
+     * Creates a new integer value term with the specified value and no attachments, and the default separators.
      *
      * @param value the value of the term
      * @return the created term
      */
-    fun createInt(value: Int): IntTerm = createInt(value, TermAttachments.empty())
+    fun createInt(value: Int): IntTerm =
+        createInt(value, TermAttachments.empty(), null)
 
     /**
-     * Creates a new integer value term with the specified value and attachments.
+     * Creates a new integer value term with the specified value and attachments, and the default separators.
      *
      * @param value the value of the term
      * @param attachments the attachments of the term
      * @return the created term
      */
-    fun createInt(value: Int, attachments: TermAttachments): IntTerm
+    fun createInt(value: Int, attachments: TermAttachments): IntTerm =
+        createInt(value, TermAttachments.empty(), null)
+
+    /**
+     * Creates a new integer value term with the specified value and separators, and no attachments.
+     *
+     * @param value the value of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createInt(value: Int, separators: List<String>?): IntTerm =
+        createInt(value, TermAttachments.empty(), separators)
+
+    /**
+     * Creates a new integer value term with the specified value, attachments, and separators.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createInt(value: Int, attachments: TermAttachments, separators: List<String>?): IntTerm
 
     /**
      * Create a copy of the specified integer value term with the specified new value
-     * and the same attachments.
+     * and the same attachments and separators.
      *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
      * @param newValue the new value of the term
      * @return the copy of the term, but with the new value
      */
@@ -49,26 +89,51 @@ interface TermBuilder {
     /////////
 
     /**
-     * Creates a new real value term with the specified value and no attachments.
+     * Creates a new real value term with the specified value and no attachments, and the default separators.
      *
      * @param value the value of the term
      * @return the created term
      */
-    fun createReal(value: Double): RealTerm = createReal(value, TermAttachments.empty())
+    fun createReal(value: Double): RealTerm =
+        createReal(value, TermAttachments.empty(), null)
 
     /**
-     * Creates a new real value term with the specified value and attachments.
+     * Creates a new real value term with the specified value and attachments, and the default separators.
      *
      * @param value the value of the term
      * @param attachments the attachments of the term
      * @return the created term
      */
-    fun createReal(value: Double, attachments: TermAttachments): RealTerm
+    fun createReal(value: Double, attachments: TermAttachments): RealTerm =
+        createReal(value, attachments, null)
+
+    /**
+     * Creates a new real value term with the specified value and separators, and no attachments.
+     *
+     * @param value the value of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createReal(value: Double, separators: List<String>?): RealTerm =
+        createReal(value, TermAttachments.empty(), separators)
+
+    /**
+     * Creates a new real value term with the specified value, attachments, and separators.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createReal(value: Double, attachments: TermAttachments, separators: List<String>?): RealTerm
 
     /**
      * Create a copy of the specified real value term with the specified new value
-     * and the same attachments.
+     * and the same attachments and separators.
      *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
      * @param newValue the new value of the term
      * @return the copy of the term, but with the new value
      */
@@ -79,43 +144,72 @@ interface TermBuilder {
     ////////////
 
     /**
-     * Creates a new string term with the specified value and no attachments.
+     * Creates a new string term with the specified value and no attachments, and the default separators.
      *
      * @param value the value of the term
      * @return the created term
      */
-    fun createString(value: String): StringTerm = createString(value, TermAttachments.empty())
+    fun createString(value: String): StringTerm =
+        createString(value, TermAttachments.empty(), null)
 
     /**
-     * Creates a new string term with the specified value and attachments.
+     * Creates a new string term with the specified value and attachments, and the default separators.
      *
      * @param value the value of the term
      * @param attachments the attachments of the term
      * @return the created term
      */
-    fun createString(value: String, attachments: TermAttachments): StringTerm
+    fun createString(value: String, attachments: TermAttachments): StringTerm =
+        createString(value, attachments, null)
+
+    /**
+     * Creates a new string term with the specified value and separators, and no attachments.
+     *
+     * @param value the value of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createString(value: String, separators: List<String>?): StringTerm =
+        createString(value, TermAttachments.empty(), separators)
+
+    /**
+     * Creates a new string term with the specified value, attachments, and separators.
+     *
+     * @param value the value of the term
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createString(value: String, attachments: TermAttachments, separators: List<String>?): StringTerm
 
     /**
      * Create a copy of the specified string term with the specified new value
-     * and the same attachments.
+     * and the same attachments and separators.
      *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
      * @param newValue the new value of the term
      * @return the copy of the term, but with the new value
      */
     fun replaceString(term: StringTerm, newValue: String): StringTerm
 
 
+    ///////////
+    // Value //
+    ///////////
 
     /**
-     * Creates a new blob term with the specified value and no attachments.
+     * Creates a new value term with the specified value and no attachments, and the default separators.
      *
      * @param value the value of the term
      * @return the created term
      */
-    fun createBlob(value: Any): BlobTerm = createBlob(value, TermAttachments.empty())
+    fun <T> createValue(value: T): ValueTerm<T> =
+        createValue(value, TermAttachments.empty(), null)
 
     /**
-     * Creates a new blob term with the specified value and attachments.
+     * Creates a new value term with the specified value and attachments, and the default separators.
      *
      * @param value the value of the term
      * @param attachments the attachments of the term
@@ -200,47 +294,210 @@ interface TermBuilder {
     // Appl //
     //////////
 
-    fun createAppl(op: String, vararg args: Term): ApplTerm = createAppl(op, args.asList())
-    fun createAppl(type: ApplTermType, vararg args: Term): ApplTerm = createAppl(type, args.asList())
+    /**
+     * Creates a new constructor application term with the specified constructor and arguments,
+     * and no attachments and the default separators.
+     *
+     * @param op the name of the constructor
+     * @param args the arguments of the term
+     * @return the created term
+     */
+    fun createAppl(op: String, vararg args: Term): ApplTerm =
+        createAppl(op, args.asList(), TermAttachments.empty())
 
-    fun createAppl(op: String, args: List<Term>): ApplTerm = createAppl(ApplTermType(op, args.map { it.termType }), args, TermAttachments.empty())
-    fun createAppl(type: ApplTermType, args: List<Term>): ApplTerm = createAppl(type, args, TermAttachments.empty())
+    /**
+     * Creates a new constructor application term with the specified constructor and arguments,
+     * and no attachments and the default separators.
+     *
+     * @param op the name of the constructor
+     * @param args the arguments of the term
+     * @return the created term
+     */
+    fun createAppl(op: String, args: List<Term>): ApplTerm =
+        createAppl(op, args, TermAttachments.empty())
 
-    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm = createAppl(ApplTermType(op, args.map { it.termType }), args, attachments)
-    fun createAppl(type: ApplTermType, args: List<Term>, attachments: TermAttachments): ApplTerm
+    /**
+     * Creates a new constructor application term with the specified constructor, arguments, and separators,
+     * and no attachments.
+     *
+     * @param op the name of the constructor
+     * @param args the arguments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createAppl(op: String, args: List<Term>, separators: List<String>?): ApplTerm =
+        createAppl(op, args, TermAttachments.empty(), separators)
 
+    /**
+     * Creates a new constructor application term with the specified constructor, arguments, attachments,
+     * and the default separators.
+     *
+     * @param op the name of the constructor
+     * @param args the arguments of the term
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm =
+        createAppl(op, args, attachments, null)
+
+    /**
+     * Creates a new constructor application term with the specified constructor, arguments, attachments, and separators.
+     *
+     * @param op the name of the constructor
+     * @param args the arguments of the term
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createAppl(op: String, args: List<Term>, attachments: TermAttachments, separators: List<String>?): ApplTerm
+
+    /**
+     * Create a copy of the specified constructor application term with the specified new arguments
+     * and the same constructor, attachments and separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newArgs the new arguments of the term
+     * @return the copy of the term, but with the new arguments
+     */
     fun replaceAppl(term: ApplTerm, vararg newArgs: Term): ApplTerm = replaceAppl(term, newArgs.asList())
+
+    /**
+     * Create a copy of the specified constructor application term with the specified new arguments
+     * and the same constructor, attachments and separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newArgs the new arguments of the term
+     * @return the copy of the term, but with the new arguments
+     */
     fun replaceAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm
 
     //////////
     // List //
     //////////
 
-    fun createList(vararg elements: Term): ListTerm = createList(elements.asList())
-    fun createList(type: ListTermType, vararg elements: Term): ListTerm = createList(elements.asList())
+    /**
+     * Creates a new list term with the specified elements, and no attachments and the default separators.
+     *
+     * @param elements the elements in the list
+     * @return the created term
+     */
+    fun createList(vararg elements: Term): ListTerm =
+        createList(elements.asList(), null)
 
-    fun createList(elements: List<Term>): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.termType} )), elements, TermAttachments.empty())
-    fun createList(type: ListTermType, elements: List<Term>): ListTerm = createList(type, elements, TermAttachments.empty())
+    /**
+     * Creates a new list term with the specified elements, and no attachments and the default separators.
+     *
+     * @param elements the elements in the list
+     * @return the created term
+     */
+    fun createList(elements: List<Term>): ListTerm =
+        createList(elements, TermAttachments.empty(), null)
 
-    fun createList(elements: List<Term>, attachments: TermAttachments): ListTerm = createList(ListTermType(TermType.getSupertypeOf(elements.map { it.termType} )), elements, attachments)
-    fun createList(type: ListTermType, elements: List<Term>, attachments: TermAttachments): ListTerm
+    /**
+     * Creates a new list term with the specified elements and separators, and no attachments.
+     *
+     * @param elements the elements in the list
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createList(elements: List<Term>, separators: List<String>?): ListTerm =
+        createList(elements, TermAttachments.empty(), separators)
 
+    /**
+     * Creates a new list term with the specified elements and attachments, and the default separators.
+     *
+     * @param elements the elements in the list
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createList(elements: List<Term>, attachments: TermAttachments): ListTerm =
+        createList(elements, attachments, null)
+
+    /**
+     * Creates a new list term with the specified elements, attachments, and separators.
+     *
+     * @param elements the elements in the list
+     * @param attachments the attachments of the term
+     * @param separators the separators; or `null` to use the default separators
+     * @return the created term
+     */
+    fun createList(elements: List<Term>, attachments: TermAttachments, separators: List<String>?): ListTerm
+
+    /**
+     * Create a copy of the specified list term with the specified new elements
+     * and the same attachments and separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newElements the new elements of the term
+     * @return the copy of the term, but with the new elements
+     */
     fun replaceList(term: ListTerm, vararg newElements: Term): ListTerm = replaceList(term, newElements.asList())
+
+    /**
+     * Create a copy of the specified list term with the specified new elements
+     * and the same attachments and separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newElements the new elements of the term
+     * @return the copy of the term, but with the new elements
+     */
     fun replaceList(term: ListTerm, newElements: List<Term>): ListTerm
 
     /////////
     // Var //
     /////////
 
-    fun createVar(type: TermType, name: String, resource: String? = null): TermVar = createVar(type, name, resource, TermAttachments.empty())
-    fun createVar(type: TermType, name: String, resource: String? = null, attachments: TermAttachments): TermVar
+    /**
+     * Creates a new term variable with the specified name, and no attachments or separators.
+     *
+     * Term variables cannot have separators.
+     *
+     * Any resource names should be encoded as part of the variable name.
+     *
+     * @param name the name of the variable
+     * @return the created term
+     */
+    fun createVar(name: String): TermVar = createVar(name, TermAttachments.empty())
+
+    /**
+     * Creates a new term variable with the specified name and attachments, and no separators.
+     *
+     * Term variables cannot have separators.
+     *
+     * Any resource names should be encoded as part of the variable name.
+     *
+     * @param name the name of the variable
+     * @param attachments the attachments of the term
+     * @return the created term
+     */
+    fun createVar(name: String, attachments: TermAttachments): TermVar
+
+    /**
+     * Create a copy of the specified term variable with the specified new name
+     * and the same attachments and no separators.
+     *
+     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     *
+     * @param term the term to copy
+     * @param newName the new name of the variable
+     * @return the copy of the term, but with the new name
+     */
+    fun replaceVar(term: TermVar, newName: String): TermVar
 
     /////////////
     // ListVar //
     /////////////
 
-    fun createListVar(type: ListTermType, name: String, resource: String? = null): ListTermVar = createListVar(type, name, resource, TermAttachments.empty())
-    fun createListVar(type: ListTermType, name: String, resource: String? = null, attachments: TermAttachments): ListTermVar
+    fun createListVar(name: String): ListTermVar = createListVar(name, TermAttachments.empty())
+    fun createListVar(name: String, attachments: TermAttachments): ListTermVar
 
 }
 

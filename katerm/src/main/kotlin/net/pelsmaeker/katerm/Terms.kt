@@ -6,12 +6,13 @@ package net.pelsmaeker.katerm
  * Terms are immutable. To create or change a term, use a [TermBuilder].
  */
 interface Term {
-    /** The type of term. */
-    val termType: TermType
     /** The attachments of the term. */
     val termAttachments: TermAttachments
     /** A list of child terms of the term. */
     val termChildren: List<Term>
+    /** A list of separators between the child terms; or `null` to use the default separators.
+     * If specified, there are always (n + 1) separators, where n is the number of children. */
+    val termSeparators: List<String>?
 
     /**
      * Accepts a term visitor.
@@ -45,33 +46,44 @@ interface Term {
 /** A constructor application term. */
 interface ApplTerm : Term {
     /** The constructor name. */
-    val termOp: String get() = termType.op
+    val termOp: String
     /** The term arguments. */
     val termArgs: List<Term>
 
-    override val termType: ApplTermType
     override val termChildren: List<Term> get() = termArgs
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 }
 
-/** An integer number term. */
-interface IntTerm : Term {
+/**
+ * A value term.
+ *
+ * This replaces the BLOB type of term from the standard ATerm library.
+ * When representing a custom value, it is preferred to represent it as an [ApplTerm].
+ * When that's not possible, implement this [ValueTerm] interface instead.
+ * The value should be immutable.
+ */
+interface ValueTerm<T> : Term {
     /** The value of the term. */
-    val value: Int
-    override val termType: IntTermType get() = IntTermType
+    val termValue: T
+    /** The text representation of the value of the term. */
+    val termText: String
+
     override val termChildren: List<Term> get() = emptyList()
+}
+
+/** An integer number term. */
+interface IntTerm : ValueTerm<Int> {
+    override val termValue: Int // FIXME: Is this a boxed Int?
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
 }
 
 /** A real number term. */
-interface RealTerm : Term {
-    /** The value of the term. */
-    val value: Double
-    override val termType: RealTermType get() = RealTermType
+interface RealTerm : ValueTerm<Double> {
+    override val termValue: Double  // FIXME: Is this a boxed Double?
     override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
@@ -79,10 +91,8 @@ interface RealTerm : Term {
 }
 
 /** A string term. */
-interface StringTerm : Term {
-    /** The value of the term. */
-    val value: String
-    override val termType: StringTermType get() = StringTermType
+interface StringTerm : ValueTerm<String> {
+    override val termValue: String
     override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
@@ -110,7 +120,6 @@ interface ListTerm : Term {
     /** The trailing variable of the list; or `null` if the list does not have a trailing variable. */
     val trailingVar: ListTermVar?
 
-    override val termType: ListTermType
     override val termChildren: List<Term> get() = elements
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
@@ -136,13 +145,11 @@ interface ListTerm : Term {
 
 /** A term variable. */
 interface TermVar: Term {
-    /** The resource; or `null`. */
-    val resource: String?
-    /** The unique name. */
+    /** The variable name. Any resource names should be encoded as part of the variable name. */
     val name: String
 
-    override val termType: TermType
     override val termChildren: List<Term> get() = emptyList()
+    override val termSeparators: List<String>? get() = null
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
@@ -150,8 +157,8 @@ interface TermVar: Term {
 
 /** A term list variable. */
 interface ListTermVar: TermVar, ListTerm {
-    override val termType: ListTermType
     override val termChildren: List<Term> get() = emptyList()
+    override val termSeparators: List<String>? get() = null
 
     override val minSize: Int get() = 0
     override val size: Int? get() = null
