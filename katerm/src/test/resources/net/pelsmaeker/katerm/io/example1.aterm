@@ -1,0 +1,35 @@
+Module(
+  ModuleDecl("example1")
+, [ StrategyDecl(
+      "repeat"
+    , [TypeParamDef("a")]
+    , Strategy(
+        [StrategyNoArgs(TypeName("a"), TypeName("a"))]
+      , TypeName("a")
+      , TypeName("a")
+      )
+    )
+  , StrategyDef(
+      "repeat"
+    , [ParamDef("s")]
+    , Call(
+        "try"
+      , [Seq(Var("s"), Call("repeat", [Var("s")]))]
+      )
+    )
+  , StrategyDecl(
+      "try"
+    , [TypeParamDef("a")]
+    , Strategy(
+        [StrategyNoArgs(TypeName("a"), TypeName("a"))]
+      , TypeName("a")
+      , TypeName("a")
+      )
+    )
+  , StrategyDef(
+      "try"
+    , [ParamDef("s")]
+    , Call("glc", [Var("s"), Id(), Id()])
+    )
+  ]
+)

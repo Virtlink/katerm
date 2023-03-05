@@ -54,6 +54,18 @@ interface ApplTerm : Term {
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+
+    // These will throw an exception if the term has less than the requested number of arguments. This is intentional.
+    operator fun component1(): Term = termArgs[0]
+    operator fun component2(): Term = termArgs[1]
+    operator fun component3(): Term = termArgs[2]
+    operator fun component4(): Term = termArgs[3]
+    operator fun component5(): Term = termArgs[4]
+    operator fun component6(): Term = termArgs[5]
+    operator fun component7(): Term = termArgs[6]
+    operator fun component8(): Term = termArgs[7]
+    operator fun component9(): Term = termArgs[8]
+    operator fun component10(): Term = termArgs[9]
 }
 
 /**
@@ -118,6 +130,10 @@ interface ListTerm : Term {
 
     override val termChildren: List<Term> get() = elements
 
+    // These will throw an exception if the list is empty or a variable. This is intentional.
+    operator fun component1(): Term = head!!
+    operator fun component2(): Term = tail!!
+
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
 }
@@ -147,29 +163,3 @@ interface ListTermVar: TermVar, ListTerm {
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 }
-
-///** A non-empty list term. */
-//interface ConsTerm : ListTerm {
-//    /** The head of the list. */
-//    val head: Term
-//    /** The tail of the list, which may be a variable. */
-//    val tail: ListTerm
-//
-//    override val elements: List<Term> get() = listOf(head) + tail.elements  // TODO: Optimize
-//
-//    override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitCons(this)
-//    override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitCons(this, arg)
-//}
-//
-///** An empty list term. */
-//interface NilTerm : ListTerm {
-//    override val minSize: Int get() = 0
-//    override val size: Int? get() = 0
-//    override val elements: List<Term> get() = emptyList()
-//    override val trailingVar: ListTermVar? get() = null
-//
-//    override fun <R> accept(visitor: ListTermVisitor<R>): R = visitor.visitNil(this)
-//    override fun <A, R> accept(visitor: ListTermVisitor1<A, R>, arg: A): R = visitor.visitNil(this, arg)
-//}
-//
-

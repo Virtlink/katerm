@@ -30,5 +30,6 @@ junit                           = { module = "org.junit.jupiter:junit-jupiter", 
 kotest                          = { module = "io.kotest:kotest-runner-junit5",                              version.ref = "kotest" }
 kotest-assertions               = { module = "io.kotest:kotest-assertions-core",                            version.ref = "kotest" }
 kotest-property                 = { module = "io.kotest:kotest-property",                                   version.ref = "kotest" }
+kotest-datatest                 = { module = "io.kotest:kotest-framework-datatest",                         version.ref = "kotest" }
 jmh                             = { module = "org.openjdk.jmh:jmh-core",                                    version.ref = "jmh" }
 jmh-generator                   = { module = "org.openjdk.jmh:jmh-generator-annprocess",                    version.ref = "jmh" }
