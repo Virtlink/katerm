@@ -22,7 +22,7 @@ fun Term.match(pattern: Term): MatchResult? {
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 private class MatcherVisitor(
     private val associations: MutableMap<TermVar, Term>
-): TermVisitor1<Term, Boolean>, ListTermVisitor1<Term, Boolean> {
+): TermVisitor1<Term, Boolean> {
 
     override fun visitInt(term: IntTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
@@ -44,7 +44,7 @@ private class MatcherVisitor(
         pattern is StringTerm -> true
         else -> false
     }
-    
+
     override fun visitAppl(term: ApplTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
@@ -55,32 +55,11 @@ private class MatcherVisitor(
     override fun visitList(term: ListTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is ListTerm -> term.accept(this as ListTermVisitor1<Term, Boolean>, pattern)
+        pattern is ListTerm -> acceptAll(term.elements, pattern.elements)
         else -> false
     }
 
     override fun visitVar(term: TermVar, pattern: Term): Boolean = when {
-        term === pattern -> associateSelf(term)
-        pattern is TermVar -> associate(term, pattern)
-        else -> false
-    }
-
-    override fun visitCons(term: ConsTerm, pattern: Term): Boolean = when {
-        term === pattern -> associateSelf(term)
-        pattern is TermVar -> associate(term, pattern)
-        pattern is ConsTerm -> term.head.accept(this, pattern.head)
-                && term.tail.accept(this as ListTermVisitor1<Term, Boolean>, pattern.tail)
-        else -> false
-    }
-
-    override fun visitNil(term: NilTerm, pattern: Term): Boolean = when {
-        term === pattern -> associateSelf(term)
-        pattern is TermVar -> associate(term, pattern)
-        pattern is NilTerm -> true
-        else -> false
-    }
-
-    override fun visitListVar(term: ListTermVar, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
         else -> false

@@ -14,7 +14,7 @@ val Term.variables: Set<TermVar> get() {
 private class TermVariableVisitor(
     /** A mutable set of variables found. */
     private val variables: MutableSet<TermVar>
-): TermVisitor<Unit>, ListTermVisitor<Unit> {
+): TermVisitor<Unit> {
 
     override fun visitInt(term: IntTerm) {
         // Nothing to do.
@@ -34,23 +34,10 @@ private class TermVariableVisitor(
     }
 
     override fun visitList(term: ListTerm) {
-        term.accept(this as ListTermVisitor<Unit>)
-    }
-
-    override fun visitCons(term: ConsTerm) {
-        term.head.accept(this)
-        term.tail.accept(this as ListTermVisitor<Unit>)
-    }
-
-    override fun visitNil(term: NilTerm) {
-        // Nothing to do.
+        term.elements.forEach { it.accept(this) }
     }
 
     override fun visitVar(term: TermVar) {
-        variables.add(term)
-    }
-
-    override fun visitListVar(term: ListTermVar) {
         variables.add(term)
     }
 

@@ -37,29 +37,3 @@ interface TermVisitor1<A, R> {
     fun visitVar(term: TermVar, arg: A): R
 
 }
-
-/**
- * Visits terms.
- */
-interface ListTermVisitor<R> {
-
-    fun visitCons(term: ConsTerm): R
-
-    fun visitNil(term: NilTerm): R
-
-    fun visitListVar(term: ListTermVar): R
-
-}
-
-/**
- * Visits terms. Supports one argument.
- */
-interface ListTermVisitor1<A, R> {
-
-    fun visitCons(term: ConsTerm, arg: A): R
-
-    fun visitNil(term: NilTerm, arg: A): R
-
-    fun visitListVar(term: ListTermVar, arg: A): R
-
-}
