@@ -50,7 +50,7 @@ interface TermBuilder {
      * @return the created term
      */
     fun newInt(value: Int, attachments: TermAttachments): IntTerm =
-        newInt(value, TermAttachments.empty(), null)
+        newInt(value, attachments, null)
 
     /**
      * Creates a new integer value term with the specified value and separators, and no attachments.

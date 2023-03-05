@@ -3,133 +3,146 @@ package net.pelsmaeker.katerm
 /**
  * Holds term attachments.
  */
-sealed interface TermAttachments {
-    // TODO: Make this a multiset Class -> Value,
-    //  and perhaps even add a way to specify the class under which the value is registered,
-    //  or a custom key is even better
+class TermAttachments private constructor(
+    /** A map from keys to values, where the T parameter of the key is the type of the value. */
+    private val attachments: Map<Key<*>, Any>,
+) {
 
-    /** The number of attachments (key/value-pairs) in this map. */
-    val size: Int
-    /** Whether the set of attachments is empty. */
-    fun isEmpty(): Boolean = size == 0
-    /** Whether the set of attachments is not empty. */
-    fun isNotEmpty(): Boolean = !isEmpty()
-
-    /** Whether the map of attachments contains any values associated with the specified key. */
-    fun containsKey(key: Any): Boolean = get(key).isNotEmpty()
+    /** A term attachment key. */
+    abstract class Key<out T>(
+        /** The type of the value associated with this key. */
+        val type: Class<out T>,
+    )
 
     /**
-     * Gets the attachments with the specified key.
+     * Gets the attachment with the specified key.
      *
      * @param key the key of the attachment
-     * @return the collection of attachments associated with the specified key, if found;
-     * otherwise, an empty collection
+     * @return the attachment associated with the specified key, if found; otherwise, `null`
      */
-    operator fun get(key: Any): Collection<Any> = getOrDefault(key, emptyList())
+    @Suppress("UNCHECKED_CAST")
+    operator fun <T> get(key: Key<T>): T? = attachments[key] as? T
 
     /**
-     * Gets the attachments with the specified key.
+     * Determines whether an attachment with the specified key is present.
      *
      * @param key the key of the attachment
-     * @param default the default value to return if no values are associated with the specified key
-     * @return the collection of attachments associated with the specified key, if found;
-     * otherwise, the given default value
+     * @return `true` if an attachment with the specified key is present; otherwise, `false`
      */
-    fun getOrDefault(key: Any, default: Collection<Any>): Collection<Any>
+    fun containsKey(key: Key<*>): Boolean = attachments.containsKey(key)
 
-    /** The set of keys of the attachments. */
-    val keys: Set<Any>
+    /**
+     * Inserts an attachment with the specified key/value pair into this map.
+     *
+     * If the key is already present, it is replaced.
+     *
+     * @param pair the key/value pair to insert
+     * @return a new map with the specified attachment added
+     */
+    fun add(pair: Pair<Key<Any>, Any>): TermAttachments {
+        require(pair.first.type.isInstance(pair.second)) {
+            "The value ${pair.second} (${pair.second::class.java}) is not an instance of ${pair.first.type}"
+        }
+        return TermAttachments(attachments + (pair.first to pair.second))
+    }
 
-    /** The collection of key/value pairs. */
-    val entries: Collection<Map.Entry<Any, Any>>
+    /**
+     * Inserts attachments with the specified key/value pairs into this map.
+     *
+     * If a key is already present, it is replaced.
+     *
+     * @param pairs the key/value pairs to insert
+     * @return a new map with the specified attachments added
+     */
+    fun addAll(vararg pairs: Pair<Key<*>, Any>): TermAttachments =
+        addAll(pairs.asIterable())
 
-
-//    infix operator fun plus(other: TermAttachments): TermAttachments = when {
-//        isEmpty() -> other
-//        other.isEmpty() -> this
-//        else -> from(this.toSet() + other.toSet())
-//    }
-//
-//    infix operator fun plus(other: Any): TermAttachments = when {
-//        isEmpty() -> of(other)
-//        else -> from(this.toSet() + other)
-//    }
-
-    companion object {
-        /** Gets an empty term attachments object. */
-        fun empty(): TermAttachments = EmptyTermAttachments
-
-        /** Gets an empty term attachments object. */
-        fun of(): TermAttachments = EmptyTermAttachments
-
-        /** Gets a term attachments object with the specified attachment. */
-        fun of(attachment: Pair<Any, Any>): TermAttachments = SingletonTermAttachments(attachment.first, listOf(attachment.second))
-
-        /** Gets a term attachments object with the specified attachments. */
-        fun of(vararg attachments: Pair<Any, Any>): TermAttachments = from(attachments.asList())
-
-        fun from(attachments: Map<Any, Collection<Any>>) = from(attachments.entries.map { it.key to it.value })
-
-        /** Gets a term attachments object from the specified iterable of attachments. */
-        fun from(attachments: Collection<Pair<Any, Any>>): TermAttachments {
-            return when (attachments.size) {
-                0 -> EmptyTermAttachments
-                1 -> attachments.first().let { SingletonTermAttachments(it.first, listOf(it.second)) }
-                else -> MultiTermAttachments(attachments.groupBy { it.first }.mapValues { it.value.map { (_, v) -> v } });
+    /**
+     * Inserts attachments with the specified key/value pairs into this map.
+     *
+     * If a key is already present, it is replaced.
+     *
+     * @param pairs the key/value pairs to insert
+     * @return a new map with the specified attachments added
+     */
+    fun addAll(pairs: Iterable<Pair<Key<*>, Any>>): TermAttachments {
+        pairs.forEach { pair ->
+            require(pair.first.type.isInstance(pair.second)) {
+                "The value ${pair.second} (${pair.second::class.java}) is not an instance of ${pair.first.type}"
             }
         }
+        return TermAttachments(attachments + pairs.map { it.first to it.second })
     }
 
-    // This is a `private object` so that there is always just one instance.
-    // This is important because it is the default value for [Term.termAttachments]
+    /**
+     * Removes the attachment with the specified key from this map.
+     *
+     * If the key is not present, nothing happens.
+     *
+     * @param key the key of the attachment to remove
+     * @return a new map with the specified attachment removed
+     */
+    fun remove(key: Key<*>): TermAttachments {
+        return TermAttachments(attachments - key)
+    }
 
-    /** An empty term attachments object. */
-    private object EmptyTermAttachments: TermAttachments {
-        override val size: Int get() = 0
+    /**
+     * Inserts an attachment with the specified key/value pair into this map.
+     *
+     * If the key is already present, it is replaced.
+     *
+     * @param pair the key/value pair to insert
+     * @return a new map with the specified attachment added
+     */
+    operator fun <T> plus(pair: Pair<Key<T>, T>): TermAttachments = add(pair as Pair<Key<Any>, Any>)
 
-        override fun getOrDefault(key: Any, default: Collection<Any>): Collection<Any> {
-            return emptyList()
+    /**
+     * Removes the attachment with the specified key from this map.
+     *
+     * If the key is not present, nothing happens.
+     *
+     * @param key the key of the attachment to remove
+     * @return a new map with the specified attachment removed
+     */
+    operator fun minus(key: Key<*>): TermAttachments = remove(key)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TermAttachments) return false
+        val that = other as TermAttachments
+        return this.attachments == that.attachments
+    }
+
+    override fun hashCode(): Int {
+        return attachments.hashCode()
+    }
+
+    override fun toString(): String {
+        return attachments.toString()
+    }
+
+    companion object {
+        /** An empty instance that can be reused. */
+        private val empty = TermAttachments(emptyMap())
+
+        /** Gets an empty term attachments object. */
+        fun empty(): TermAttachments = empty
+
+        /** Gets an empty term attachments object. */
+        fun of(): TermAttachments = empty
+
+        /** Gets a term attachments object with the specified attachment. */
+        fun <T> of(attachment: Pair<Key<T>, T>): TermAttachments = from(listOf(attachment.first to listOf(attachment.second)))
+
+        /** Gets a term attachments object with the specified attachments. */
+        fun of(vararg attachments: Pair<Key<*>, Any>): TermAttachments = from(attachments.asList())
+
+        fun from(attachments: Map<Key<*>, Any>) = from(attachments.entries.map { it.key to it.value })
+
+        /** Gets a term attachments object from the specified iterable of attachments. */
+        fun from(attachments: Collection<Pair<Key<*>, Any>>): TermAttachments {
+            return empty.addAll(attachments)
         }
-
-        override val keys: Set<Any> get() = emptySet()
-        override val entries: Set<Map.Entry<Any, Any>> get() = emptySet()
     }
 
-    /** A singleton term attachments object. */
-    private data class SingletonTermAttachments(
-        private val key: Any,
-        private val values: Collection<Any>,
-    ): TermAttachments {
-        override val size: Int get() = 1
-
-        override fun getOrDefault(key: Any, default: Collection<Any>): Collection<Any> {
-            return if (key == this.key) values else default
-        }
-
-        override val keys: Set<Any> get() = setOf(key)
-        override val entries: Collection<Map.Entry<Any, Any>>
-            get() = values.map { Entry(key, it) }   // TODO: Make this a view or something without all the copying
-
-    }
-
-    /** A multiple attachments object. */
-    private class MultiTermAttachments(
-        private val map: Map<Any, Collection<Any>>
-    ): TermAttachments {
-        override val size: Int = map.values.fold(0) { acc, values -> acc + values.size }
-
-        override fun getOrDefault(key: Any, default: Collection<Any>): Collection<Any> {
-            return map[key] ?: default
-        }
-
-        override val keys: Set<Any>
-            get() = map.keys
-        override val entries: Collection<Map.Entry<Any, Any>>
-            get() = map.entries.flatMap { (key, values) -> values.map { Entry(key, it) } }   // TODO: Make this a view or something without all the copying
-    }
-
-    private data class Entry(
-        override val key: Any,
-        override val value: Any,
-    ): Map.Entry<Any, Any>
 }

@@ -83,9 +83,9 @@ class DefaultTermReaderTests: FunSpec({
         withData<Pair<String, Term>>(
             nameFn = { "should parse \"${it.first}\" to \"${it.second}\"" },
             termTests.map { (input, expected) ->
-                "$input{MyAnno(42)}" to withAttachments(expected, TermAttachments.of(
-                    TermAnnotationKey to newAppl("MyAnno", newInt(42)))
-                )
+                "$input{MyAnno(42)}" to withAttachments(expected, TermAttachments.of(TermAnnotationKey to listOf(
+                    newAppl("MyAnno", newInt(42)))
+                ))
             },
         ) { (input, expected) ->
             // Arrange
@@ -104,11 +104,11 @@ class DefaultTermReaderTests: FunSpec({
         withData<Pair<String, Term>>(
             nameFn = { "should parse \"${it.first}\" to \"${it.second}\"" },
             termTests.map { (input, expected) ->
-                "$input{.4,MyAnno(42),\"xyz\"}" to withAttachments(expected, TermAttachments.of(
-                    TermAnnotationKey to newReal(.4),
-                    TermAnnotationKey to newAppl("MyAnno", newInt(42)),
-                    TermAnnotationKey to newString("xyz"))
-                )
+                "$input{.4,MyAnno(42),\"xyz\"}" to withAttachments(expected, TermAttachments.of(TermAnnotationKey to listOf(
+                    newReal(.4),
+                    newAppl("MyAnno", newInt(42)),
+                    newString("xyz"))
+                ))
             },
         ) { (input, expected) ->
             // Arrange

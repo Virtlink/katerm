@@ -257,7 +257,8 @@ class DefaultTermReader(
      */
     private fun readAttachments(reader: PushbackReader): TermAttachments = reader.run {
         val annotations = readAnnotations(reader)
-        return TermAttachments.from(annotations.map { TermAnnotationKey to it })
+        if (annotations.isEmpty()) return TermAttachments.empty()
+        return TermAttachments.of(TermAnnotationKey to annotations)
     }
 
     /**
