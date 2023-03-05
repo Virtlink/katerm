@@ -14,13 +14,13 @@ open class DefaultTermBuilder: TermBuilder {
     override fun withAttachments(term: Term, newAttachments: TermAttachments): Term {
         if (term.termAttachments == newAttachments) return term
         return when (term) {
-            is IntTerm -> createInt(term.termValue, newAttachments, term.termSeparators)
-            is RealTerm -> createReal(term.termValue, newAttachments, term.termSeparators)
-            is StringTerm -> createString(term.termValue, newAttachments, term.termSeparators)
-            is ApplTerm -> createAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators)
-            is ListTermVar -> createListVar(term.name, newAttachments)
-            is ListTerm -> createList(term.elements, newAttachments, term.termSeparators)
-            is TermVar -> createVar(term.name, newAttachments)
+            is IntTerm -> newInt(term.termValue, newAttachments, term.termSeparators)
+            is RealTerm -> newReal(term.termValue, newAttachments, term.termSeparators)
+            is StringTerm -> newString(term.termValue, newAttachments, term.termSeparators)
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators)
+            is ListTermVar -> newListVar(term.name, newAttachments)
+            is ListTerm -> newList(term.elements, newAttachments, term.termSeparators)
+            is TermVar -> newVar(term.name, newAttachments)
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
@@ -28,53 +28,53 @@ open class DefaultTermBuilder: TermBuilder {
     override fun withSeparators(term: Term, newSeparators: List<String>?): Term {
         if (term.termSeparators == newSeparators) return term
         return when (term) {
-            is IntTerm -> createInt(term.termValue, term.termAttachments, newSeparators)
-            is RealTerm -> createReal(term.termValue, term.termAttachments, newSeparators)
-            is StringTerm -> createString(term.termValue, term.termAttachments, newSeparators)
-            is ApplTerm -> createAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators)
+            is IntTerm -> newInt(term.termValue, term.termAttachments, newSeparators)
+            is RealTerm -> newReal(term.termValue, term.termAttachments, newSeparators)
+            is StringTerm -> newString(term.termValue, term.termAttachments, newSeparators)
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators)
             is ListTermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
-            is ListTerm -> createList(term.elements, term.termAttachments, newSeparators)
+            is ListTerm -> newList(term.elements, term.termAttachments, newSeparators)
             is TermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
 
-    override fun createInt(value: Int, attachments: TermAttachments, separators: List<String>?): IntTerm {
+    override fun newInt(value: Int, attachments: TermAttachments, separators: List<String>?): IntTerm {
         return IntTermImpl(value, null /* TODO */, attachments, separators)
     }
 
-    override fun replaceInt(term: IntTerm, newValue: Int): IntTerm {
+    override fun copyInt(term: IntTerm, newValue: Int): IntTerm {
         if (term.termValue == newValue) return term
-        return createInt(newValue /* TODO: termText */, term.termAttachments, term.termSeparators)
+        return newInt(newValue /* TODO: termText */, term.termAttachments, term.termSeparators)
     }
 
-    override fun createReal(value: Double, attachments: TermAttachments, separators: List<String>?): RealTerm {
+    override fun newReal(value: Double, attachments: TermAttachments, separators: List<String>?): RealTerm {
         return RealTermImpl(value, null /* TODO */, attachments, separators)
     }
 
-    override fun replaceReal(term: RealTerm, newValue: Double): RealTerm {
+    override fun copyReal(term: RealTerm, newValue: Double): RealTerm {
         if (term.termValue == newValue) return term
-        return createReal(newValue, term.termAttachments, term.termSeparators)
+        return newReal(newValue, term.termAttachments, term.termSeparators)
     }
 
-    override fun createString(value: String, attachments: TermAttachments, separators: List<String>?): StringTerm {
+    override fun newString(value: String, attachments: TermAttachments, separators: List<String>?): StringTerm {
         return StringTermImpl(value, null /* TODO */, attachments, separators)
     }
 
-    override fun replaceString(term: StringTerm, newValue: String): StringTerm {
+    override fun copyString(term: StringTerm, newValue: String): StringTerm {
         if (term.termValue == newValue) return term
-        return createString(newValue, term.termAttachments, term.termSeparators)
+        return newString(newValue, term.termAttachments, term.termSeparators)
     }
 
-    override fun <T> createValue(value: T, attachments: TermAttachments, separators: List<String>?): ValueTerm<T> {
+    override fun <T> newValue(value: T, attachments: TermAttachments, separators: List<String>?): ValueTerm<T> {
         TODO("Not yet implemented")
     }
 
-    override fun <T> replaceValue(term: ValueTerm<T>, newValue: T): ValueTerm<T> {
+    override fun <T> copyValue(term: ValueTerm<T>, newValue: T): ValueTerm<T> {
         TODO("Not yet implemented")
     }
 
-    override fun createAppl(op: String, args: List<Term>, attachments: TermAttachments, separators: List<String>?): ApplTerm {
+    override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments, separators: List<String>?): ApplTerm {
         require(separators == null || separators.size == args.size + 1) {
             "Expected ${args.size + 1} separators separating ${args.size} arguments; got ${separators!!.size}."
         }
@@ -93,36 +93,36 @@ open class DefaultTermBuilder: TermBuilder {
         return ::ApplTermImpl
     }
 
-    override fun replaceAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
+    override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
         if (term.termArgs == newArgs) return term
-        return createAppl(term.termOp, newArgs, term.termAttachments, term.termSeparators)
+        return newAppl(term.termOp, newArgs, term.termAttachments, term.termSeparators)
     }
 
-    override fun createList(elements: List<Term>, attachments: TermAttachments, separators: List<String>?): ListTerm {
+    override fun newList(elements: List<Term>, attachments: TermAttachments, separators: List<String>?): ListTerm {
         return if (elements.isNotEmpty()) {
             // TODO: Enforce that all elements of a list share the same separators and attachments?
             //  This would mean: no term sharing, or copying a tail of a list to another list
 
-            ConsTermImpl(elements.first(), createList(elements.drop(1)), attachments, separators)
+            ConsTermImpl(elements.first(), newList(elements.drop(1)), attachments, separators)
         } else {
             NilTermImpl(attachments, separators)
         }
     }
 
-    override fun replaceList(term: ListTerm, newElements: List<Term>): ListTerm {
+    override fun copyList(term: ListTerm, newElements: List<Term>): ListTerm {
         if (term.elements == newElements) return term
-        return createList(newElements, term.termAttachments, term.termSeparators)
+        return newList(newElements, term.termAttachments, term.termSeparators)
     }
 
-    override fun replaceVar(term: TermVar, newName: String): TermVar {
+    override fun copyVar(term: TermVar, newName: String): TermVar {
         TODO("Not yet implemented")
     }
 
-    override fun createVar(name: String, attachments: TermAttachments): TermVar {
+    override fun newVar(name: String, attachments: TermAttachments): TermVar {
         return TermVarImpl(name, attachments)
     }
 
-    override fun createListVar(name: String, attachments: TermAttachments): ListTermVar {
+    override fun newListVar(name: String, attachments: TermAttachments): ListTermVar {
         return ListTermVarImpl(name, attachments)
     }
 
