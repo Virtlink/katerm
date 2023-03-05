@@ -25,6 +25,19 @@ dependencies {
 </dependency>
 ```
 
+## Design
+This term library supports the following kinds of terms:
+
+- Constructor application terms (`ApplTerm`)
+- String terms (`StringTerm`)
+- Integer value terms (`IntTerm`)
+- Real value terms (`RealTerm`)
+- List terms (`ListTerm`)
+- Term variables (`TermVar`)
+
+### List terms
+List terms can be implemented as cons-nil lists, or as arrays.
+
 ## License
 Copyright © 2023 Daniel A. A. Pelsmaeker
 
