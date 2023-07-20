@@ -270,10 +270,12 @@ open class DefaultTermBuilder: TermBuilder {
     /** Constructor application term. */
     private class ApplTermImpl(
         override val termOp: String,
-        override val termArgs: List<Term>,
+        termArgs: List<Term>,
         attachments: TermAttachments = TermAttachments.empty(),
         separators: List<String>? = null,
     ) : ApplTerm, ApplTermImplBase(attachments, separators) {
+
+        override val termArgs: List<Term> = termArgs.toList() // Safety copy.
 
         init {
             require(separators == null || separators.size == termArgs.size + 1) {
