@@ -97,7 +97,7 @@ class DefaultTermWriter(
             if (collection.isEmpty()) {
                 // The collection is empty. Write an empty list, even if we reached the maximum depth.
                 return
-            } else if (depth > 0) {
+            } else if (depth != 0) {
                 // The collection is not empty and we haven't reached the maximum depth yet.
                 depth -= 1
                 collection.iterator().run {
@@ -110,12 +110,8 @@ class DefaultTermWriter(
                 depth += 1
             } else {
                 // We've reached the maximum depth.
-                // Write something like "..3 terms.." to indicate that terms were elided
-                write("..")
-                write(collection.size)
-                write(' '.code)
-                write("terms")
-                write("..")
+                // Write something like "..(3 terms).." to indicate that terms were elided
+                write("..(${collection.size} terms)..")
             }
         }
     }
