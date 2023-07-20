@@ -2,7 +2,7 @@
 How to publish a new version of the library.
 
 ## Setup
-In your _home_ directory at `~/gradle.properties`, ensure the file contains properties for signing, publishing to GitHub Packages, and publishing to Maven Central.
+In your _home_ directory at `~/.gradle/gradle.properties`, ensure the file contains properties for signing, publishing to GitHub Packages, and publishing to Maven Central.
 
 ### Signing
 Obtain the short ID of the GPG subkey you want to use for signing using the command:
@@ -20,7 +20,7 @@ Also create a base64-encoded version of the secret key ring:
 base64 ~/.gnupg/secring.gpg > ~/.gnupg/secring.gpg.b64
 ```
 
-In the `~/gradle.properties` file in your _home_ directory, add those values as the following properties:
+In the `~/.gradle/gradle.properties` file in your _home_ directory, add those values as the following properties:
 ```properties
 # GPG Signing
 signing.keyId=0ABA0F98
@@ -35,9 +35,9 @@ On the [repository settings Secrets page](https://github.com/Virtlink/katerm/set
 
 
 ### GitHub Packages
-For GitHub Packages, obtain the GitHub Personal Access Token (PAT) from the [GitHub Developer Settings](https://github.com/settings/tokens) page. The token should have the `read:packages` and `write:packages` scopes. The username is your GitHub username.
+For GitHub Packages, obtain a _classic_ GitHub Personal Access Token (PAT) from the [GitHub Developer Settings](https://github.com/settings/tokens) page. The token should have the `read:packages` and `write:packages` scopes. The username is your GitHub username.
 
-In the `~/gradle.properties` file in your _home_ directory, add those values as the following properties:
+In the `~/.gradle/gradle.properties` file in your _home_ directory, add those values as the following properties:
 ```properties
 # GitHub Packages
 gpr.user=MyUsername
@@ -53,7 +53,7 @@ The OSSRH username and token can be found as follows:
 3. In the drop-down box, change from Summary to User Token.
 4. Click the Access User Token button. It will give a username and token.
 
-In the `~/gradle.properties` file in your _home_ directory, add those values as the following properties:
+In the `~/.gradle/gradle.properties` file in your _home_ directory, add those values as the following properties:
 ```properties
 # OSSRH Maven Central
 ossrh.user=bYpE4FzT
