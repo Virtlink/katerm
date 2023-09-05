@@ -1,17 +1,17 @@
 [versions]
 # Plugins
-kotlin                          = "1.8.0"           # https://kotlinlang.org/
-dokka                           = "1.7.20"          # https://github.com/Kotlin/dokka
-gitversion                      = "0.15.0"          # https://github.com/palantir/gradle-git-version
-ben-manes-versions              = "0.44.0"          # https://github.com/ben-manes/gradle-versions-plugin
+kotlin                          = "1.9.10"          # https://kotlinlang.org/
+dokka                           = "1.9.0"           # https://github.com/Kotlin/dokka
+gitversion                      = "3.0.0"           # https://github.com/palantir/gradle-git-version
+ben-manes-versions              = "0.47.0"          # https://github.com/ben-manes/gradle-versions-plugin
 
 # Utils
 jsr305                          = "3.0.2"           # https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 
 # Testing
 junit                           = "5.9.1"           # https://junit.org
-kotest                          = "5.5.4"           # https://kotest.io/
-jmh                             = "1.36"            # https://github.com/openjdk/jmh
+kotest                          = "5.7.1"           # https://kotest.io/
+jmh                             = "1.37"            # https://github.com/openjdk/jmh
 
 
 [plugins]
