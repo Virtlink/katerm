@@ -4,6 +4,7 @@ kotlin                          = "1.9.10"          # https://kotlinlang.org/ (h
 dokka                           = "1.9.0"           # https://github.com/Kotlin/dokka
 gitversion                      = "3.0.0"           # https://github.com/palantir/gradle-git-version
 ben-manes-versions              = "0.47.0"          # https://github.com/ben-manes/gradle-versions-plugin
+nexuspublish                    = "2.0.0"           # https://github.com/gradle-nexus/publish-plugin/
 
 # Utils
 jsr305                          = "3.0.2"           # https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
@@ -19,6 +20,7 @@ kotlin-jvm                      = { id = "org.jetbrains.kotlin.jvm",            
 dokka                           = { id = "org.jetbrains.dokka",                                             version.ref = "dokka" }
 gitversion                      = { id = "com.palantir.git-version",                                        version.ref = "gitversion" }
 versions                        = { id = "com.github.ben-manes.versions",                                   version.ref = "ben-manes-versions" }
+nexuspublish                    = { id = "io.github.gradle-nexus.publish-plugin",                           version.ref = "nexuspublish" }
 
 
 [libraries]

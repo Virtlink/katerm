@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.gitversion)
     alias(libs.plugins.versions)
+    alias(libs.plugins.nexuspublish)        // Publish on Maven Central
 }
 
 allprojects {
@@ -23,6 +24,10 @@ allprojects {
     group = "net.pelsmaeker"
     version = gitVersion()
     description = "Advanced term library."
+
+    extra["isSnapshotVersion"] = version.toString().endsWith("-SNAPSHOT")
+    extra["isDirtyVersion"] = version.toString().endsWith(".dirty")
+    extra["isCI"] = !System.getenv("CI").isNullOrEmpty()
 
     repositories {
         google()
@@ -101,16 +106,6 @@ subprojects {
             }
         }
         repositories {
-//            maven {
-//                val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-//                val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-//                name = "OSSRH"
-//                url = if (project.version.toString().endsWith("-SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-//                credentials {
-//                    username = project.findProperty("ossrh.user") as String? ?: System.getenv("OSSRH_USERNAME")
-//                    password = project.findProperty("ossrh.token") as String? ?: System.getenv("OSSRH_TOKEN")
-//                }
-//            }
             maven {
                 name = "GitHub"
                 url = uri("https://maven.pkg.github.com/Virtlink/katerm")
@@ -124,5 +119,34 @@ subprojects {
 
     signing {
         sign(publishing.publications["library"])
+        if (!project.hasProperty("signing.secretKeyRingFile")) {
+            // If no secretKeyRingFile was set, we assume an in-memory key in the SIGNING_KEY environment variable (used in CI)
+            useInMemoryPgpKeys(
+                project.findProperty("signing.keyId") as String? ?: System.getenv("SIGNING_KEY_ID"),
+                System.getenv("SIGNING_KEY"),
+                project.findProperty("signing.password") as String? ?: System.getenv("SIGNING_KEY_PASSWORD"),
+            )
+        }
+    }
+
+    val checkNotDirty by tasks.registering {
+        doLast {
+            if (project.extra["isDirtyVersion"] as Boolean) {
+                throw GradleException("Cannot publish a dirty version: ${project.version}")
+            }
+        }
+    }
+
+    tasks.publish { dependsOn(checkNotDirty) }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username.set(project.findProperty("ossrh.user") as String? ?: System.getenv("OSSRH_USERNAME"))
+            password.set(project.findProperty("ossrh.token") as String? ?: System.getenv("OSSRH_TOKEN"))
+        }
     }
 }
