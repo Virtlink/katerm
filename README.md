@@ -12,7 +12,7 @@ Add this library as a dependency to your project.
 ### Gradle
 ```kotlin
 dependencies {
-    implementation("net.pelsmaeker:katerm:0.0.4-alpha")
+    implementation("net.pelsmaeker:katerm:0.0.5")
 }
 ```
 
@@ -21,7 +21,7 @@ dependencies {
 <dependency>
     <groupId>net.pelsmaeker</groupId>
     <artifactId>katerm</artifactId>
-    <version>0.0.4-alpha</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 
