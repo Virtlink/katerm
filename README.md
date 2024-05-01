@@ -39,7 +39,7 @@ This term library supports the following kinds of terms:
 List terms can be implemented as cons-nil lists, or as arrays.
 
 ## License
-Copyright © 2023 Daniel A. A. Pelsmaeker
+Copyright © 2023-2024 Daniel A. A. Pelsmaeker
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use files in this project except in compliance with the License. You may obtain a copy of the License at <https://www.apache.org/licenses/LICENSE-2.0>
 
