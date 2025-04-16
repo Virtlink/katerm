@@ -3,7 +3,7 @@ package net.pelsmaeker.katerm.io
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
-import net.pelsmaeker.katerm.DefaultTermBuilder
+import net.pelsmaeker.katerm.DefaultSimpleTermBuilder
 import net.pelsmaeker.katerm.*
 
 /**
@@ -11,7 +11,7 @@ import net.pelsmaeker.katerm.*
  */
 class DefaultTermReaderTests: FunSpec({
 
-    val builder = DefaultTermBuilder()
+    val builder = DefaultSimpleTermBuilder()
 
     /** The test data for the tests. */
     val termTests: List<Pair<String, Term>> = builder.run {
@@ -49,7 +49,7 @@ class DefaultTermReaderTests: FunSpec({
             termTests,
         ) { (input, expected) ->
             // Arrange
-            val builder = DefaultTermBuilder()
+            val builder = DefaultSimpleTermBuilder()
             val reader = DefaultTermReader(builder)
 
             // Act
@@ -68,7 +68,7 @@ class DefaultTermReaderTests: FunSpec({
             },
         ) { (input, expected) ->
             // Arrange
-            val builder = DefaultTermBuilder()
+            val builder = DefaultSimpleTermBuilder()
             val reader = DefaultTermReader(builder)
 
             // Act
@@ -89,7 +89,7 @@ class DefaultTermReaderTests: FunSpec({
             },
         ) { (input, expected) ->
             // Arrange
-            val builder = DefaultTermBuilder()
+            val builder = DefaultSimpleTermBuilder()
             val reader = DefaultTermReader(builder)
 
             // Act
@@ -112,7 +112,7 @@ class DefaultTermReaderTests: FunSpec({
             },
         ) { (input, expected) ->
             // Arrange
-            val builder = DefaultTermBuilder()
+            val builder = DefaultSimpleTermBuilder()
             val reader = DefaultTermReader(builder)
 
             // Act
@@ -125,7 +125,7 @@ class DefaultTermReaderTests: FunSpec({
 
     test("should parse example1 from resources correctly") {
         // Arrange
-        val builder = DefaultTermBuilder()
+        val builder = DefaultSimpleTermBuilder()
         val reader = DefaultTermReader(builder)
 
         // Act

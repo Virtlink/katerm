@@ -75,10 +75,12 @@ interface ApplTerm : Term {
  * When representing a custom value, it is preferred to represent it as an [ApplTerm].
  * When that's not possible, implement this [ValueTerm] interface instead.
  * The value should be immutable.
+ *
+ * @property V The type of value.
  */
-interface ValueTerm<T> : Term {
+interface ValueTerm<V> : Term {
     /** The value of the term. */
-    val termValue: T
+    val termValue: V
     /** The text representation of the value of the term. */
     val termText: String
 
@@ -111,24 +113,28 @@ interface StringTerm : ValueTerm<String> {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
-/** A list term. */
-interface ListTerm<out T: Term> : Term {
+/**
+ * A list term.
+ *
+ * @property E The type of the elements in the list.
+ */
+interface ListTerm<out E: Term> : Term {
 
     /** The minimum number of elements in the list. This is the number of elements in [elements]. */
     val minSize: Int
     /** The number of elements in the list; or `null` if the list ends with a variable. */
     val size: Int?
     /** The elements in the list. If the list ends with a variable, it is not included here. */
-    val elements: List<T>
+    val elements: List<E>
     /** The trailing variable of the list; or `null` if the list does not have a trailing variable. */
     val trailingVar: ListTermVar?
 
     /** The head of the list; or `null` if the list is empty. */
-    val head: T?
+    val head: E?
     /** The tail of the list; or an [ListTermVar] if the list ends with a variable; or `null` if the list is empty. */
-    val tail: ListTerm<T>?
+    val tail: ListTerm<E>?
 
-    override val termChildren: List<T> get() = elements
+    override val termChildren: List<E> get() = elements
 
     // These will throw an exception if the list is empty or a variable. This is intentional.
     operator fun component1(): Term = head!!

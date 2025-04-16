@@ -3,7 +3,7 @@ package net.pelsmaeker.katerm.io
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
-import net.pelsmaeker.katerm.DefaultTermBuilder
+import net.pelsmaeker.katerm.DefaultSimpleTermBuilder
 import net.pelsmaeker.katerm.Term
 import net.pelsmaeker.katerm.TermAttachments
 
@@ -45,6 +45,6 @@ fun TermTests(constructor: (attachments: TermAttachments, separators: List<Strin
 
 class DefaultTermBuilderTests: FunSpec({
 
-    include(TermTests { a, s -> DefaultTermBuilder().newAppl("MyCons", emptyList(), a, s) })
+    include(TermTests { a, s -> DefaultSimpleTermBuilder().newAppl("MyCons", emptyList(), a, s) })
 
 })

@@ -7,33 +7,33 @@ import java.util.*
 typealias ApplTermBuilder = (String, List<Term>, TermAttachments, List<String>?) -> ApplTerm
 
 /**
- * The default term builder.
+ * The default simple term builder.
  */
-open class DefaultTermBuilder: TermBuilder {
+open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
-    override fun withAttachments(term: Term, newAttachments: TermAttachments): Term {
+    override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
         if (term.termAttachments == newAttachments) return term
         return when (term) {
-            is IntTerm -> newInt(term.termValue, newAttachments, term.termSeparators)
-            is RealTerm -> newReal(term.termValue, newAttachments, term.termSeparators)
-            is StringTerm -> newString(term.termValue, newAttachments, term.termSeparators)
-            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators)
-            is ListTermVar -> newListVar(term.name, newAttachments)
-            is ListTerm<*> -> newList(term.elements, newAttachments, term.termSeparators)
-            is TermVar -> newVar(term.name, newAttachments)
+            is IntTerm -> newInt(term.termValue, newAttachments, term.termSeparators) as T
+            is RealTerm -> newReal(term.termValue, newAttachments, term.termSeparators) as T
+            is StringTerm -> newString(term.termValue, newAttachments, term.termSeparators) as T
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators) as T
+            is ListTermVar -> newListVar(term.name, newAttachments) as T
+            is ListTerm<*> -> newList(term.elements, newAttachments, term.termSeparators) as T
+            is TermVar -> newVar(term.name, newAttachments) as T
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
 
-    override fun withSeparators(term: Term, newSeparators: List<String>?): Term {
+    override fun <T : Term> withSeparators(term: T, newSeparators: List<String>?): T {
         if (term.termSeparators == newSeparators) return term
         return when (term) {
-            is IntTerm -> newInt(term.termValue, term.termAttachments, newSeparators)
-            is RealTerm -> newReal(term.termValue, term.termAttachments, newSeparators)
-            is StringTerm -> newString(term.termValue, term.termAttachments, newSeparators)
-            is ApplTerm -> newAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators)
+            is IntTerm -> newInt(term.termValue, term.termAttachments, newSeparators) as T
+            is RealTerm -> newReal(term.termValue, term.termAttachments, newSeparators) as T
+            is StringTerm -> newString(term.termValue, term.termAttachments, newSeparators) as T
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators) as T
             is ListTermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
-            is ListTerm<*> -> newList(term.elements, term.termAttachments, newSeparators)
+            is ListTerm<*> -> newList(term.elements, term.termAttachments, newSeparators) as T
             is TermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
@@ -70,7 +70,7 @@ open class DefaultTermBuilder: TermBuilder {
         TODO("Not yet implemented")
     }
 
-    override fun <T> copyValue(term: ValueTerm<T>, newValue: T): ValueTerm<T> {
+    override fun <V> copyValue(term: ValueTerm<V>, newValue: V): ValueTerm<V> {
         TODO("Not yet implemented")
     }
 
@@ -113,7 +113,7 @@ open class DefaultTermBuilder: TermBuilder {
         }
     }
 
-    override fun <T : Term> copyList(term: ListTerm<T>, newElements: List<T>): ListTerm<T> {
+    override fun <E : Term> copyList(term: ListTerm<E>, newElements: List<E>): ListTerm<E> {
         if (term.elements == newElements) return term
         return newList(newElements, term.termAttachments, term.termSeparators)
     }

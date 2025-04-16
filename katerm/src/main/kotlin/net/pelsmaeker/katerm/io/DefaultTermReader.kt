@@ -8,7 +8,7 @@ import java.io.*
  * An ATerm reader.
  */
 class DefaultTermReader(
-    private val termFactory: TermBuilder
+    private val termFactory: SimpleTermBuilder
 ): TermReader, TermTextReader {
 
     override fun read(reader: Reader): Term? {

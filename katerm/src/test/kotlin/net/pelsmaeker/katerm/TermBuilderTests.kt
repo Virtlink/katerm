@@ -4,9 +4,9 @@ import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 
-/** Tests the [TermBuilder] interface. */
-fun termBuilderTests(
-    create: () -> TermBuilder,
+/** Tests the [SimpleTermBuilder] interface. */
+fun testSimpleTermBuilder(
+    create: () -> SimpleTermBuilder,
 ) = funSpec {
 
     context("newAppl()") {
