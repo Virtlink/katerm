@@ -134,6 +134,7 @@ open class DefaultTermBuilder: TermBuilder {
     // Instead, the base interfaces should be used.
 
     /** Base class for this term implementation. */
+    @Suppress("EqualsOrHashCode")
     protected abstract class TermImplBase(
         override val termAttachments: TermAttachments,
         override val termSeparators: List<String>?,
@@ -416,7 +417,6 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** Real value term. */
-    @Suppress("EqualsOrHashCode")
     private class RealTermImpl(
         override val termValue: Double,
         /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
@@ -486,7 +486,6 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** String term. */
-    @Suppress("EqualsOrHashCode")
     private class StringTermImpl(
         override val termValue: String,
         /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
@@ -591,7 +590,7 @@ open class DefaultTermBuilder: TermBuilder {
          * @param that The term to check.
          * @return `true` if this term is equal to the specified term; otherwise, `false`.
          */
-        protected abstract fun equalsList(that: ListTerm<T>): Boolean
+        protected abstract fun equalsList(that: ListTerm<*>): Boolean
 
         /**
          * Implement this property to perform a custom hash code calculation.
@@ -617,7 +616,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val elements: List<T> get() = listOf(head) + tail.elements // TODO: Optimize
         override val trailingVar: ListTermVar? get() = tail.trailingVar
 
-        override fun equalsList(that: ListTerm<T>): Boolean {
+        override fun equalsList(that: ListTerm<*>): Boolean {
             // @formatter:off
             return this.head == that.head
                 && this.tail == that.tail
@@ -629,7 +628,6 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** List nil term (an empty list). */
-    @Suppress("EqualsOrHashCode")
     private class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
         separators: List<String>?,
@@ -646,7 +644,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val head: Nothing? get() = null
         override val tail: ListTerm<Nothing>? get() = null
 
-        override fun equalsList(that: ListTerm<Nothing>): Boolean {
+        override fun equalsList(that: ListTerm<*>): Boolean {
             // @formatter:off
             return this.head == that.head
                 && this.tail == that.tail
@@ -657,7 +655,6 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** A term variable as a list tail. */
-    @Suppress("EqualsOrHashCode")
     private class ListTermVarImpl(
         override val name: String,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -668,7 +665,7 @@ open class DefaultTermBuilder: TermBuilder {
         override val head: Nothing? get() = null
         override val tail: ListTerm<Nothing>? get() = null
 
-        override fun equalsList(that: ListTerm<Nothing>): Boolean {
+        override fun equalsList(that: ListTerm<*>): Boolean {
             // @formatter:off
             return that is ListTermVar
                 && this.name == that.name
