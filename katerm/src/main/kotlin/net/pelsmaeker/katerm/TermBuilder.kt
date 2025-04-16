@@ -342,10 +342,11 @@ interface TermBuilder {
     /**
      * Creates a new list term with the specified elements, and no attachments and the default separators.
      *
+     * @param T The type of the elements in the list.
      * @param elements the elements in the list
      * @return the created term
      */
-    fun newList(vararg elements: Term): ListTerm =
+    fun <T: Term> newList(vararg elements: T): ListTerm<T> =
         newList(elements.asList(), null)
 
     /**
@@ -354,38 +355,41 @@ interface TermBuilder {
      * @param elements the elements in the list
      * @return the created term
      */
-    fun newList(elements: List<Term>): ListTerm =
+    fun <T: Term> newList(elements: List<T>): ListTerm<T> =
         newList(elements, TermAttachments.empty(), null)
 
     /**
      * Creates a new list term with the specified elements and separators, and no attachments.
      *
+     * @param T The type of the elements in the list.
      * @param elements the elements in the list
      * @param separators the separators; or `null` to use the default separators
      * @return the created term
      */
-    fun newList(elements: List<Term>, separators: List<String>?): ListTerm =
+    fun <T: Term> newList(elements: List<T>, separators: List<String>?): ListTerm<T> =
         newList(elements, TermAttachments.empty(), separators)
 
     /**
      * Creates a new list term with the specified elements and attachments, and the default separators.
      *
+     * @param T The type of the elements in the list.
      * @param elements the elements in the list
      * @param attachments the attachments of the term
      * @return the created term
      */
-    fun newList(elements: List<Term>, attachments: TermAttachments): ListTerm =
+    fun <T: Term> newList(elements: List<T>, attachments: TermAttachments): ListTerm<T> =
         newList(elements, attachments, null)
 
     /**
      * Creates a new list term with the specified elements, attachments, and separators.
      *
+     * @param T The type of the elements in the list.
      * @param elements the elements in the list
      * @param attachments the attachments of the term
      * @param separators the separators; or `null` to use the default separators
      * @return the created term
      */
-    fun newList(elements: List<Term>, attachments: TermAttachments, separators: List<String>?): ListTerm
+    fun <T: Term> newList(elements: List<T>, attachments: TermAttachments, separators: List<String>?): ListTerm<T>
 
     /**
      * Create a copy of the specified list term with the specified new elements
@@ -393,11 +397,12 @@ interface TermBuilder {
      *
      * Calling this method can be efficient than deconstructing and rebuilding a term.
      *
+     * @param T The type of the elements in the list.
      * @param term the term to copy
      * @param newElements the new elements of the term
      * @return the copy of the term, but with the new elements
      */
-    fun copyList(term: ListTerm, vararg newElements: Term): ListTerm = copyList(term, newElements.asList())
+    fun <T: Term> copyList(term: ListTerm<T>, vararg newElements: T): ListTerm<T> = copyList(term, newElements.asList())
 
     /**
      * Create a copy of the specified list term with the specified new elements
@@ -405,11 +410,12 @@ interface TermBuilder {
      *
      * Calling this method can be efficient than deconstructing and rebuilding a term.
      *
+     * @param T The type of the elements in the list.
      * @param term the term to copy
      * @param newElements the new elements of the term
      * @return the copy of the term, but with the new elements
      */
-    fun copyList(term: ListTerm, newElements: List<Term>): ListTerm
+    fun <T: Term> copyList(term: ListTerm<T>, newElements: List<T>): ListTerm<T>
 
     /////////
     // Var //

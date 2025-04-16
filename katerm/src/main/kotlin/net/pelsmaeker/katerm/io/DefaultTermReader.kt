@@ -48,7 +48,7 @@ class DefaultTermReader(
      * @param reader the reader to read from
      * @return the read term
      */
-    private fun readList(reader: PushbackReader): ListTerm = reader.run {
+    private fun readList(reader: PushbackReader): ListTerm<Term> = reader.run {
         readExpected("list", '[')
 
         val terms = readTermSequence(reader, ',', ']')

@@ -67,7 +67,7 @@ class DefaultTermWriter(
             write(')'.code)
         }
 
-        override fun visitList(term: ListTerm) = writer.run {
+        override fun visitList(term: ListTerm<Term>) = writer.run {
             write('['.code)
             writeSubtermList(term.elements)
             write(']'.code)

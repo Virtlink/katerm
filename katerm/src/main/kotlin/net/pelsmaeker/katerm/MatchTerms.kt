@@ -52,10 +52,10 @@ private class MatcherVisitor(
         else -> false
     }
 
-    override fun visitList(term: ListTerm, pattern: Term): Boolean = when {
+    override fun visitList(term: ListTerm<*>, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is ListTerm -> acceptAll(term.elements, pattern.elements)
+        pattern is ListTerm<*> -> acceptAll(term.elements, pattern.elements)
         else -> false
     }
 

@@ -13,7 +13,7 @@ interface TermVisitor<R> {
 
     fun visitAppl(term: ApplTerm): R
 
-    fun visitList(term: ListTerm): R
+    fun visitList(term: ListTerm<Term>): R
 
     fun visitVar(term: TermVar): R
 
@@ -32,7 +32,7 @@ interface TermVisitor1<A, R> {
 
     fun visitAppl(term: ApplTerm, arg: A): R
 
-    fun visitList(term: ListTerm, arg: A): R
+    fun visitList(term: ListTerm<Term>, arg: A): R
 
     fun visitVar(term: TermVar, arg: A): R
 

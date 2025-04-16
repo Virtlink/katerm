@@ -112,23 +112,23 @@ interface StringTerm : ValueTerm<String> {
 }
 
 /** A list term. */
-interface ListTerm : Term {
+interface ListTerm<out T: Term> : Term {
 
     /** The minimum number of elements in the list. This is the number of elements in [elements]. */
     val minSize: Int
     /** The number of elements in the list; or `null` if the list ends with a variable. */
     val size: Int?
     /** The elements in the list. If the list ends with a variable, it is not included here. */
-    val elements: List<Term>
+    val elements: List<T>
     /** The trailing variable of the list; or `null` if the list does not have a trailing variable. */
     val trailingVar: ListTermVar?
 
     /** The head of the list; or `null` if the list is empty. */
-    val head: Term?
+    val head: T?
     /** The tail of the list; or an [ListTermVar] if the list ends with a variable; or `null` if the list is empty. */
-    val tail: ListTerm?
+    val tail: ListTerm<T>?
 
-    override val termChildren: List<Term> get() = elements
+    override val termChildren: List<T> get() = elements
 
     // These will throw an exception if the list is empty or a variable. This is intentional.
     operator fun component1(): Term = head!!
@@ -151,13 +151,13 @@ interface TermVar: Term {
 }
 
 /** A term list variable. */
-interface ListTermVar: TermVar, ListTerm {
-    override val termChildren: List<Term> get() = emptyList()
+interface ListTermVar: TermVar, ListTerm<Nothing> {
+    override val termChildren: List<Nothing> get() = emptyList()
     override val termSeparators: List<String>? get() = null
 
     override val minSize: Int get() = 0
     override val size: Int? get() = null
-    override val elements: List<Term> get() = emptyList()
+    override val elements: List<Nothing> get() = emptyList()
     override val trailingVar: ListTermVar? get() = this
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)

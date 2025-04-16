@@ -33,7 +33,7 @@ private class TermVariableVisitor(
         term.termArgs.forEach { it.accept(this) }
     }
 
-    override fun visitList(term: ListTerm) {
+    override fun visitList(term: ListTerm<*>) {
         term.elements.forEach { it.accept(this) }
     }
 

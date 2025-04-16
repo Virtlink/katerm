@@ -19,7 +19,7 @@ open class DefaultTermBuilder: TermBuilder {
             is StringTerm -> newString(term.termValue, newAttachments, term.termSeparators)
             is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators)
             is ListTermVar -> newListVar(term.name, newAttachments)
-            is ListTerm -> newList(term.elements, newAttachments, term.termSeparators)
+            is ListTerm<*> -> newList(term.elements, newAttachments, term.termSeparators)
             is TermVar -> newVar(term.name, newAttachments)
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
@@ -33,7 +33,7 @@ open class DefaultTermBuilder: TermBuilder {
             is StringTerm -> newString(term.termValue, term.termAttachments, newSeparators)
             is ApplTerm -> newAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators)
             is ListTermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
-            is ListTerm -> newList(term.elements, term.termAttachments, newSeparators)
+            is ListTerm<*> -> newList(term.elements, term.termAttachments, newSeparators)
             is TermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
@@ -98,7 +98,11 @@ open class DefaultTermBuilder: TermBuilder {
         return newAppl(term.termOp, newArgs, term.termAttachments, term.termSeparators)
     }
 
-    override fun newList(elements: List<Term>, attachments: TermAttachments, separators: List<String>?): ListTerm {
+    override fun <T : Term> newList(
+        elements: List<T>,
+        attachments: TermAttachments,
+        separators: List<String>?
+    ): ListTerm<T> {
         return if (elements.isNotEmpty()) {
             // TODO: Enforce that all elements of a list share the same separators and attachments?
             //  This would mean: no term sharing, or copying a tail of a list to another list
@@ -109,7 +113,7 @@ open class DefaultTermBuilder: TermBuilder {
         }
     }
 
-    override fun copyList(term: ListTerm, newElements: List<Term>): ListTerm {
+    override fun <T : Term> copyList(term: ListTerm<T>, newElements: List<T>): ListTerm<T> {
         if (term.elements == newElements) return term
         return newList(newElements, term.termAttachments, term.termSeparators)
     }
@@ -557,14 +561,14 @@ open class DefaultTermBuilder: TermBuilder {
 
     /** Base class for list terms. */
     @Suppress("EqualsOrHashCode")
-    protected sealed class ListTermImplBase(
+    protected sealed class ListTermImplBase<T: Term>(
         attachments: TermAttachments,
         separators: List<String>?,
-    ): ListTerm, TermImplBase(attachments, separators) {
+    ): ListTerm<T>, TermImplBase(attachments, separators) {
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
-            val that = other as? ListTerm ?: return false       // Must be a ListTerm
+            val that = other as? ListTerm<T> ?: return false    // Must be a ListTerm
             // @formatter:off
             return this::class.java == that::class.java
                     // TODO: Compare hash code
@@ -587,7 +591,7 @@ open class DefaultTermBuilder: TermBuilder {
          * @param that the term to check
          * @return `true` is this term is equal to the specified term; otherwise, `false`
          */
-        protected abstract fun equalsList(that: ListTerm): Boolean
+        protected abstract fun equalsList(that: ListTerm<T>): Boolean
 
         /**
          * Implement this property to perform a custom hash code calculation.
@@ -597,12 +601,12 @@ open class DefaultTermBuilder: TermBuilder {
     }
 
     /** List cons term (a list head with a tail). */
-    private class ConsTermImpl(
-        override val head: Term,
-        override val tail: ListTerm,
+    private class ConsTermImpl<T: Term>(
+        override val head: T,
+        override val tail: ListTerm<T>,
         attachments: TermAttachments = TermAttachments.empty(),
         separators: List<String>?,
-    ) : ListTerm, ListTermImplBase(attachments, separators) {
+    ) : ListTerm<T>, ListTermImplBase<T>(attachments, separators) {
 
         init {
             require(separators == null || separators.size == 3) { "Expected 3 separators; got ${separators!!.size}." }
@@ -610,10 +614,10 @@ open class DefaultTermBuilder: TermBuilder {
 
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
-        override val elements: List<Term> get() = listOf(head) + tail.elements // TODO: Optimize
+        override val elements: List<T> get() = listOf(head) + tail.elements // TODO: Optimize
         override val trailingVar: ListTermVar? get() = tail.trailingVar
 
-        override fun equalsList(that: ListTerm): Boolean {
+        override fun equalsList(that: ListTerm<T>): Boolean {
             // @formatter:off
             return this.head == that.head
                 && this.tail == that.tail
@@ -629,7 +633,7 @@ open class DefaultTermBuilder: TermBuilder {
     private class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
         separators: List<String>?,
-    ) : ListTerm, ListTermImplBase(attachments, separators) {
+    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(attachments, separators) {
 
         init {
             require(separators == null || separators.size == 2) { "Expected 2 separators; got ${separators!!.size}." }
@@ -637,12 +641,12 @@ open class DefaultTermBuilder: TermBuilder {
 
         override val minSize: Int get() = 0
         override val size: Int? get() = null
-        override val elements: List<Term> get() = emptyList()
+        override val elements: List<Nothing> get() = emptyList()
         override val trailingVar: ListTermVar? get() = null
-        override val head: Term? get() = null
-        override val tail: ListTerm? get() = null
+        override val head: Nothing? get() = null
+        override val tail: ListTerm<Nothing>? get() = null
 
-        override fun equalsList(that: ListTerm): Boolean {
+        override fun equalsList(that: ListTerm<Nothing>): Boolean {
             // @formatter:off
             return this.head == that.head
                 && this.tail == that.tail
@@ -657,14 +661,14 @@ open class DefaultTermBuilder: TermBuilder {
     private class ListTermVarImpl(
         override val name: String,
         attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTermVar, ListTermImplBase(attachments, null) {
+    ) : ListTermVar, ListTermImplBase<Nothing>(attachments, null) {
 
         override val termSeparators: List<String>? get() = null
 
-        override val head: Term? get() = null
-        override val tail: ListTerm? get() = null
+        override val head: Nothing? get() = null
+        override val tail: ListTerm<Nothing>? get() = null
 
-        override fun equalsList(that: ListTerm): Boolean {
+        override fun equalsList(that: ListTerm<Nothing>): Boolean {
             // @formatter:off
             return that is ListTermVar
                 && this.name == that.name

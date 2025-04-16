@@ -24,7 +24,7 @@ class DefaultTermReaderTests: FunSpec({
             "MyCons(10)" to newAppl("MyCons", newInt(10)),
             "MyCons(\"a\", 10)" to newAppl("MyCons", newString("a"), newInt(10)),
 
-            "[]" to newList(),
+            "[]" to newList<Term>(),
             "[10]" to newList(newInt(10)),
             "[\"a\", 10]" to newList(newString("a"), newInt(10)),
 
