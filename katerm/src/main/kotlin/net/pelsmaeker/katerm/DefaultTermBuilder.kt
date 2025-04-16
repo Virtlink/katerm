@@ -86,8 +86,8 @@ open class DefaultTermBuilder: TermBuilder {
     /**
      * Gets the builder to use to build a term of the specified type.
      *
-     * @param type the type of the term to build
-     * @return the builder to use
+     * @param op The constructor name.
+     * @return The builder to use.
      */
     protected open fun getApplBuilder(op: String): ApplTermBuilder {
         return ::ApplTermImpl
@@ -333,8 +333,8 @@ open class DefaultTermBuilder: TermBuilder {
          *
          * Implement this method to customize the equality check.
          *
-         * @param that the term to check
-         * @return `true` is this term is equal to the specified term; otherwise, `false`
+         * @param that The term to check.
+         * @return `true` if this term is equal to the specified term; otherwise, `false`.
          */
         protected abstract fun equalsInt(that: IntTerm): Boolean
 
@@ -403,8 +403,8 @@ open class DefaultTermBuilder: TermBuilder {
          *
          * Implement this method to customize the equality check.
          *
-         * @param that the term to check
-         * @return `true` is this term is equal to the specified term; otherwise, `false`
+         * @param that The term to check.
+         * @return `true` if this term is equal to the specified term; otherwise, `false`.
          */
         protected abstract fun equalsReal(that: RealTerm): Boolean
 
@@ -473,8 +473,8 @@ open class DefaultTermBuilder: TermBuilder {
          *
          * Implement this method to customize the equality check.
          *
-         * @param that the term to check
-         * @return `true` is this term is equal to the specified term; otherwise, `false`
+         * @param that The term to check.
+         * @return `true` if this term is equal to the specified term; otherwise, `false`.
          */
         protected abstract fun equalsString(that: StringTerm): Boolean
 
@@ -568,7 +568,7 @@ open class DefaultTermBuilder: TermBuilder {
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
-            val that = other as? ListTerm<T> ?: return false    // Must be a ListTerm
+            val that = other as? ListTerm<*> ?: return false    // Must be a ListTerm
             // @formatter:off
             return this::class.java == that::class.java
                     // TODO: Compare hash code
@@ -588,8 +588,8 @@ open class DefaultTermBuilder: TermBuilder {
          *
          * Implement this method to customize the equality check.
          *
-         * @param that the term to check
-         * @return `true` is this term is equal to the specified term; otherwise, `false`
+         * @param that The term to check.
+         * @return `true` if this term is equal to the specified term; otherwise, `false`.
          */
         protected abstract fun equalsList(that: ListTerm<T>): Boolean
 

@@ -10,8 +10,8 @@ package net.pelsmaeker.katerm
  *
  * Note that the term attachments are not checked by this method.
  *
- * @param pattern the pattern to match against
- * @return the result of the match; or `null` if the match failed
+ * @param pattern The pattern to match against.
+ * @return The result of the match; or `null` if the match failed.
  */
 fun Term.match(pattern: Term): MatchResult? {
     val associations = mutableMapOf<TermVar, Term>()

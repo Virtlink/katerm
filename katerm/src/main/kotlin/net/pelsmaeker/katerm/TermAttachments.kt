@@ -2,23 +2,27 @@ package net.pelsmaeker.katerm
 
 /**
  * Holds term attachments.
+ *
+ * @property attachments A map from keys to values, where the T parameter of the key is the type of the value.
  */
 class TermAttachments private constructor(
-    /** A map from keys to values, where the T parameter of the key is the type of the value. */
     private val attachments: Map<Key<*>, Any>,
 ) {
 
-    /** A term attachment key. */
+    /**
+     * A term attachment key.
+     *
+     * @property type The type of the value associated with this key.
+     */
     abstract class Key<out T>(
-        /** The type of the value associated with this key. */
         val type: Class<out T>,
     )
 
     /**
      * Gets the attachment with the specified key.
      *
-     * @param key the key of the attachment
-     * @return the attachment associated with the specified key, if found; otherwise, `null`
+     * @param key The key of the attachment.
+     * @return The attachment associated with the specified key, if found; otherwise, `null`.
      */
     @Suppress("UNCHECKED_CAST")
     operator fun <T> get(key: Key<T>): T? = attachments[key] as? T
@@ -36,8 +40,8 @@ class TermAttachments private constructor(
      *
      * If the key is already present, it is replaced.
      *
-     * @param pair the key/value pair to insert
-     * @return a new map with the specified attachment added
+     * @param pair The key/value pair to insert.
+     * @return A new map with the specified attachment added.
      */
     fun add(pair: Pair<Key<Any>, Any>): TermAttachments {
         require(pair.first.type.isInstance(pair.second)) {
@@ -51,8 +55,8 @@ class TermAttachments private constructor(
      *
      * If a key is already present, it is replaced.
      *
-     * @param pairs the key/value pairs to insert
-     * @return a new map with the specified attachments added
+     * @param pairs The key/value pairs to insert.
+     * @return A new map with the specified attachments added.
      */
     fun addAll(vararg pairs: Pair<Key<*>, Any>): TermAttachments =
         addAll(pairs.asIterable())
@@ -62,8 +66,8 @@ class TermAttachments private constructor(
      *
      * If a key is already present, it is replaced.
      *
-     * @param pairs the key/value pairs to insert
-     * @return a new map with the specified attachments added
+     * @param pairs The key/value pairs to insert.
+     * @return A new map with the specified attachments added.
      */
     fun addAll(pairs: Iterable<Pair<Key<*>, Any>>): TermAttachments {
         pairs.forEach { pair ->
@@ -79,8 +83,8 @@ class TermAttachments private constructor(
      *
      * If the key is not present, nothing happens.
      *
-     * @param key the key of the attachment to remove
-     * @return a new map with the specified attachment removed
+     * @param key The key of the attachment to remove.
+     * @return A new map with the specified attachment removed.
      */
     fun remove(key: Key<*>): TermAttachments {
         return TermAttachments(attachments - key)
@@ -91,8 +95,8 @@ class TermAttachments private constructor(
      *
      * If the key is already present, it is replaced.
      *
-     * @param pair the key/value pair to insert
-     * @return a new map with the specified attachment added
+     * @param pair The key/value pair to insert.
+     * @return A new map with the specified attachment added.
      */
     operator fun <T> plus(pair: Pair<Key<T>, T>): TermAttachments = add(pair as Pair<Key<Any>, Any>)
 
@@ -101,8 +105,8 @@ class TermAttachments private constructor(
      *
      * If the key is not present, nothing happens.
      *
-     * @param key the key of the attachment to remove
-     * @return a new map with the specified attachment removed
+     * @param key The key of the attachment to remove.
+     * @return A new map with the specified attachment removed.
      */
     operator fun minus(key: Key<*>): TermAttachments = remove(key)
 
@@ -131,15 +135,32 @@ class TermAttachments private constructor(
         /** Gets an empty term attachments object. */
         fun of(): TermAttachments = empty
 
-        /** Gets a term attachments object with the specified attachment. */
+        /**
+         * Gets a term attachments object with the specified attachment.
+         *
+         * @param attachment The attachment to look for.
+         */
         fun <T> of(attachment: Pair<Key<T>, T>): TermAttachments = from(listOf(attachment.first to listOf(attachment.second)))
 
-        /** Gets a term attachments object with the specified attachments. */
+        /**
+         * Gets a term attachments object with the specified attachments.
+         *
+         * @param attachments The attachments to look for.
+         */
         fun of(vararg attachments: Pair<Key<*>, Any>): TermAttachments = from(attachments.asList())
 
+        /**
+         * Gets a term attachments object from the specified iterable of attachments.
+         *
+         * @param attachments The attachments to look for.
+         */
         fun from(attachments: Map<Key<*>, Any>) = from(attachments.entries.map { it.key to it.value })
 
-        /** Gets a term attachments object from the specified iterable of attachments. */
+        /**
+         * Gets a term attachments object from the specified iterable of attachments.
+         *
+         * @param attachments The attachments to look for.
+         */
         fun from(attachments: Collection<Pair<Key<*>, Any>>): TermAttachments {
             return empty.addAll(attachments)
         }
