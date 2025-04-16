@@ -89,7 +89,7 @@ interface ValueTerm<V> : Term {
 
 /** An integer number term. */
 interface IntTerm : ValueTerm<Int> {
-    override val termValue: Int // FIXME: Is this a boxed Int?
+    override val termValue: Int
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
@@ -97,7 +97,7 @@ interface IntTerm : ValueTerm<Int> {
 
 /** A real number term. */
 interface RealTerm : ValueTerm<Double> {
-    override val termValue: Double  // FIXME: Is this a boxed Double?
+    override val termValue: Double
     override val termChildren: List<Term> get() = emptyList()
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
