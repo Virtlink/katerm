@@ -15,14 +15,6 @@ abstract class TermBase(
 ): Term {
 
     /**
-     * Whether the term has separators.
-     *
-     * Please override this property to provide a more efficient implementation.
-     */
-    // Please override to provide a more efficient implementation.
-    override val hasTermSeparators: Boolean get() = super.hasTermSeparators
-
-    /**
      * Creates a copy of this term with the specified new attachments.
      *
      * Calling this method can be more efficient than deconstructing and rebuilding a term.
@@ -31,16 +23,6 @@ abstract class TermBase(
      * @return The copy of the term, but with the new attachments.
      */
     abstract override fun withAttachments(newAttachments: TermAttachments): TermBase
-
-    /**
-     * Creates a copy of this term with the specified new separators.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newSeparators The new separators of the term; or `null` to use (or reset to) the default separators.
-     * @return The copy of the term, but with the new separators.
-     */
-    abstract override fun withSeparators(newSeparators: List<String>?): TermBase
 
     /**
      * Determines whether this term and its subterms represent the same value
@@ -60,7 +42,6 @@ abstract class TermBase(
             && this.hash == that.hash                       // Same hash code (cheap check)
             && equals(that)                                 // Same subterms
             && this.termAttachments == that.termAttachments // Same attachments
-            && this.termSeparators == that.termSeparators   // Same separators
         // @formatter:on
     }
 
@@ -92,15 +73,12 @@ abstract class TermBase(
     protected open val hash: Int = Objects.hash(
         this.termChildren,
         this.termAttachments,
-        this.termSeparators,
     )
 
     final override fun toString(): String = printer.writeToString(this)
 
     companion object {
         /** The default term writer used for [toString]. */
-        private val printer = DefaultTermWriter(
-            format = DefaultTermWriter.Format.AUTO,
-        )
+        private val printer = DefaultTermWriter()
     }
 }

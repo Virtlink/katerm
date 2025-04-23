@@ -10,11 +10,6 @@ interface Term {
     val termAttachments: TermAttachments
     /** A list of child terms of the term. */
     val termChildren: List<Term>
-    /** A list of separators between the child terms; or `null` to use the default separators.
-     * If specified, there are always (n + 1) separators, where n is the number of children. */
-    val termSeparators: List<String>?
-    /** Whether the term has separators. */
-    val hasTermSeparators: Boolean get() = termSeparators != null
 
     /**
      * Accepts a term visitor.
@@ -53,32 +48,6 @@ interface Term {
      * @return The copy of the term, but with the new attachments.
      */
     fun withAttachments(newAttachments: TermAttachments): Term
-
-    /**
-     * Creates a copy of this term with the specified new separators.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newSeparators The new separators of the term; or `null` to use (or reset to) the default separators.
-     * @return The copy of the term, but with the new separators.
-     */
-    fun withSeparators(newSeparators: List<String>?): Term
-
-    /**
-     * Appends a string representation of the term to the specified [Appendable].
-     *
-     * @param writer The [Appendable] to append the string representation to.
-     * @param writeTerm The function to write the term.
-     */
-    fun appendString(writer: Appendable, writeTerm: Appendable.(Term) -> Unit): Unit = writer.run {
-        val termChildren = this@Term.termChildren
-        val termSeparators = this@Term.termSeparators ?: List(termChildren.size + 1) { "" }
-        for (i in termChildren.indices) {
-            append(termSeparators[i])
-            writeTerm(termChildren[i])
-        }
-        append(termSeparators[termChildren.size])
-    }
 }
 
 /** A constructor application term. */
@@ -174,7 +143,6 @@ interface ListTerm<out E: Term> : Term {
     override val termChildren: List<Term>
 
     abstract override fun withAttachments(newAttachments: TermAttachments): ListTerm<E>
-    abstract override fun withSeparators(newSeparators: List<String>?): ListTerm<E>
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
@@ -225,14 +193,8 @@ class ListTermView<out E: Term>(
         TODO("Not yet implemented")
     }
 
-    override fun withSeparators(newSeparators: List<String>?): ListTerm<E> {
-        TODO("Not yet implemented")
-    }
-
     override val termAttachments: TermAttachments
         get() = content.getAttachmentAt(startIndex) ?: TermAttachments.empty()
-    override val termSeparators: List<String>?
-        get() = content.getSeparatorsAt(startIndex)
 
     override fun equals(other: Any?): Boolean {
         TODO("Not yet implemented")
@@ -252,7 +214,6 @@ class ListTermContent<out E: Term>(
     private val elements: Array<E?>,
     private val vars: Map<Int, TermVar>?,
     private val attachments: Array<TermAttachments>?,
-    private val separators: Array<String?>?,
 ) {
     /** The number of children of the list (the number of elements plus the number of term variables). */
     val size: Int get() = elements.size
@@ -291,86 +252,7 @@ class ListTermContent<out E: Term>(
         assert(index >= 0 && index < size) { "Index out of bounds: $index" }
         return attachments?.get(index)
     }
-
-    /**
-     * Returns the separators at the specified index.
-     *
-     * @param index The index of the separators to return.
-     * @return The separators at the specified index; or `null` if there are no separators at that index.
-     */
-    fun getSeparatorsAt(index: Int): List<String>? {
-        assert(index >= 0 && index < size) { "Index out of bounds: $index" }
-        val separators = this.separators
-        if (separators == null) return null
-        val sep0 = separators[index * 3 + 0] ?: return null
-        val sep1 = separators[index * 3 + 1]!!
-        val sep2 = separators[index * 3 + 2]!!
-        return listOf(sep0, sep1, sep2)
-    }
 }
-
-//
-///**
-// * A list term that starts with a term variable as the list's prefix.
-// *
-// * @property E The type of the elements in the list.
-// */
-//interface ConcListTerm<out E: Term>: ListTerm<E> {
-//    /** The term variable that is the prefix of the list. */
-//    override val prefix: TermVar
-//    /** The list term that is the suffix of the list. */
-//    override val tail: ListTerm<E>
-//
-//    override val minSize: Int get() = tail.minSize
-//    override val size: Int? get() = null
-//    override val elements: List<E> get() = tail.elements
-//    override val termChildren: List<Term> get() = listOf(prefix) + tail.termChildren
-//
-//    abstract override fun withAttachments(newAttachments: TermAttachments): ConcListTerm<E>
-//    abstract override fun withSeparators(newSeparators: List<String>?): ConcListTerm<E>
-//
-//    operator fun component1(): Term = prefix
-//    operator fun component2(): Term = tail
-//}
-//
-///**
-// * A list term that consists of a head term and a tail list.
-// *
-// * @property E The type of the elements in the list.
-// */
-//interface ConsListTerm<out E: Term>: ListTerm<E> {
-//    /** The term that is the head of the list. */
-//    override val head: E
-//    /** The list term that is the tail of the list. */
-//    override val tail: ListTerm<E>
-//
-//    override val minSize: Int get() = 1 + tail.minSize
-//    override val size: Int? get() = tail.size?.let { it + 1 }
-//    override val elements: List<E> get() = listOf(head) + tail.elements
-//    override val termChildren: List<Term> get() = listOf(head) + tail.termChildren
-//
-//    abstract override fun withAttachments(newAttachments: TermAttachments): ConsListTerm<E>
-//    abstract override fun withSeparators(newSeparators: List<String>?): ConsListTerm<E>
-//
-//    operator fun component1(): Term = head
-//    operator fun component2(): Term = tail
-//}
-//
-///**
-// * An empty list.
-// */
-//interface NilListTerm: ListTerm<Nothing> {
-//    override val head: Nothing? get() = null
-//    override val tail: ListTerm<Nothing>? get() = null
-//    override val minSize: Int get() = 0
-//    override val size: Int? get() = 0
-//    override val elements: List<Nothing> get() = emptyList()
-//    override val termChildren: List<Term> get() = emptyList()
-//
-//    abstract override fun withAttachments(newAttachments: TermAttachments): NilListTerm
-//    abstract override fun withSeparators(newSeparators: List<String>?): NilListTerm
-//}
-
 
 /** A term variable. */
 interface TermVar: Term {
@@ -378,22 +260,7 @@ interface TermVar: Term {
     val name: String
 
     override val termChildren: List<Term> get() = emptyList()
-    override val termSeparators: List<String>? get() = null
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 }
-
-///** A term list variable. */
-//interface ListTermVar: TermVar, ListTerm<Nothing> {
-//    override val termChildren: List<Nothing> get() = emptyList()
-//    override val termSeparators: List<String>? get() = null
-//
-//    override val minSize: Int get() = 0
-//    override val size: Int? get() = null
-//    override val elements: List<Nothing> get() = emptyList()
-//    override val trailingVar: ListTermVar? get() = this
-//
-//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
-//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
-//}

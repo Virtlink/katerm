@@ -6,12 +6,9 @@ import java.io.Writer
 /**
  * Prints a term as a string.
  *
- * @property format The format in which to print the term.
  * @property maxDepth The maximum depth of the tree to print; or -1 to print all.
  */
 class DefaultTermWriter(
-    // The configuration of the term printer.
-    val format: Format = Format.AUTO,
     val maxDepth: Int = -1,
     // TODO: Print multiline pretty.
 //    /** Whether to print a multiline tree. */
@@ -23,16 +20,6 @@ class DefaultTermWriter(
 
     override fun write(term: Term, writer: Writer) {
         term.accept(Visitor(writer))
-    }
-
-    /** Specifies the format in which to print the term. */
-    enum class Format {
-        /** Prints the term as [TEXT], unless it has no term separators specified, in which case it is printed as [TERM]. */
-        AUTO,
-        /** Prints the term as a text string with layout and separators. */
-        TEXT,
-        /** Prints the term as a term tree. */
-        TERM,
     }
 
     /**
@@ -47,32 +34,20 @@ class DefaultTermWriter(
         private var depth = maxDepth
 
         override fun visitInt(term: IntTerm): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                // Print the integer value.
-                append(term.termValue.toString())
-            }
+            // Print the integer value.
+            append(term.termValue.toString())
         }
 
         override fun visitReal(term: RealTerm): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                // Print the real value.
-                append(term.termValue.toString())
-            }
+            // Print the real value.
+            append(term.termValue.toString())
         }
 
         override fun visitString(term: StringTerm): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                // Print the escaped string.
-                append('"')
-                append(escape(term.termValue))
-                append('"')
-            }
+            // Print the escaped string.
+            append('"')
+            append(escape(term.termValue))
+            append('"')
         }
 
 //        override fun visitBlob(term: BlobTerm) = writer.run {
@@ -86,34 +61,22 @@ class DefaultTermWriter(
 //        }
 
         override fun visitAppl(term: ApplTerm): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                append(term.termOp)
-                append('(')
-                writeSubtermList(term.termArgs)
-                append(')')
-            }
+            append(term.termOp)
+            append('(')
+            writeSubtermList(term.termArgs)
+            append(')')
         }
 
         override fun visitList(term: ListTerm<Term>): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                append('[')
-                writeSubtermList(term.elements)
-                append(']')
-            }
+            append('[')
+            writeSubtermList(term.elements)
+            append(']')
         }
 
         override fun visitVar(term: TermVar): Unit = writer.run {
-            if (format == Format.TEXT || (format == Format.AUTO && term.hasTermSeparators)) {
-                writeAsText(term)
-            } else {
-                // Print something like "?x@resource", or "?x" if there is no resource.
-                append('?')
-                append(term.name)
-            }
+            // Print something like "?x@resource", or "?x" if there is no resource.
+            append('?')
+            append(term.name)
         }
 
         // TODO: Optimize to write the escaped string immediately to the writer
@@ -123,17 +86,6 @@ class DefaultTermWriter(
             .replace("\r", "\\r")
             .replace("\n", "\\n")
         // TODO: Escape non-printable characters
-
-        /**
-         * Writes the term as a text string with layout and separators.
-         *
-         * @param term The term to write.
-         */
-        private fun writeAsText(term: Term): Unit = writer.run {
-            term.appendString(writer) {
-                it.accept(this@Visitor)
-            }
-        }
 
         /**
          * Writes a comma-separated list of subterms.

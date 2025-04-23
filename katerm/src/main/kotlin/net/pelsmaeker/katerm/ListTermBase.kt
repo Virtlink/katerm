@@ -22,16 +22,6 @@ abstract class ListTermBase<E: Term>(
      */
     abstract override fun withAttachments(newAttachments: TermAttachments): ListTermBase<E>
 
-    /**
-     * Creates a copy of this term with the specified new separators.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newSeparators The new separators of the term; or `null` to use (or reset to) the default separators.
-     * @return The copy of the term, but with the new separators.
-     */
-    abstract override fun withSeparators(newSeparators: List<String>?): ListTermBase<E>
-
     final override fun equals(that: TermBase): Boolean {
         if (that !is ListTermBase<E>) return false
         return equalSubterms(that)

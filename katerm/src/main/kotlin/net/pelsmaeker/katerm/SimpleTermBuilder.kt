@@ -18,7 +18,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun newInt(value: Int): IntTerm =
-        newInt(value, TermAttachments.empty(), null)
+        newInt(value, TermAttachments.empty())
 
     /**
      * Creates a new integer value term with the specified value and attachments, and the default separators.
@@ -27,28 +27,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun newInt(value: Int, attachments: TermAttachments): IntTerm =
-        newInt(value, attachments, null)
-
-    /**
-     * Creates a new integer value term with the specified value and separators, and no attachments.
-     *
-     * @param value The value of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newInt(value: Int, separators: List<String>?): IntTerm =
-        newInt(value, TermAttachments.empty(), separators)
-
-    /**
-     * Creates a new integer value term with the specified value, attachments, and separators.
-     *
-     * @param value The value of the term.
-     * @param attachments The attachments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newInt(value: Int, attachments: TermAttachments, separators: List<String>?): IntTerm
+    fun newInt(value: Int, attachments: TermAttachments): IntTerm
 
     /**
      * Create a copy of the specified integer value term with the specified new value
@@ -73,7 +52,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun newReal(value: Double): RealTerm =
-        newReal(value, TermAttachments.empty(), null)
+        newReal(value, TermAttachments.empty())
 
     /**
      * Creates a new real value term with the specified value and attachments, and the default separators.
@@ -82,28 +61,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun newReal(value: Double, attachments: TermAttachments): RealTerm =
-        newReal(value, attachments, null)
-
-    /**
-     * Creates a new real value term with the specified value and separators, and no attachments.
-     *
-     * @param value The value of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newReal(value: Double, separators: List<String>?): RealTerm =
-        newReal(value, TermAttachments.empty(), separators)
-
-    /**
-     * Creates a new real value term with the specified value, attachments, and separators.
-     *
-     * @param value The value of the term.
-     * @param attachments The attachments of the term,
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newReal(value: Double, attachments: TermAttachments, separators: List<String>?): RealTerm
+    fun newReal(value: Double, attachments: TermAttachments): RealTerm
 
     /**
      * Create a copy of the specified real value term with the specified new value
@@ -128,7 +86,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun newString(value: String): StringTerm =
-        newString(value, TermAttachments.empty(), null)
+        newString(value, TermAttachments.empty())
 
     /**
      * Creates a new string term with the specified value and attachments, and the default separators.
@@ -137,28 +95,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun newString(value: String, attachments: TermAttachments): StringTerm =
-        newString(value, attachments, null)
-
-    /**
-     * Creates a new string term with the specified value and separators, and no attachments.
-     *
-     * @param value The value of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newString(value: String, separators: List<String>?): StringTerm =
-        newString(value, TermAttachments.empty(), separators)
-
-    /**
-     * Creates a new string term with the specified value, attachments, and separators.
-     *
-     * @param value The value of the term.
-     * @param attachments The attachments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newString(value: String, attachments: TermAttachments, separators: List<String>?): StringTerm
+    fun newString(value: String, attachments: TermAttachments): StringTerm
 
     /**
      * Create a copy of the specified string term with the specified new value
@@ -183,7 +120,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun <T> newValue(value: T): ValueTerm<T> =
-        newValue(value, TermAttachments.empty(), null)
+        newValue(value, TermAttachments.empty())
 
     /**
      * Creates a new value term with the specified value and attachments, and the default separators.
@@ -192,28 +129,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun <T> newValue(value: T, attachments: TermAttachments): ValueTerm<T> =
-        newValue(value, attachments, null)
-
-    /**
-     * Creates a new value term with the specified value and separators, and no attachments.
-     *
-     * @param value The value of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun <T> newValue(value: T, separators: List<String>?): ValueTerm<T> =
-        newValue(value, TermAttachments.empty(), separators)
-
-    /**
-     * Creates a new value term with the specified value, attachments, and separators.
-     *
-     * @param value The value of the term.
-     * @param attachments The attachments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun <T> newValue(value: T, attachments: TermAttachments, separators: List<String>?): ValueTerm<T>
+    fun <T> newValue(value: T, attachments: TermAttachments): ValueTerm<T>
 
     /**
      * Create a copy of the specified value term with the specified new value
@@ -255,18 +171,6 @@ interface SimpleTermBuilder: TermBuilder {
         newAppl(op, args, TermAttachments.empty())
 
     /**
-     * Creates a new constructor application term with the specified constructor, arguments, and separators,
-     * and no attachments.
-     *
-     * @param op The name of the constructor.
-     * @param args The arguments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newAppl(op: String, args: List<Term>, separators: List<String>?): ApplTerm =
-        newAppl(op, args, TermAttachments.empty(), separators)
-
-    /**
      * Creates a new constructor application term with the specified constructor, arguments, attachments,
      * and the default separators.
      *
@@ -275,19 +179,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm =
-        newAppl(op, args, attachments, null)
-
-    /**
-     * Creates a new constructor application term with the specified constructor, arguments, attachments, and separators.
-     *
-     * @param op The name of the constructor.
-     * @param args The arguments of the term.
-     * @param attachments The attachments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun newAppl(op: String, args: List<Term>, attachments: TermAttachments, separators: List<String>?): ApplTerm
+    fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm
 
     /**
      * Create a copy of the specified constructor application term with the specified new arguments
@@ -325,7 +217,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun <E: Term> newList(vararg elements: E): ListTerm<E> =
-        newList(elements.asList(), null)
+        newList(elements.asList(), TermAttachments.empty())
 
     /**
      * Creates a new list term with the specified elements, and no attachments and the default separators.
@@ -335,18 +227,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The created term.
      */
     fun <E: Term> newList(elements: List<E>): ListTerm<E> =
-        newList(elements, TermAttachments.empty(), null)
-
-    /**
-     * Creates a new list term with the specified elements and separators, and no attachments.
-     *
-     * @param E The type of the elements in the list.
-     * @param elements The elements in the list.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun <E: Term> newList(elements: List<E>, separators: List<String>?): ListTerm<E> =
-        newList(elements, TermAttachments.empty(), separators)
+        newList(elements, TermAttachments.empty())
 
     /**
      * Creates a new list term with the specified elements and attachments, and the default separators.
@@ -356,19 +237,7 @@ interface SimpleTermBuilder: TermBuilder {
      * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun <E: Term> newList(elements: List<E>, attachments: TermAttachments): ListTerm<E> =
-        newList(elements, attachments, null)
-
-    /**
-     * Creates a new list term with the specified elements, attachments, and separators.
-     *
-     * @param E The type of the elements in the list.
-     * @param elements The elements in the list.
-     * @param attachments The attachments of the term.
-     * @param separators The separators; or `null` to use the default separators.
-     * @return The created term.
-     */
-    fun <E: Term> newList(elements: List<E>, attachments: TermAttachments, separators: List<String>?): ListTerm<E>
+    fun <E: Term> newList(elements: List<E>, attachments: TermAttachments): ListTerm<E>
 
     /**
      * Create a copy of the specified list term with the specified new elements
@@ -436,13 +305,6 @@ interface SimpleTermBuilder: TermBuilder {
      * @return The copy of the term, but with the new name.
      */
     fun copyVar(term: TermVar, newName: String): TermVar
-
-    /////////////
-    // ListVar //
-    /////////////
-
-//    fun newListVar(name: String): ListTermVar = newListVar(name, TermAttachments.empty())
-//    fun newListVar(name: String, attachments: TermAttachments): ListTermVar
 
 }
 

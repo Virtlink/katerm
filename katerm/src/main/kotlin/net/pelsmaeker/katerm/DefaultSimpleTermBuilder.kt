@@ -4,7 +4,7 @@ import net.pelsmaeker.katerm.io.DefaultTermWriter
 import java.util.*
 
 // TODO: Make this an interface
-typealias ApplTermBuilder = (String, List<Term>, TermAttachments, List<String>?) -> ApplTerm
+typealias ApplTermBuilder = (String, List<Term>, TermAttachments) -> ApplTerm
 
 /**
  * The default simple term builder.
@@ -15,60 +15,45 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
         if (term.termAttachments == newAttachments) return term
         return when (term) {
-            is IntTerm -> newInt(term.termValue, newAttachments, term.termSeparators) as T
-            is RealTerm -> newReal(term.termValue, newAttachments, term.termSeparators) as T
-            is StringTerm -> newString(term.termValue, newAttachments, term.termSeparators) as T
-            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments, term.termSeparators) as T
+            is IntTerm -> newInt(term.termValue, newAttachments) as T
+            is RealTerm -> newReal(term.termValue, newAttachments) as T
+            is StringTerm -> newString(term.termValue, newAttachments) as T
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
 //            is ListTermVar -> newListVar(term.name, newAttachments) as T
-            is ListTerm<*> -> newList(term.elements, newAttachments, term.termSeparators) as T
+            is ListTerm<*> -> newList(term.elements, newAttachments) as T
             is TermVar -> newVar(term.name, newAttachments) as T
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Term> withSeparators(term: T, newSeparators: List<String>?): T {
-        if (term.termSeparators == newSeparators) return term
-        return when (term) {
-            is IntTerm -> newInt(term.termValue, term.termAttachments, newSeparators) as T
-            is RealTerm -> newReal(term.termValue, term.termAttachments, newSeparators) as T
-            is StringTerm -> newString(term.termValue, term.termAttachments, newSeparators) as T
-            is ApplTerm -> newAppl(term.termOp, term.termArgs, term.termAttachments, newSeparators) as T
-//            is ListTermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
-            is ListTerm<*> -> newList(term.elements, term.termAttachments, newSeparators) as T
-            is TermVar -> if (newSeparators != null) throw IllegalArgumentException("Term variables cannot have separators") else term
-            else -> throw IllegalArgumentException("Unknown term type: $term")
-        }
-    }
-
-    override fun newInt(value: Int, attachments: TermAttachments, separators: List<String>?): IntTerm {
-        return IntTermImpl(value, null /* TODO */, attachments, separators)
+    override fun newInt(value: Int, attachments: TermAttachments): IntTerm {
+        return IntTermImpl(value, null /* TODO */, attachments)
     }
 
     override fun copyInt(term: IntTerm, newValue: Int): IntTerm {
         if (term.termValue == newValue) return term
-        return newInt(newValue /* TODO: termText */, term.termAttachments, term.termSeparators)
+        return newInt(newValue /* TODO: termText */, term.termAttachments)
     }
 
-    override fun newReal(value: Double, attachments: TermAttachments, separators: List<String>?): RealTerm {
-        return RealTermImpl(value, null /* TODO */, attachments, separators)
+    override fun newReal(value: Double, attachments: TermAttachments): RealTerm {
+        return RealTermImpl(value, null /* TODO */, attachments)
     }
 
     override fun copyReal(term: RealTerm, newValue: Double): RealTerm {
         if (term.termValue == newValue) return term
-        return newReal(newValue, term.termAttachments, term.termSeparators)
+        return newReal(newValue, term.termAttachments)
     }
 
-    override fun newString(value: String, attachments: TermAttachments, separators: List<String>?): StringTerm {
-        return StringTermImpl(value, null /* TODO */, attachments, separators)
+    override fun newString(value: String, attachments: TermAttachments): StringTerm {
+        return StringTermImpl(value, null /* TODO */, attachments)
     }
 
     override fun copyString(term: StringTerm, newValue: String): StringTerm {
         if (term.termValue == newValue) return term
-        return newString(newValue, term.termAttachments, term.termSeparators)
+        return newString(newValue, term.termAttachments)
     }
 
-    override fun <T> newValue(value: T, attachments: TermAttachments, separators: List<String>?): ValueTerm<T> {
+    override fun <T> newValue(value: T, attachments: TermAttachments): ValueTerm<T> {
         TODO("Not yet implemented")
     }
 
@@ -76,13 +61,9 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         TODO("Not yet implemented")
     }
 
-    override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments, separators: List<String>?): ApplTerm {
-        require(separators == null || separators.size == args.size + 1) {
-            "Expected ${args.size + 1} separators separating ${args.size} arguments; got ${separators!!.size}."
-        }
-
+    override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm {
         val customBuilder = getApplBuilder(op)
-        return customBuilder(op, args, attachments, separators)
+        return customBuilder(op, args, attachments)
     }
 
     /**
@@ -97,27 +78,26 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
     override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
         if (term.termArgs == newArgs) return term
-        return newAppl(term.termOp, newArgs, term.termAttachments, term.termSeparators)
+        return newAppl(term.termOp, newArgs, term.termAttachments)
     }
 
     override fun <T : Term> newList(
         elements: List<T>,
         attachments: TermAttachments,
-        separators: List<String>?
     ): ListTerm<T> {
         return if (elements.isNotEmpty()) {
             // TODO: Enforce that all elements of a list share the same separators and attachments?
             //  This would mean: no term sharing, or copying a tail of a list to another list
 
-            ConsTermImpl(elements.first(), newList(elements.drop(1)), attachments, separators)
+            ConsTermImpl(elements.first(), newList(elements.drop(1)), attachments)
         } else {
-            NilTermImpl(attachments, separators)
+            NilTermImpl(attachments)
         }
     }
 
     override fun <E : Term> copyList(term: ListTerm<E>, newElements: List<E>): ListTerm<E> {
         if (term.elements == newElements) return term
-        return newList(newElements, term.termAttachments, term.termSeparators)
+        return newList(newElements, term.termAttachments)
     }
 
     override fun copyVar(term: TermVar, newName: String): TermVar {
@@ -139,7 +119,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected abstract class TermImplBase(
         override val termAttachments: TermAttachments,
-        override val termSeparators: List<String>?,
     ): Term {
         companion object {
             /** The default term writer used for [toString]. */
@@ -207,8 +186,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected abstract class ValueTermImplBase<T>(
         attachments: TermAttachments,
-        separators: List<String>?,
-    ) : ValueTerm<T>, TermImplBase(attachments, separators) {
+    ) : ValueTerm<T>, TermImplBase(attachments) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
             @Suppress("UNCHECKED_CAST")
@@ -217,7 +195,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
             return this::class.java == that::class.java
                 && equalsValue(that)
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // @formatter:on
         }
 
@@ -241,7 +218,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     protected abstract class ApplTermImplBase(
         attachments: TermAttachments,
         termSeparators: List<String>?,
-    ) : ApplTerm, TermImplBase(attachments, termSeparators) {
+    ) : ApplTerm, TermImplBase(attachments) {
 
         abstract override val termArgs: List<Term>
 
@@ -253,7 +230,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 // TODO: Compare hash code
                 && equalsAppl(that)
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // @formatter:on
         }
 
@@ -301,11 +277,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(termOp, termArgs)
 
         override fun withAttachments(newAttachments: TermAttachments): ApplTermImpl {
-            return ApplTermImpl(termOp, termArgs, newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): ApplTermImpl {
-            return ApplTermImpl(termOp, termArgs, termAttachments, newSeparators)
+            return ApplTermImpl(termOp, termArgs, newAttachments)
         }
     }
 
@@ -313,12 +285,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected abstract class IntTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : IntTerm, ValueTermImplBase<Int>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : IntTerm, ValueTermImplBase<Int>(attachments) {
 
         abstract override val termText: String
 
@@ -330,7 +297,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 // TODO: Compare hash code
                 && equalsInt(that)
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // FIXME: Should we compare termText?
             // @formatter:on
         }
@@ -362,12 +328,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : IntTerm, IntTermImplBase(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : IntTerm, IntTermImplBase(attachments) {
 
         override val termText: String get() = text ?: termValue.toString()
 
@@ -379,11 +340,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(termValue)
 
         override fun withAttachments(newAttachments: TermAttachments): IntTermImpl {
-            return IntTermImpl(termValue, text, newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): IntTermImpl {
-            return IntTermImpl(termValue, text, termAttachments, newSeparators)
+            return IntTermImpl(termValue, text, newAttachments)
         }
     }
 
@@ -391,12 +348,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected abstract class RealTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : RealTerm, ValueTermImplBase<Double>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : RealTerm, ValueTermImplBase<Double>(attachments) {
 
         abstract override val termText: String
 
@@ -408,7 +360,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 // TODO: Compare hash code
                 && equalsReal(that)
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // FIXME: Should we compare termText?
             // @formatter:on
         }
@@ -440,12 +391,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : RealTerm, RealTermImplBase(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : RealTerm, RealTermImplBase(attachments) {
 
         override val termText: String get() = text ?: termValue.toString()
 
@@ -456,11 +402,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(termValue)
 
         override fun withAttachments(newAttachments: TermAttachments): RealTermImpl {
-            return RealTermImpl(termValue, text, newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): RealTermImpl {
-            return RealTermImpl(termValue, text, termAttachments, newSeparators)
+            return RealTermImpl(termValue, text, newAttachments)
         }
     }
 
@@ -468,12 +410,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected abstract class StringTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : StringTerm, ValueTermImplBase<String>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : StringTerm, ValueTermImplBase<String>(attachments) {
 
         abstract override val termText: String
 
@@ -485,7 +422,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 // TODO: Compare hash code
                 && equalsString(that)
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // FIXME: Should we compare termText?
             // @formatter:on
         }
@@ -517,12 +453,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : StringTerm, StringTermImplBase(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators, got ${separators?.size}." }
-        }
+    ) : StringTerm, StringTermImplBase(attachments) {
 
         override val termText: String get() = text ?: termValue
 
@@ -533,11 +464,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(termValue)
 
         override fun withAttachments(newAttachments: TermAttachments): StringTermImpl {
-            return StringTermImpl(termValue, text, newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): StringTermImpl {
-            return StringTermImpl(termValue, text, termAttachments, newSeparators)
+            return StringTermImpl(termValue, text, newAttachments)
         }
     }
 
@@ -571,9 +498,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     private class TermVarImpl(
         override val name: String,
         attachments: TermAttachments = TermAttachments.empty(),
-    ) : TermVar, TermImplBase(attachments, null) {
-
-        override val termSeparators: List<String>? get() = null
+    ) : TermVar, TermImplBase(attachments) {
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                 // Identity equality
@@ -585,17 +510,11 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 // TODO: Compare hash code
                 && this.name == that.name
                 && this.termAttachments == that.termAttachments
-                && this.termSeparators == that.termSeparators
             // @formatter:on
         }
 
         override fun withAttachments(newAttachments: TermAttachments): TermVarImpl {
             return TermVarImpl(name, newAttachments)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): TermVarImpl {
-            require(newSeparators == null) { "Term variables cannot have separators" }
-            return this
         }
 
         override val hash: Int = Objects.hash(name)
@@ -605,8 +524,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     @Suppress("EqualsOrHashCode")
     protected sealed class ListTermImplBase<T: Term>(
         attachments: TermAttachments,
-        separators: List<String>?,
-    ): ListTerm<T>, TermImplBase(attachments, separators) {
+    ): ListTerm<T>, TermImplBase(attachments) {
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
@@ -619,7 +537,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                     && this.size == that.size
                     && this.termChildren == that.termChildren
                     && this.termAttachments == that.termAttachments
-                    && this.termSeparators == that.termSeparators
             // FIXME: Should we compare termText?
             // @formatter:on
         }
@@ -646,12 +563,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val head: E,
         override val tail: ListTerm<E>,
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : ListTerm<E>, ListTermImplBase<E>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 3) { "Expected 3 separators; got ${separators!!.size}." }
-        }
+    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
 
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
@@ -669,11 +581,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(head, tail)
 
         override fun withAttachments(newAttachments: TermAttachments): ConsTermImpl<E> {
-            return ConsTermImpl(head, tail, newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): ConsTermImpl<E> {
-            return ConsTermImpl(head, tail, termAttachments, newSeparators)
+            return ConsTermImpl(head, tail, newAttachments)
         }
     }
 
@@ -682,12 +590,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val prefix: TermVar,
         override val tail: ListTerm<E>,
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : ListTerm<E>, ListTermImplBase<E>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 3) { "Expected 3 separators; got ${separators!!.size}." }
-        }
+    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
 
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
@@ -705,23 +608,15 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = Objects.hash(prefix, tail)
 
         override fun withAttachments(newAttachments: TermAttachments): ConcTermImpl<E> {
-            return ConcTermImpl(prefix, tail, newAttachments, termSeparators)
+            return ConcTermImpl(prefix, tail, newAttachments)
         }
 
-        override fun withSeparators(newSeparators: List<String>?): ConcTermImpl<E> {
-            return ConcTermImpl(prefix, tail, termAttachments, newSeparators)
-        }
     }
 
     /** List nil term (an empty list). */
     private class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>?,
-    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(attachments, separators) {
-
-        init {
-            require(separators == null || separators.size == 2) { "Expected 2 separators; got ${separators!!.size}." }
-        }
+    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(attachments) {
 
         override val minSize: Int get() = 0
         override val size: Int? get() = null
@@ -741,33 +636,8 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         override val hash: Int = 0
 
         override fun withAttachments(newAttachments: TermAttachments): NilTermImpl {
-            return NilTermImpl(newAttachments, termSeparators)
-        }
-
-        override fun withSeparators(newSeparators: List<String>?): NilTermImpl {
-            return NilTermImpl(termAttachments, newSeparators)
+            return NilTermImpl(newAttachments)
         }
     }
-
-//    /** A term variable as a list tail. */
-//    private class ListTermVarImpl(
-//        override val name: String,
-//        attachments: TermAttachments = TermAttachments.empty(),
-//    ) : ListTermVar, ListTermImplBase<Nothing>(attachments, null) {
-//
-//        override val termSeparators: List<String>? get() = null
-//
-//        override val head: Nothing? get() = null
-//        override val tail: ListTerm<Nothing>? get() = null
-//
-//        override fun equalsList(that: ListTerm<*>): Boolean {
-//            // @formatter:off
-//            return that is ListTermVar
-//                && this.name == that.name
-//            // @formatter:on
-//        }
-//
-//        override val hash: Int = Objects.hash(name)
-//    }
 
 }

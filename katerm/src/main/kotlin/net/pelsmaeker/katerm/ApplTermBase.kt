@@ -30,16 +30,6 @@ abstract class ApplTermBase(
      */
     abstract override fun withAttachments(newAttachments: TermAttachments): ApplTermBase
 
-    /**
-     * Creates a copy of this term with the specified new separators.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newSeparators The new separators of the term; or `null` to use (or reset to) the default separators.
-     * @return The copy of the term, but with the new separators.
-     */
-    abstract override fun withSeparators(newSeparators: List<String>?): ApplTermBase
-
     final override fun equals(that: TermBase): Boolean {
         if (that !is ApplTermBase) return false
         return this.termOp == that.termOp
@@ -68,6 +58,5 @@ abstract class ApplTermBase(
     override val hash: Int get() = Objects.hash(
         this.termChildren,
         this.termAttachments,
-        this.termSeparators,
     )
 }

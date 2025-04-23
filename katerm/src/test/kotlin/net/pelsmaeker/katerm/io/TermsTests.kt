@@ -12,7 +12,7 @@ object ListOfStringAnnotationKey: TermAttachments.Key<List<String>>(List::class.
 
 /** Tests an implementation of the [Term] interface. */
 @Suppress("TestFunctionName")
-fun TermTests(constructor: (attachments: TermAttachments, separators: List<String>?) -> Term) = funSpec {
+fun TermTests(constructor: (attachments: TermAttachments) -> Term) = funSpec {
 
     context("termAttachments") {
         test("should return the term attachments") {
@@ -20,24 +20,10 @@ fun TermTests(constructor: (attachments: TermAttachments, separators: List<Strin
             val attachments = TermAttachments.of(ListOfStringAnnotationKey to listOf("A", "B"))
 
             // Act
-            val term = constructor(attachments, null)
+            val term = constructor(attachments)
 
             // Assert
             term.termAttachments shouldBe attachments
-        }
-    }
-
-    context("termSeparators") {
-        xtest("should return the term separators") {
-            // Arrange
-            val separators = listOf("A", "B")
-            // FIXME: This won't work since we don't know how many separators the term expects
-
-            // Act
-            val term = constructor(TermAttachments.empty(), separators)
-
-            // Assert
-            term.termSeparators shouldBe separators
         }
     }
 
@@ -45,6 +31,6 @@ fun TermTests(constructor: (attachments: TermAttachments, separators: List<Strin
 
 class DefaultTermBuilderTests: FunSpec({
 
-    include(TermTests { a, s -> DefaultSimpleTermBuilder().newAppl("MyCons", emptyList(), a, s) })
+    include(TermTests { a -> DefaultSimpleTermBuilder().newAppl("MyCons", emptyList(), a) })
 
 })
