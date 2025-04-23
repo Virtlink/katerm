@@ -13,6 +13,27 @@ interface Term {
     val termAttachments: TermAttachments
 
     /**
+     * Determines whether this term and its subterms represent the same value
+     * as the given term and it subterms, regardless of the actual implementations
+     * of the terms and its subterms.
+     *
+     * Note that attachments are also checked by this method.
+     *
+     * This method may be used in tests to assert equality.
+     */
+    override fun equals(other: Any?): Boolean
+
+//    /**
+//     * Matches this term to the specified term, producing a unifier.
+//     *
+//     * Term attachments are not used when matching terms.
+//     *
+//     * @param that The other term to match against this term.
+//     * @return A unifier that contains the substitutions needed to make the two terms equal.
+//     */
+//    fun match(that: Term): Unifier
+
+    /**
      * Accepts a term visitor.
      *
      * @param visitor the visitor to accept
@@ -28,17 +49,6 @@ interface Term {
      * @return the result returned by the visitor
      */
     fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
-
-    /**
-     * Determines whether this term and its subterms represent the same value
-     * as the given term and it subterms, regardless of the actual implementations
-     * of the terms and its subterms.
-     *
-     * Note that attachments are also checked by this method.
-     *
-     * This method may be used in tests to assert equality.
-     */
-    override fun equals(other: Any?): Boolean
 }
 
 /** A constructor application term. */
