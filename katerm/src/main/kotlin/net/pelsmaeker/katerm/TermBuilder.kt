@@ -10,7 +10,7 @@ interface TermBuilder {
     /**
      * Creates a copy of the specified term with the specified new attachments.
      *
-     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
      * @param T The type of term to copy.
      * @param term The term to copy.
@@ -22,7 +22,7 @@ interface TermBuilder {
     /**
      * Creates a copy of the specified term with the specified new separators.
      *
-     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
      * @param T The type of term to copy.
      * @param term The term to copy.

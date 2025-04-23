@@ -374,7 +374,7 @@ interface SimpleTermBuilder: TermBuilder {
      * Create a copy of the specified list term with the specified new elements
      * and the same attachments and separators.
      *
-     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
      * @param E The type of the elements in the list.
      * @param term The term to copy.
@@ -387,7 +387,7 @@ interface SimpleTermBuilder: TermBuilder {
      * Create a copy of the specified list term with the specified new elements
      * and the same attachments and separators.
      *
-     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
      * @param E The type of the elements in the list.
      * @param term The term to copy.
@@ -429,7 +429,7 @@ interface SimpleTermBuilder: TermBuilder {
      * Create a copy of the specified term variable with the specified new name
      * and the same attachments and no separators.
      *
-     * Calling this method can be efficient than deconstructing and rebuilding a term.
+     * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
      * @param term The term to copy.
      * @param newName The new name of the variable.
@@ -441,8 +441,8 @@ interface SimpleTermBuilder: TermBuilder {
     // ListVar //
     /////////////
 
-    fun newListVar(name: String): ListTermVar = newListVar(name, TermAttachments.empty())
-    fun newListVar(name: String, attachments: TermAttachments): ListTermVar
+//    fun newListVar(name: String): ListTermVar = newListVar(name, TermAttachments.empty())
+//    fun newListVar(name: String, attachments: TermAttachments): ListTermVar
 
 }
 
