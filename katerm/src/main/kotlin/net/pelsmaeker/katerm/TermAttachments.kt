@@ -98,6 +98,7 @@ class TermAttachments private constructor(
      * @param pair The key/value pair to insert.
      * @return A new map with the specified attachment added.
      */
+    @Suppress("UNCHECKED_CAST")
     operator fun <T> plus(pair: Pair<Key<T>, T>): TermAttachments = add(pair as Pair<Key<Any>, Any>)
 
     /**

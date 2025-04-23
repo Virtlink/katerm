@@ -275,10 +275,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
         // The fields in the hash must match the fields in [equalsAppl]
         override val hash: Int = Objects.hash(termOp, termArgs)
-
-        override fun withAttachments(newAttachments: TermAttachments): ApplTermImpl {
-            return ApplTermImpl(termOp, termArgs, newAttachments)
-        }
     }
 
     /** Integer value term base class. */
@@ -338,10 +334,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
         // The fields in the hash must match the fields in [equalsInt]
         override val hash: Int = Objects.hash(termValue)
-
-        override fun withAttachments(newAttachments: TermAttachments): IntTermImpl {
-            return IntTermImpl(termValue, text, newAttachments)
-        }
     }
 
     /** Real value term base class. */
@@ -400,10 +392,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         }
 
         override val hash: Int = Objects.hash(termValue)
-
-        override fun withAttachments(newAttachments: TermAttachments): RealTermImpl {
-            return RealTermImpl(termValue, text, newAttachments)
-        }
     }
 
     /** String value term base class. */
@@ -462,10 +450,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         }
 
         override val hash: Int = Objects.hash(termValue)
-
-        override fun withAttachments(newAttachments: TermAttachments): StringTermImpl {
-            return StringTermImpl(termValue, text, newAttachments)
-        }
     }
 
 //    /** Blob term. */
@@ -511,10 +495,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
                 && this.name == that.name
                 && this.termAttachments == that.termAttachments
             // @formatter:on
-        }
-
-        override fun withAttachments(newAttachments: TermAttachments): TermVarImpl {
-            return TermVarImpl(name, newAttachments)
         }
 
         override val hash: Int = Objects.hash(name)
@@ -579,10 +559,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         }
 
         override val hash: Int = Objects.hash(head, tail)
-
-        override fun withAttachments(newAttachments: TermAttachments): ConsTermImpl<E> {
-            return ConsTermImpl(head, tail, newAttachments)
-        }
     }
 
     /** Concat variable with list (a term variable and a tail). */
@@ -607,10 +583,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
         override val hash: Int = Objects.hash(prefix, tail)
 
-        override fun withAttachments(newAttachments: TermAttachments): ConcTermImpl<E> {
-            return ConcTermImpl(prefix, tail, newAttachments)
-        }
-
     }
 
     /** List nil term (an empty list). */
@@ -634,10 +606,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         }
 
         override val hash: Int = 0
-
-        override fun withAttachments(newAttachments: TermAttachments): NilTermImpl {
-            return NilTermImpl(newAttachments)
-        }
     }
 
 }

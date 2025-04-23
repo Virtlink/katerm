@@ -15,16 +15,6 @@ abstract class TermBase(
 ): Term {
 
     /**
-     * Creates a copy of this term with the specified new attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newAttachments The new attachments of the term.
-     * @return The copy of the term, but with the new attachments.
-     */
-    abstract override fun withAttachments(newAttachments: TermAttachments): TermBase
-
-    /**
      * Determines whether this term and its subterms represent the same value
      * as the given term and it subterms, regardless of the actual implementations
      * of the terms and its subterms.

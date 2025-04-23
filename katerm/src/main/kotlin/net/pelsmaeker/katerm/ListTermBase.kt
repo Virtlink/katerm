@@ -12,16 +12,6 @@ abstract class ListTermBase<E: Term>(
     termAttachments: TermAttachments = TermAttachments.empty(),
 ): ListTerm<E>, TermBase(termAttachments) {
 
-    /**
-     * Creates a copy of this term with the specified new attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newAttachments The new attachments of the term.
-     * @return The copy of the term, but with the new attachments.
-     */
-    abstract override fun withAttachments(newAttachments: TermAttachments): ListTermBase<E>
-
     final override fun equals(that: TermBase): Boolean {
         if (that !is ListTermBase<E>) return false
         return equalSubterms(that)

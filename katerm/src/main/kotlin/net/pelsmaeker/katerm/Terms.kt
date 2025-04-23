@@ -6,10 +6,11 @@ package net.pelsmaeker.katerm
  * Terms are immutable. To create or change a term, use a [TermBuilder].
  */
 interface Term {
-    /** The attachments of the term. */
-    val termAttachments: TermAttachments
     /** A list of child terms of the term. */
     val termChildren: List<Term>
+
+    /** The attachments of the term. */
+    val termAttachments: TermAttachments
 
     /**
      * Accepts a term visitor.
@@ -38,16 +39,6 @@ interface Term {
      * This method may be used in tests to assert equality.
      */
     override fun equals(other: Any?): Boolean
-
-    /**
-     * Creates a copy of this term with the specified new attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newAttachments The new attachments of the term.
-     * @return The copy of the term, but with the new attachments.
-     */
-    fun withAttachments(newAttachments: TermAttachments): Term
 }
 
 /** A constructor application term. */
@@ -142,8 +133,6 @@ interface ListTerm<out E: Term> : Term {
     /** The children of the list. If the list contains term variables, they are also included here. */
     override val termChildren: List<Term>
 
-    abstract override fun withAttachments(newAttachments: TermAttachments): ListTerm<E>
-
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
 }
@@ -188,10 +177,6 @@ class ListTermView<out E: Term>(
                 TODO()
             }
         }
-
-    override fun withAttachments(newAttachments: TermAttachments): ListTerm<E> {
-        TODO("Not yet implemented")
-    }
 
     override val termAttachments: TermAttachments
         get() = content.getAttachmentAt(startIndex) ?: TermAttachments.empty()

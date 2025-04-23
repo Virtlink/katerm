@@ -20,16 +20,6 @@ abstract class ApplTermBase(
     // Please override to provide a custom implementation.
     override val termOp: String get() = this::class.java.simpleName
 
-    /**
-     * Creates a copy of this term with the specified new attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param newAttachments The new attachments of the term.
-     * @return The copy of the term, but with the new attachments.
-     */
-    abstract override fun withAttachments(newAttachments: TermAttachments): ApplTermBase
-
     final override fun equals(that: TermBase): Boolean {
         if (that !is ApplTermBase) return false
         return this.termOp == that.termOp
