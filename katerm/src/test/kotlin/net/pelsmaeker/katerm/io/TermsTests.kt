@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.DefaultSimpleTermBuilder
 import net.pelsmaeker.katerm.Term
-import net.pelsmaeker.katerm.TermAttachments
+import net.pelsmaeker.katerm.attachments.TermAttachments
 
 @Suppress("UNCHECKED_CAST")
 object ListOfStringAnnotationKey: TermAttachments.Key<List<String>>(List::class.java as Class<out List<String>>)

@@ -5,6 +5,8 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.DefaultSimpleTermBuilder
 import net.pelsmaeker.katerm.*
+import net.pelsmaeker.katerm.annotations.TermAnnotationKey
+import net.pelsmaeker.katerm.attachments.TermAttachments
 
 /**
  * Tests the [DefaultTermReader] class.
@@ -83,7 +85,8 @@ class DefaultTermReaderTests: FunSpec({
         withData<Pair<String, Term>>(
             nameFn = { "should parse \"${it.first}\" to \"${it.second}\"" },
             termTests.map { (input, expected) ->
-                "$input{MyAnno(42)}" to withAttachments(expected, TermAttachments.of(TermAnnotationKey to listOf(
+                "$input{MyAnno(42)}" to withAttachments(expected, TermAttachments.of(
+                    TermAnnotationKey to listOf(
                     newAppl("MyAnno", newInt(42)))
                 ))
             },
@@ -104,7 +107,8 @@ class DefaultTermReaderTests: FunSpec({
         withData<Pair<String, Term>>(
             nameFn = { "should parse \"${it.first}\" to \"${it.second}\"" },
             termTests.map { (input, expected) ->
-                "$input{.4,MyAnno(42),\"xyz\"}" to withAttachments(expected, TermAttachments.of(TermAnnotationKey to listOf(
+                "$input{.4,MyAnno(42),\"xyz\"}" to withAttachments(expected, TermAttachments.of(
+                    TermAnnotationKey to listOf(
                     newReal(.4),
                     newAppl("MyAnno", newInt(42)),
                     newString("xyz"))

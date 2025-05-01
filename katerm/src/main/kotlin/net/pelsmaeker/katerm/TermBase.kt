@@ -1,5 +1,6 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.attachments.TermAttachments
 import net.pelsmaeker.katerm.io.DefaultTermWriter
 import java.io.Writer
 import java.lang.StringBuilder

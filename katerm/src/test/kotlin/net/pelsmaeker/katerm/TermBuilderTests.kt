@@ -133,7 +133,7 @@ fun testSimpleTermBuilder(
             val result = builder.newString(value)
 
             // Assert
-            result.termValue shouldBe value
+            result.value shouldBe value
         }
     }
 
@@ -147,7 +147,7 @@ fun testSimpleTermBuilder(
             val result = builder.newInt(value)
 
             // Assert
-            result.termValue shouldBe value
+            result.value shouldBe value
         }
     }
 
@@ -161,7 +161,7 @@ fun testSimpleTermBuilder(
             val result = builder.newReal(value)
 
             // Assert
-            result.termValue shouldBe value
+            result.value shouldBe value
         }
     }
 

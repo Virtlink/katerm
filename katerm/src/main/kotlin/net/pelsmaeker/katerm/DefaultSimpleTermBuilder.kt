@@ -1,5 +1,6 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.attachments.TermAttachments
 import net.pelsmaeker.katerm.io.DefaultTermWriter
 import java.util.*
 
@@ -15,9 +16,9 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
         if (term.termAttachments == newAttachments) return term
         return when (term) {
-            is IntTerm -> newInt(term.termValue, newAttachments) as T
-            is RealTerm -> newReal(term.termValue, newAttachments) as T
-            is StringTerm -> newString(term.termValue, newAttachments) as T
+            is IntTerm -> newInt(term.value, newAttachments) as T
+            is RealTerm -> newReal(term.value, newAttachments) as T
+            is StringTerm -> newString(term.value, newAttachments) as T
             is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
 //            is ListTermVar -> newListVar(term.name, newAttachments) as T
             is ListTerm<*> -> newList(term.elements, newAttachments) as T
@@ -31,8 +32,8 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     }
 
     override fun copyInt(term: IntTerm, newValue: Int): IntTerm {
-        if (term.termValue == newValue) return term
         return newInt(newValue /* TODO: termText */, term.termAttachments)
+        if (term.value == newValue) return term
     }
 
     override fun newReal(value: Double, attachments: TermAttachments): RealTerm {
@@ -40,7 +41,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     }
 
     override fun copyReal(term: RealTerm, newValue: Double): RealTerm {
-        if (term.termValue == newValue) return term
+        if (term.value == newValue) return term
         return newReal(newValue, term.termAttachments)
     }
 
@@ -49,7 +50,7 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     }
 
     override fun copyString(term: StringTerm, newValue: String): StringTerm {
-        if (term.termValue == newValue) return term
+        if (term.value == newValue) return term
         return newString(newValue, term.termAttachments)
     }
 
@@ -283,8 +284,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
         attachments: TermAttachments = TermAttachments.empty(),
     ) : IntTerm, ValueTermImplBase<Int>(attachments) {
 
-        abstract override val termText: String
-
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
             val that = other as? IntTerm ?: return false        // Must be an IntTerm
@@ -320,20 +319,18 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
     /** Integer value term. */
     private class IntTermImpl(
-        override val termValue: Int,
-        /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
+        override val value: Int,
+        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : IntTerm, IntTermImplBase(attachments) {
 
-        override val termText: String get() = text ?: termValue.toString()
-
         override fun equalsInt(that: IntTerm): Boolean {
-            return this.termValue == that.termValue
+            return this.value == that.value
         }
 
         // The fields in the hash must match the fields in [equalsInt]
-        override val hash: Int = Objects.hash(termValue)
+        override val hash: Int = Objects.hash(value)
     }
 
     /** Real value term base class. */
@@ -341,8 +338,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     protected abstract class RealTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : RealTerm, ValueTermImplBase<Double>(attachments) {
-
-        abstract override val termText: String
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
@@ -379,19 +374,17 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
     /** Real value term. */
     private class RealTermImpl(
-        override val termValue: Double,
-        /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
+        override val value: Double,
+        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : RealTerm, RealTermImplBase(attachments) {
 
-        override val termText: String get() = text ?: termValue.toString()
-
         override fun equalsReal(that: RealTerm): Boolean {
-            return this.termValue == that.termValue
+            return this.value == that.value
         }
 
-        override val hash: Int = Objects.hash(termValue)
+        override val hash: Int = Objects.hash(value)
     }
 
     /** String value term base class. */
@@ -399,8 +392,6 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
     protected abstract class StringTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : StringTerm, ValueTermImplBase<String>(attachments) {
-
-        abstract override val termText: String
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true                     // Identity equality
@@ -437,45 +428,18 @@ open class DefaultSimpleTermBuilder: SimpleTermBuilder {
 
     /** String term. */
     private class StringTermImpl(
-        override val termValue: String,
-        /** The text representation of the value of the term; or `null` to use the default representation of [termValue]. */
+        override val value: String,
+        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
         private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : StringTerm, StringTermImplBase(attachments) {
 
-        override val termText: String get() = text ?: termValue
-
         override fun equalsString(that: StringTerm): Boolean {
-            return this.termValue == that.termValue
+            return this.value == that.value
         }
 
-        override val hash: Int = Objects.hash(termValue)
+        override val hash: Int = Objects.hash(value)
     }
-
-//    /** Blob term. */
-//    // TODO: We should probably not support this? Instead, users can create an implementation of `ApplTerm`.
-//    @Suppress("EqualsOrHashCode")
-//    protected class BlobTermImpl(
-//        override val value: Any,
-//        attachments: TermAttachments = TermAttachments.empty()
-//    ) : BlobTerm, TermImpl(attachments, null) {
-//
-//        override val termSeparators: List<String>? get() = null
-//
-//        override fun equals(other: Any?): Boolean {
-//            if (this === other) return true                 // Identity equality
-//            val that = other as? BlobTerm ?: return false   // Not a BlobTerm
-//
-//            // Check that the term and all its subterms are truly equal
-//            // @formatter:off
-//            return maybeEqual(other)
-//                && this.value == that.value
-//                && this.termAttachments == that.termAttachments
-//            // @formatter:on
-//        }
-//
-//        override val hash: Int = Objects.hash(value, termAttachments)
-//    }
 
     /** Term variable. */
     @Suppress("EqualsOrHashCode")

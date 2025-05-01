@@ -1,5 +1,7 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.attachments.TermAttachments
+
 /**
  * Builds simple terms.
  *

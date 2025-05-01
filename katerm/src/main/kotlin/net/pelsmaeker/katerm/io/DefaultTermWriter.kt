@@ -35,18 +35,18 @@ class DefaultTermWriter(
 
         override fun visitInt(term: IntTerm): Unit = writer.run {
             // Print the integer value.
-            append(term.termValue.toString())
+            append(term.value.toString())
         }
 
         override fun visitReal(term: RealTerm): Unit = writer.run {
             // Print the real value.
-            append(term.termValue.toString())
+            append(term.value.toString())
         }
 
         override fun visitString(term: StringTerm): Unit = writer.run {
             // Print the escaped string.
             append('"')
-            append(escape(term.termValue))
+            append(escape(term.value))
             append('"')
         }
 

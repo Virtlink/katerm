@@ -1,5 +1,7 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.attachments.TermAttachments
+
 /**
  * A term.
  *
@@ -22,16 +24,6 @@ interface Term {
      * This method may be used in tests to assert equality.
      */
     override fun equals(other: Any?): Boolean
-
-//    /**
-//     * Matches this term to the specified term, producing a unifier.
-//     *
-//     * Term attachments are not used when matching terms.
-//     *
-//     * @param that The other term to match against this term.
-//     * @return A unifier that contains the substitutions needed to make the two terms equal.
-//     */
-//    fun match(that: Term): Unifier
 
     /**
      * Accepts a term visitor.
@@ -88,16 +80,14 @@ interface ApplTerm : Term {
  */
 interface ValueTerm<V> : Term {
     /** The value of the term. */
-    val termValue: V
-    /** The text representation of the value of the term. */
-    val termText: String
+    val value: V
 
     override val termChildren: List<Term> get() = emptyList()
 }
 
 /** An integer number term. */
 interface IntTerm : ValueTerm<Int> {
-    override val termValue: Int
+    override val value: Int
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
@@ -105,8 +95,7 @@ interface IntTerm : ValueTerm<Int> {
 
 /** A real number term. */
 interface RealTerm : ValueTerm<Double> {
-    override val termValue: Double
-    override val termChildren: List<Term> get() = emptyList()
+    override val value: Double
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
@@ -114,8 +103,7 @@ interface RealTerm : ValueTerm<Double> {
 
 /** A string term. */
 interface StringTerm : ValueTerm<String> {
-    override val termValue: String
-    override val termChildren: List<Term> get() = emptyList()
+    override val value: String
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)

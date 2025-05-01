@@ -1,5 +1,6 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
 /**

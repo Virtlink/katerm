@@ -1,4 +1,4 @@
-package net.pelsmaeker.katerm
+package net.pelsmaeker.katerm.attachments
 
 /**
  * Holds term attachments.

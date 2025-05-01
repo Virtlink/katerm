@@ -2,6 +2,8 @@ package net.pelsmaeker.katerm.io
 
 import net.pelsmaeker.katerm.*
 import net.pelsmaeker.katerm.TermBuilder
+import net.pelsmaeker.katerm.annotations.TermAnnotationKey
+import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.io.*
 
 /**
