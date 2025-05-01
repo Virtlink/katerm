@@ -69,8 +69,20 @@ class DefaultTermWriter(
 
         override fun visitList(term: ListTerm<Term>): Unit = writer.run {
             append('[')
+            // TODO: Deal with variables in the list
             writeSubtermList(term.elements)
             append(']')
+        }
+
+        override fun visitOption(term: OptionTerm<Term>): Unit = writer.run {
+            if (term.isPresent()) {
+                append("some ")
+                term.value!!.accept(this@Visitor)
+            } else if (term.isEmpty()) {
+                append("none")
+            } else {
+                TODO("Deal with a variable in the option")
+            }
         }
 
         override fun visitVar(term: TermVar): Unit = writer.run {

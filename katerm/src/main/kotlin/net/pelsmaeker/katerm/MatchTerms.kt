@@ -59,6 +59,13 @@ private class MatcherVisitor(
         else -> false
     }
 
+    override fun visitOption(term: OptionTerm<Term>, pattern: Term): Boolean = when {
+        term === pattern -> associateSelf(term)
+        pattern is TermVar -> associate(term, pattern)
+        pattern is OptionTerm<*> -> accept(term.value, pattern.value)
+        else -> false
+    }
+
     override fun visitVar(term: TermVar, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
@@ -73,6 +80,12 @@ private class MatcherVisitor(
     private fun associate(term: Term, pattern: TermVar): Boolean {
         associations[pattern] = term
         return true
+    }
+
+    private fun accept(term: Term?, pattern: Term?): Boolean {
+        if (term == null && pattern == null) return true
+        if (term == null || pattern == null) return false
+        return term.accept(this, pattern)
     }
 
     private fun acceptAll(terms: List<Term>, patterns: List<Term>): Boolean {

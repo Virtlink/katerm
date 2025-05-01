@@ -30,11 +30,15 @@ private class TermVariableVisitor(
 
     override fun visitAppl(term: ApplTerm) {
         // Visit arguments.
-        term.termArgs.forEach { it.accept(this) }
+        term.termChildren.forEach { it.accept(this) }
     }
 
     override fun visitList(term: ListTerm<*>) {
-        term.elements.forEach { it.accept(this) }
+        term.termChildren.forEach { it.accept(this) }
+    }
+
+    override fun visitOption(term: OptionTerm<Term>) {
+        term.termChildren.forEach { it.accept(this) }
     }
 
     override fun visitVar(term: TermVar) {
