@@ -209,9 +209,8 @@ abstract class TermBuilderBase(
      * Implementations should check that the number of separators, if not `null`, matches the number of arguments + 1.
      */
     @Suppress("EqualsOrHashCode")
-    protected abstract inner class ApplTermImplBase(
+    protected abstract inner class ApplTermBase(
         attachments: TermAttachments,
-        termSeparators: List<String>?,
     ) : ApplTerm, TermImplBase(attachments) {
 
         abstract override val termArgs: List<Term>
@@ -242,33 +241,6 @@ abstract class TermBuilderBase(
          * Do include the attachments and separators.
          */
         abstract override val hash: Int
-    }
-
-    /** Constructor application term. */
-    private inner class ApplTermImpl(
-        override val termOp: String,
-        termArgs: List<Term>,
-        attachments: TermAttachments = TermAttachments.empty(),
-        separators: List<String>? = null,
-    ) : ApplTerm, ApplTermImplBase(attachments, separators) {
-
-        override val termArgs: List<Term> = termArgs.toList() // Safety copy.
-
-        init {
-            require(separators == null || separators.size == termArgs.size + 1) {
-                "Expected ${termArgs.size + 1} separators separating ${termArgs.size} arguments; got ${separators!!.size}."
-            }
-        }
-
-        override fun equalsAppl(that: ApplTerm): Boolean {
-            // @formatter:off
-            return this.termOp == that.termOp
-                && this.termArgs == that.termArgs
-            // @formatter:on
-        }
-
-        // The fields in the hash must match the fields in [equalsAppl]
-        override val hash: Int = Objects.hash(termOp, termArgs)
     }
 
     /** Integer value term base class. */
