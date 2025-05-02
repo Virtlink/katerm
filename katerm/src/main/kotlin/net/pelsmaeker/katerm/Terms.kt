@@ -109,14 +109,14 @@ interface StringTerm : ValueTerm<String> {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
-interface OptionTerm<out T : Term> : Term {
-    /** The term that is the value of the option; or `null` if the option is empty or a variable. */
-    val value: T?
+interface OptionTerm<out E : Term> : Term {
+    /** The term that is the element of the option; or `null` if the option is empty or a variable. */
+    val element: E?
     /** The term variable that is in this option; or `null`. */
     val variable: TermVar?
 
-    fun isEmpty(): Boolean = value == null && variable == null
-    fun isPresent(): Boolean = value != null && variable == null
+    fun isEmpty(): Boolean = element == null && variable == null
+    fun isPresent(): Boolean = element != null && variable == null
 
     /** The child of the option. If the option contains a term variable, it is also returned here. */
     override val termChildren: List<Term>

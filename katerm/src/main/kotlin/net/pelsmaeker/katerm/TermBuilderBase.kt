@@ -2,15 +2,17 @@ package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import net.pelsmaeker.katerm.io.DefaultTermWriter
+import net.pelsmaeker.katerm.io.TermTextWriter
 import java.util.*
 
-// TODO: Make this an interface
-typealias ApplTermBuilder = (String, List<Term>, TermAttachments) -> ApplTerm
-
 /**
- * The default simple term builder.
+ * Base class for term builders.
+ *
+ * @property termPrinter The term printer used for printing terms.
  */
-open class DefaultSimpleTermBuilder: TermBuilder {
+abstract class TermBuilderBase(
+    private val termPrinter: TermTextWriter = DefaultTermWriter(),
+): TermBuilder {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
@@ -20,67 +22,83 @@ open class DefaultSimpleTermBuilder: TermBuilder {
             is RealTerm -> newReal(term.value, newAttachments) as T
             is StringTerm -> newString(term.value, newAttachments) as T
             is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
-//            is ListTermVar -> newListVar(term.name, newAttachments) as T
+            is OptionTerm<*> -> newOption(term.element, newAttachments) as T
             is ListTerm<*> -> newList(term.elements, newAttachments) as T
             is TermVar -> newVar(term.name, newAttachments) as T
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
     }
 
-    override fun newInt(value: Int, attachments: TermAttachments): IntTerm {
-        return IntTermImpl(value, null /* TODO */, attachments)
+    /////////
+    // Int //
+    /////////
+
+    final override fun newInt(value: Int, attachments: TermAttachments): IntTerm {
+        return IntTermImpl(value, attachments)
     }
 
-    override fun copyInt(term: IntTerm, newValue: Int): IntTerm {
-        return newInt(newValue /* TODO: termText */, term.termAttachments)
+    final override fun copyInt(term: IntTerm, newValue: Int): IntTerm {
         if (term.value == newValue) return term
+        return newInt(newValue, term.termAttachments)
     }
 
-    override fun newReal(value: Double, attachments: TermAttachments): RealTerm {
-        return RealTermImpl(value, null /* TODO */, attachments)
+    /////////
+    // Real //
+    /////////
+
+    final override fun newReal(value: Double, attachments: TermAttachments): RealTerm {
+        return RealTermImpl(value, attachments)
     }
 
-    override fun copyReal(term: RealTerm, newValue: Double): RealTerm {
+    final override fun copyReal(term: RealTerm, newValue: Double): RealTerm {
         if (term.value == newValue) return term
         return newReal(newValue, term.termAttachments)
     }
 
-    override fun newString(value: String, attachments: TermAttachments): StringTerm {
-        return StringTermImpl(value, null /* TODO */, attachments)
+    ////////////
+    // String //
+    ////////////
+
+    final override fun newString(value: String, attachments: TermAttachments): StringTerm {
+        return StringTermImpl(value, attachments)
     }
 
-    override fun copyString(term: StringTerm, newValue: String): StringTerm {
+    final override fun copyString(term: StringTerm, newValue: String): StringTerm {
         if (term.value == newValue) return term
         return newString(newValue, term.termAttachments)
     }
 
-    override fun <T> newValue(value: T, attachments: TermAttachments): ValueTerm<T> {
-        TODO("Not yet implemented")
-    }
+    //////////
+    // Appl //
+    //////////
 
-    override fun <V> copyValue(term: ValueTerm<V>, newValue: V): ValueTerm<V> {
-        TODO("Not yet implemented")
-    }
+    abstract override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm
 
-    override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm {
-        val customBuilder = getApplBuilder(op)
-        return customBuilder(op, args, attachments)
-    }
-
-    /**
-     * Gets the builder to use to build a term of the specified type.
-     *
-     * @param op The constructor name.
-     * @return The builder to use.
-     */
-    protected open fun getApplBuilder(op: String): ApplTermBuilder {
-        return ::ApplTermImpl
-    }
-
-    override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
+    open override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
+        // Can be overridden to provide a more efficient implementation.
         if (term.termArgs == newArgs) return term
         return newAppl(term.termOp, newArgs, term.termAttachments)
     }
+
+    ////////////
+    // Option //
+    ////////////
+
+    override fun <E: Term> newOption(element: E?, attachments: TermAttachments): OptionTerm<E> {
+        return when (element) {
+            null -> NoneTermImpl(attachments) as OptionTerm<E>
+            else -> SomeTermImpl(element, attachments)
+        }
+    }
+
+    override fun <E: Term> copyOption(term: OptionTerm<E>, newElement: E?): OptionTerm<E> {
+        if (term.element == newElement) return term
+        return newOption(newElement, term.termAttachments)
+    }
+
+    //////////
+    // List //
+    //////////
 
     override fun <T : Term> newList(
         elements: List<T>,
@@ -101,30 +119,30 @@ open class DefaultSimpleTermBuilder: TermBuilder {
         return newList(newElements, term.termAttachments)
     }
 
-    override fun copyVar(term: TermVar, newName: String): TermVar {
-        TODO("Not yet implemented")
-    }
+    /////////
+    // Var //
+    /////////
 
     override fun newVar(name: String, attachments: TermAttachments): TermVar {
         return TermVarImpl(name, attachments)
     }
 
-//    override fun newListVar(name: String, attachments: TermAttachments): ListTermVar {
-//        return ListTermVarImpl(name, attachments)
-//    }
+    override fun copyVar(term: TermVar, newName: String): TermVar {
+        return newVar(newName, term.termAttachments)
+    }
+
+    //////////////////
+    // Term Classes //
+    //////////////////
 
     // The classes here are protected to prevent them from being instantiated or used outside of this class.
     // Instead, the base interfaces should be used.
 
     /** Base class for this term implementation. */
     @Suppress("EqualsOrHashCode")
-    protected abstract class TermImplBase(
+    protected abstract inner class TermImplBase(
         override val termAttachments: TermAttachments,
     ): Term {
-        companion object {
-            /** The default term writer used for [toString]. */
-            private val printer = DefaultTermWriter()
-        }
 
         /** An eager hash code calculation. */
         protected abstract val hash: Int
@@ -149,43 +167,18 @@ open class DefaultSimpleTermBuilder: TermBuilder {
          */
         abstract override fun equals(other: Any?): Boolean
 
-//        /**
-//         * Determines whether this term and its subterms represent the same value
-//         * as the given term and it subterms, regardless of the actual implementations
-//         * of the terms and its subterms.
-//         *
-//         * Note that attachments are not checked by this method.
-//         *
-//         * Implementations should compare equivalent to other implementations of the same term type,
-//         * but can take shortcuts when comparing to the same implementation of the term type.
-//         */
-//        abstract fun equivalentTo(other: Term): Boolean
-
-//        /**
-//         * Checks whether this term and the given term could be equal.
-//         * Returns `false` if they can never be equal.
-//         *
-//         * @param that the term to check
-//         * @return `true` if this term could be equal to the given term; otherwise, `false` if it can never be equal
-//         */
-//        @Suppress("NOTHING_TO_INLINE")
-//        protected inline fun maybeEqual(that: Term): Boolean {
-//            // If they use the same implementation, their hashes must be equal
-//            return this::class.java == that::class.java && this.hash != (that as TermImplBase).hash
-//        }
-
         /**
          * Returns a string representation of this term.
          *
          * Override this method to customize the string representation.
          */
         override fun toString(): String {
-            return printer.writeToString(this)
+            return this@TermBuilderBase.termPrinter.writeToString(this)
         }
     }
 
     @Suppress("EqualsOrHashCode")
-    protected abstract class ValueTermImplBase<T>(
+    protected abstract inner class ValueTermImplBase<T>(
         attachments: TermAttachments,
     ) : ValueTerm<T>, TermImplBase(attachments) {
         override fun equals(other: Any?): Boolean {
@@ -216,7 +209,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
      * Implementations should check that the number of separators, if not `null`, matches the number of arguments + 1.
      */
     @Suppress("EqualsOrHashCode")
-    protected abstract class ApplTermImplBase(
+    protected abstract inner class ApplTermImplBase(
         attachments: TermAttachments,
         termSeparators: List<String>?,
     ) : ApplTerm, TermImplBase(attachments) {
@@ -252,7 +245,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
     }
 
     /** Constructor application term. */
-    private class ApplTermImpl(
+    private inner class ApplTermImpl(
         override val termOp: String,
         termArgs: List<Term>,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -280,7 +273,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
 
     /** Integer value term base class. */
     @Suppress("EqualsOrHashCode")
-    protected abstract class IntTermImplBase(
+    protected abstract inner class IntTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : IntTerm, ValueTermImplBase<Int>(attachments) {
 
@@ -318,10 +311,8 @@ open class DefaultSimpleTermBuilder: TermBuilder {
     }
 
     /** Integer value term. */
-    private class IntTermImpl(
+    private inner class IntTermImpl(
         override val value: Int,
-        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
-        private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : IntTerm, IntTermImplBase(attachments) {
 
@@ -335,7 +326,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
 
     /** Real value term base class. */
     @Suppress("EqualsOrHashCode")
-    protected abstract class RealTermImplBase(
+    protected abstract inner class RealTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : RealTerm, ValueTermImplBase<Double>(attachments) {
 
@@ -373,10 +364,8 @@ open class DefaultSimpleTermBuilder: TermBuilder {
     }
 
     /** Real value term. */
-    private class RealTermImpl(
+    private inner class RealTermImpl(
         override val value: Double,
-        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
-        private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : RealTerm, RealTermImplBase(attachments) {
 
@@ -389,7 +378,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
 
     /** String value term base class. */
     @Suppress("EqualsOrHashCode")
-    protected abstract class StringTermImplBase(
+    protected abstract inner class StringTermImplBase(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : StringTerm, ValueTermImplBase<String>(attachments) {
 
@@ -427,10 +416,8 @@ open class DefaultSimpleTermBuilder: TermBuilder {
     }
 
     /** String term. */
-    private class StringTermImpl(
+    private inner class StringTermImpl(
         override val value: String,
-        /** The text representation of the value of the term; or `null` to use the default representation of [value]. */
-        private val text: String? = null,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : StringTerm, StringTermImplBase(attachments) {
 
@@ -443,7 +430,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
 
     /** Term variable. */
     @Suppress("EqualsOrHashCode")
-    private class TermVarImpl(
+    private inner class TermVarImpl(
         override val name: String,
         attachments: TermAttachments = TermAttachments.empty(),
     ) : TermVar, TermImplBase(attachments) {
@@ -464,9 +451,98 @@ open class DefaultSimpleTermBuilder: TermBuilder {
         override val hash: Int = Objects.hash(name)
     }
 
+    /** Base class for option terms. */
+    @Suppress("EqualsOrHashCode")
+    protected abstract inner class OptionTermImplBase<T: Term>(
+        attachments: TermAttachments,
+    ): OptionTerm<T>, TermImplBase(attachments) {
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true                     // Identity equality
+            val that = other as? OptionTerm<*> ?: return false    // Must be a ListTerm
+            // @formatter:off
+            return this::class.java == that::class.java
+                    // TODO: Compare hash code
+                    && equalsOption(that)
+                    && this.termAttachments == that.termAttachments
+            // FIXME: Should we compare termText?
+            // @formatter:on
+        }
+
+        /**
+         * Checks whether this term and the given term are equal.
+         *
+         * Implement this method to customize the equality check.
+         *
+         * @param that The term to check.
+         * @return `true` if this term is equal to the specified term; otherwise, `false`.
+         */
+        protected abstract fun equalsOption(that: OptionTerm<*>): Boolean
+
+        /**
+         * Implement this property to perform a custom hash code calculation.
+         * Do include the attachments and separators.
+         */
+        abstract override val hash: Int
+    }
+
+    /** Option term with a value. */
+    private inner class SomeTermImpl<E: Term>(
+        override val element: E,
+        attachments: TermAttachments = TermAttachments.empty(),
+    ) : OptionTerm<E>, OptionTermImplBase<E>(attachments) {
+
+        override val variable: TermVar? get() = null
+        override val termChildren: List<Term> get() = listOf(element)
+
+        override fun equalsOption(that: OptionTerm<*>): Boolean {
+            // @formatter:off
+            return this.element == that.element
+            // @formatter:on
+        }
+
+        override val hash: Int = Objects.hash(element)
+    }
+
+    /** Option term without a value */
+    private inner class NoneTermImpl(
+        attachments: TermAttachments = TermAttachments.empty(),
+    ) : OptionTerm<Nothing>, OptionTermImplBase<Nothing>(attachments) {
+
+        override val element: Nothing? get() = null
+        override val variable: TermVar? get() = null
+        override val termChildren: List<Term> get() = emptyList()
+
+        override fun equalsOption(that: OptionTerm<*>): Boolean {
+            // @formatter:off
+            return that.isEmpty()
+            // @formatter:on
+        }
+
+        override val hash: Int = 0
+    }
+
+    /** Option term with a variable. */
+    private inner class OptTermImpl<E: Term>(
+        override val variable: TermVar,
+        attachments: TermAttachments = TermAttachments.empty(),
+    ) : OptionTerm<E>, OptionTermImplBase<E>(attachments) {
+
+        override val element: E? get() = null
+        override val termChildren: List<Term> get() = listOf(variable)
+
+        override fun equalsOption(that: OptionTerm<*>): Boolean {
+            // @formatter:off
+            return this.variable == that.variable
+            // @formatter:on
+        }
+
+        override val hash: Int = Objects.hash(variable)
+    }
+
     /** Base class for list terms. */
     @Suppress("EqualsOrHashCode")
-    protected sealed class ListTermImplBase<T: Term>(
+    protected abstract inner class ListTermImplBase<T: Term>(
         attachments: TermAttachments,
     ): ListTerm<T>, TermImplBase(attachments) {
 
@@ -503,7 +579,7 @@ open class DefaultSimpleTermBuilder: TermBuilder {
     }
 
     /** List cons term (a list head with a tail). */
-    private class ConsTermImpl<E: Term>(
+    private inner class ConsTermImpl<E: Term>(
         override val head: E,
         override val tail: ListTerm<E>,
         attachments: TermAttachments = TermAttachments.empty(),
@@ -525,32 +601,8 @@ open class DefaultSimpleTermBuilder: TermBuilder {
         override val hash: Int = Objects.hash(head, tail)
     }
 
-    /** Concat variable with list (a term variable and a tail). */
-    private class ConcTermImpl<E: Term>(
-        override val prefix: TermVar,
-        override val tail: ListTerm<E>,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
-
-        override val minSize: Int = 1 + tail.minSize
-        override val size: Int? = tail.size?.let { 1 + it }
-        override val elements: List<E> get() = tail.elements
-        override val termChildren: List<Term> get() = listOf(prefix) + tail.termChildren // TODO: Optimize
-        override val head: E? get() = null
-
-        override fun equalsList(that: ListTerm<*>): Boolean {
-            // @formatter:off
-            return this.head == that.head
-                    && this.tail == that.tail
-            // @formatter:on
-        }
-
-        override val hash: Int = Objects.hash(prefix, tail)
-
-    }
-
     /** List nil term (an empty list). */
-    private class NilTermImpl(
+    private inner class NilTermImpl(
         attachments: TermAttachments = TermAttachments.empty(),
     ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(attachments) {
 
@@ -570,6 +622,29 @@ open class DefaultSimpleTermBuilder: TermBuilder {
         }
 
         override val hash: Int = 0
+    }
+
+    /** Concat variable with list (a term variable and a tail). */
+    private inner class ConcTermImpl<E: Term>(
+        override val prefix: TermVar,
+        override val tail: ListTerm<E>,
+        attachments: TermAttachments = TermAttachments.empty(),
+    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
+
+        override val minSize: Int = 1 + tail.minSize
+        override val size: Int? = tail.size?.let { 1 + it }
+        override val elements: List<E> get() = tail.elements
+        override val termChildren: List<Term> get() = listOf(prefix) + tail.termChildren // TODO: Optimize
+        override val head: E? get() = null
+
+        override fun equalsList(that: ListTerm<*>): Boolean {
+            // @formatter:off
+            return this.head == that.head
+                    && this.tail == that.tail
+            // @formatter:on
+        }
+
+        override val hash: Int = Objects.hash(prefix, tail)
     }
 
 }

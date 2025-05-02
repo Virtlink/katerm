@@ -62,7 +62,7 @@ private class MatcherVisitor(
     override fun visitOption(term: OptionTerm<Term>, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is OptionTerm<*> -> accept(term.value, pattern.value)
+        pattern is OptionTerm<*> -> accept(term.element, pattern.element)
         else -> false
     }
 

@@ -77,7 +77,7 @@ class DefaultTermWriter(
         override fun visitOption(term: OptionTerm<Term>): Unit = writer.run {
             if (term.isPresent()) {
                 append("some ")
-                term.value!!.accept(this@Visitor)
+                term.element!!.accept(this@Visitor)
             } else if (term.isEmpty()) {
                 append("none")
             } else {
