@@ -5,6 +5,10 @@ package net.pelsmaeker.katerm
  */
 interface TermVisitor<R> {
 
+    fun visitTerm(term: Term): R
+
+    fun visitValue(term: ValueTerm): R
+
     fun visitInt(term: IntTerm): R
 
     fun visitReal(term: RealTerm): R
@@ -25,6 +29,10 @@ interface TermVisitor<R> {
  * Visits terms. Supports one argument.
  */
 interface TermVisitor1<A, R> {
+
+    fun visitTerm(term: Term, arg: A): R
+
+    fun visitValue(term: ValueTerm, arg: A): R
 
     fun visitInt(term: IntTerm, arg: A): R
 

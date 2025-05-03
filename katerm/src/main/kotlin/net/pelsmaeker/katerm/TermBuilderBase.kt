@@ -135,16 +135,29 @@ abstract class TermBuilderBase(
     // Term Classes //
     //////////////////
 
-    // The classes here are protected to prevent them from being instantiated or used outside of this class.
+    // The classes here are protected and private to prevent them from being instantiated or used outside of this class.
     // Instead, the base interfaces should be used.
 
-    /** Base class for this term implementation. */
+    /**
+     * Base class for term implementations.
+     *
+     * @property termAttachments The attachments of the term.
+     */
     @Suppress("EqualsOrHashCode")
     protected abstract inner class TermImplBase(
         override val termAttachments: TermAttachments,
     ): Term {
 
-        /** An eager hash code calculation. */
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitTerm(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitTerm(this, arg)
+
+        /**
+         * An eager hash code calculation.
+         *
+         * Implement this field to compute and store the hash code of the term when the object is created.
+         * Do not include the hash code of the attachments.
+         */
         protected abstract val hash: Int
 
         /**
@@ -164,8 +177,15 @@ abstract class TermBuilderBase(
          *
          * Implementations should compare equal to other implementations of the same term type,
          * but can take shortcuts when comparing to the same implementation of the term type.
+         *
+         * @param other The other object to compare to.
+         * @return `true` if the terms are equal; otherwise, `false`.
          */
-        abstract override fun equals(other: Any?): Boolean
+        final override fun equals(other: Any?): Boolean {
+            if (this === other) return true                     // Identity equality
+            val that = other as? Term ?: return false           // Must be a Term
+            return equals(that)
+        }
 
         /**
          * Returns a string representation of this term.
@@ -177,319 +197,189 @@ abstract class TermBuilderBase(
         }
     }
 
-    @Suppress("EqualsOrHashCode")
-    protected abstract inner class ValueTermImplBase<T>(
-        attachments: TermAttachments,
-    ) : ValueTerm<T>, TermImplBase(attachments) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            @Suppress("UNCHECKED_CAST")
-            val that = other as? ValueTerm<T> ?: return false   // Must be a ValueTerm
-            // @formatter:off
-            return this::class.java == that::class.java
-                && equalsValue(that)
-                && this.termAttachments == that.termAttachments
-            // @formatter:on
-        }
-
-        /**
-         * Checks whether this term and the given term are equal, including comparing the attachments.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * Note that even if the attachments are not equal, this method must still return `true`
-         * if the value of the terms are equal.
-         */
-        protected abstract fun equalsValue(that: ValueTerm<T>): Boolean
-    }
-
     /**
      * Constructor application term base class.
-     *
-     * Implementations should check that the number of separators, if not `null`, matches the number of arguments + 1.
      */
-    @Suppress("EqualsOrHashCode")
     protected abstract inner class ApplTermBase(
-        attachments: TermAttachments,
-    ) : ApplTerm, TermImplBase(attachments) {
+        termAttachments: TermAttachments,
+    ) : ApplTerm, TermImplBase(termAttachments) {
 
         abstract override val termArgs: List<Term>
 
-        final override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? ApplTerm ?: return false       // Must be an ApplTerm
+        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is ApplTerm) return false
             // @formatter:off
-            return this::class.java == that::class.java
-                // TODO: Compare hash code
-                && equalsAppl(that)
-                && this.termAttachments == that.termAttachments
+            return (that !is ApplTermBase || this.hash == that.hash)
+                && this.termArity == that.termArity
+                && this.termOp == that.termOp
+                && this.equalsSubterms(that, compareAttachments)
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
         /**
-         * Checks whether this term and the given term are equal.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * @param that the term to check
-         * @return `true` is this term is equal to the specified term; otherwise, `false`
+         * Override this method to optimize the hash code calculation.
          */
-        protected abstract fun equalsAppl(that: ApplTerm): Boolean
+        open override val hash: Int = Objects.hash(termOp, termArgs)
 
         /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
-         */
-        abstract override val hash: Int
-    }
-
-    /** Integer value term base class. */
-    @Suppress("EqualsOrHashCode")
-    protected abstract inner class IntTermImplBase(
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : IntTerm, ValueTermImplBase<Int>(attachments) {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? IntTerm ?: return false        // Must be an IntTerm
-            // @formatter:off
-            return this::class.java == that::class.java
-                // TODO: Compare hash code
-                && equalsInt(that)
-                && this.termAttachments == that.termAttachments
-            // FIXME: Should we compare termText?
-            // @formatter:on
-        }
-
-        final override fun equalsValue(that: ValueTerm<Int>): Boolean {
-            return that is IntTerm && equalsInt(that)
-        }
-
-        /**
-         * Checks whether this term and the given term are equal.
+         * Checks whether this term and the given term have equal subterms.
          *
-         * Implement this method to customize the equality check.
+         * Override this method to customize or optimize the equality check.
          *
          * @param that The term to check.
-         * @return `true` if this term is equal to the specified term; otherwise, `false`.
+         * @param compareAttachments Whether to compare the attachments.
+         * @return `true` if this term has equal subterms as the specified term; otherwise, `false`.
          */
-        protected abstract fun equalsInt(that: IntTerm): Boolean
+        protected open fun equalsSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
+            return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(b, compareAttachments) }
+        }
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+
+    }
+
+    protected abstract inner class ValueTermImplBase(
+        termAttachments: TermAttachments,
+    ) : ValueTerm, TermImplBase(termAttachments) {
 
         /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
+         * Override this method to optimize the hash code calculation.
          */
-        abstract override val hash: Int
+        open override val hash: Int = Objects.hash(value)
+
+        /**
+         * Override this method to customize or optimize the equality check.
+         */
+        open override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is ValueTerm) return false
+            // @formatter:off
+            return (that !is ValueTermImplBase || this.hash == that.hash)
+                && this.value == that.value
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
+            // @formatter:on
+        }
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitValue(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitValue(this, arg)
+
     }
 
     /** Integer value term. */
     private inner class IntTermImpl(
         override val value: Int,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : IntTerm, IntTermImplBase(attachments) {
+        termAttachments: TermAttachments,
+    ) : IntTerm, ValueTermImplBase(termAttachments) {
 
-        override fun equalsInt(that: IntTerm): Boolean {
-            return this.value == that.value
-        }
-
-        // The fields in the hash must match the fields in [equalsInt]
         override val hash: Int = Objects.hash(value)
-    }
 
-    /** Real value term base class. */
-    @Suppress("EqualsOrHashCode")
-    protected abstract inner class RealTermImplBase(
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : RealTerm, ValueTermImplBase<Double>(attachments) {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? RealTerm ?: return false       // Must be a RealTerm
+        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is IntTerm) return false
             // @formatter:off
-            return this::class.java == that::class.java
-                // TODO: Compare hash code
-                && equalsReal(that)
-                && this.termAttachments == that.termAttachments
-            // FIXME: Should we compare termText?
+            return (that !is IntTermImpl || this.hash == that.hash)
+                && this.value == that.value
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
-        final override fun equalsValue(that: ValueTerm<Double>): Boolean {
-            return that is RealTerm && equalsReal(that)
-        }
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
 
-        /**
-         * Checks whether this term and the given term are equal.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * @param that The term to check.
-         * @return `true` if this term is equal to the specified term; otherwise, `false`.
-         */
-        protected abstract fun equalsReal(that: RealTerm): Boolean
-
-        /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
-         */
-        abstract override val hash: Int
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
     }
 
     /** Real value term. */
     private inner class RealTermImpl(
         override val value: Double,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : RealTerm, RealTermImplBase(attachments) {
-
-        override fun equalsReal(that: RealTerm): Boolean {
-            return this.value == that.value
-        }
+        termAttachments: TermAttachments,
+    ) : RealTerm, ValueTermImplBase(termAttachments) {
 
         override val hash: Int = Objects.hash(value)
+
+        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is RealTerm) return false
+            // @formatter:off
+            return (that !is RealTermImpl || this.hash == that.hash)
+                && this.value == that.value
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
+            // @formatter:on
+        }
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
+
     }
 
     /** String value term base class. */
-    @Suppress("EqualsOrHashCode")
-    protected abstract inner class StringTermImplBase(
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : StringTerm, ValueTermImplBase<String>(attachments) {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? StringTerm ?: return false     // Must be a StringTerm
-            // @formatter:off
-            return this::class.java == that::class.java
-                // TODO: Compare hash code
-                && equalsString(that)
-                && this.termAttachments == that.termAttachments
-            // FIXME: Should we compare termText?
-            // @formatter:on
-        }
-
-        final override fun equalsValue(that: ValueTerm<String>): Boolean {
-            return that is StringTerm && equalsString(that)
-        }
-
-        /**
-         * Checks whether this term and the given term are equal.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * @param that The term to check.
-         * @return `true` if this term is equal to the specified term; otherwise, `false`.
-         */
-        protected abstract fun equalsString(that: StringTerm): Boolean
-
-        /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
-         */
-        abstract override val hash: Int
-    }
-
-    /** String term. */
     private inner class StringTermImpl(
         override val value: String,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : StringTerm, StringTermImplBase(attachments) {
-
-        override fun equalsString(that: StringTerm): Boolean {
-            return this.value == that.value
-        }
+        termAttachments: TermAttachments,
+    ) : StringTerm, ValueTermImplBase(termAttachments) {
 
         override val hash: Int = Objects.hash(value)
-    }
 
-    /** Term variable. */
-    @Suppress("EqualsOrHashCode")
-    private inner class TermVarImpl(
-        override val name: String,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : TermVar, TermImplBase(attachments) {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                 // Identity equality
-            val that = other as? TermVar ?: return false    // Not a TermVar
-
-            // Check that the term and all its subterms are truly equal
+        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is StringTerm) return false
             // @formatter:off
-            return this::class.java == that::class.java
-                // TODO: Compare hash code
-                && this.name == that.name
-                && this.termAttachments == that.termAttachments
+            return (that !is StringTermImpl || this.hash == that.hash)
+                && this.value == that.value
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
-        override val hash: Int = Objects.hash(name)
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
     }
 
     /** Base class for option terms. */
-    @Suppress("EqualsOrHashCode")
-    protected abstract inner class OptionTermImplBase<T: Term>(
-        attachments: TermAttachments,
-    ): OptionTerm<T>, TermImplBase(attachments) {
+    private abstract inner class OptionTermImplBase<T: Term>(
+        termAttachments: TermAttachments,
+    ): OptionTerm<T>, TermImplBase(termAttachments) {
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? OptionTerm<*> ?: return false    // Must be a ListTerm
+        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is OptionTerm<*>) return false
             // @formatter:off
-            return this::class.java == that::class.java
-                    // TODO: Compare hash code
-                    && equalsOption(that)
-                    && this.termAttachments == that.termAttachments
-            // FIXME: Should we compare termText?
+            return (that !is OptionTermImplBase<*> || this.hash == that.hash)
+                && this.element.equals(that.element, compareAttachments)
+                && this.variable.equals(that.variable, compareAttachments)
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
-        /**
-         * Checks whether this term and the given term are equal.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * @param that The term to check.
-         * @return `true` if this term is equal to the specified term; otherwise, `false`.
-         */
-        protected abstract fun equalsOption(that: OptionTerm<*>): Boolean
+        final override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitOption(this)
 
-        /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
-         */
-        abstract override val hash: Int
+        final override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitOption(this, arg)
+
     }
 
     /** Option term with a value. */
     private inner class SomeTermImpl<E: Term>(
         override val element: E,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : OptionTerm<E>, OptionTermImplBase<E>(attachments) {
+        termAttachments: TermAttachments,
+    ) : OptionTerm<E>, OptionTermImplBase<E>(termAttachments) {
 
         override val variable: TermVar? get() = null
+
         override val termChildren: List<Term> get() = listOf(element)
 
-        override fun equalsOption(that: OptionTerm<*>): Boolean {
-            // @formatter:off
-            return this.element == that.element
-            // @formatter:on
-        }
-
         override val hash: Int = Objects.hash(element)
+
     }
 
     /** Option term without a value */
     private inner class NoneTermImpl(
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : OptionTerm<Nothing>, OptionTermImplBase<Nothing>(attachments) {
+        termAttachments: TermAttachments,
+    ) : OptionTerm<Nothing>, OptionTermImplBase<Nothing>(termAttachments) {
 
         override val element: Nothing? get() = null
-        override val variable: TermVar? get() = null
-        override val termChildren: List<Term> get() = emptyList()
 
-        override fun equalsOption(that: OptionTerm<*>): Boolean {
-            // @formatter:off
-            return that.isEmpty()
-            // @formatter:on
-        }
+        override val variable: TermVar? get() = null
+
+        override val termChildren: List<Term> get() = emptyList()
 
         override val hash: Int = 0
     }
@@ -497,65 +387,47 @@ abstract class TermBuilderBase(
     /** Option term with a variable. */
     private inner class OptTermImpl<E: Term>(
         override val variable: TermVar,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : OptionTerm<E>, OptionTermImplBase<E>(attachments) {
+        termAttachments: TermAttachments = TermAttachments.empty(),
+    ) : OptionTerm<E>, OptionTermImplBase<E>(termAttachments) {
 
         override val element: E? get() = null
-        override val termChildren: List<Term> get() = listOf(variable)
 
-        override fun equalsOption(that: OptionTerm<*>): Boolean {
-            // @formatter:off
-            return this.variable == that.variable
-            // @formatter:on
-        }
+        override val termChildren: List<Term> get() = listOf(variable)
 
         override val hash: Int = Objects.hash(variable)
     }
 
     /** Base class for list terms. */
     @Suppress("EqualsOrHashCode")
-    protected abstract inner class ListTermImplBase<T: Term>(
-        attachments: TermAttachments,
-    ): ListTerm<T>, TermImplBase(attachments) {
+    private abstract inner class ListTermImplBase<T: Term>(
+        termAttachments: TermAttachments,
+    ): ListTerm<T>, TermImplBase(termAttachments) {
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true                     // Identity equality
-            val that = other as? ListTerm<*> ?: return false    // Must be a ListTerm
+        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is ListTerm<*>) return false
             // @formatter:off
-            return this::class.java == that::class.java
-                    // TODO: Compare hash code
-                    && equalsList(that)
-                    && this.minSize == that.minSize
-                    && this.size == that.size
-                    && this.termChildren == that.termChildren
-                    && this.termAttachments == that.termAttachments
-            // FIXME: Should we compare termText?
+            return (that !is ListTermImplBase<*> || this.hash == that.hash)
+                && this.minSize == that.minSize
+                && this.size == that.size
+                && this.head.equals(that.head, compareAttachments)
+                && this.tail.equals(that.tail, compareAttachments)
+                && this.prefix.equals(that.prefix, compareAttachments)
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
-        /**
-         * Checks whether this term and the given term are equal.
-         *
-         * Implement this method to customize the equality check.
-         *
-         * @param that The term to check.
-         * @return `true` if this term is equal to the specified term; otherwise, `false`.
-         */
-        protected abstract fun equalsList(that: ListTerm<*>): Boolean
+        final override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
 
-        /**
-         * Implement this property to perform a custom hash code calculation.
-         * Do include the attachments and separators.
-         */
-        abstract override val hash: Int
+        final override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
+
     }
 
     /** List cons term (a list head with a tail). */
     private inner class ConsTermImpl<E: Term>(
         override val head: E,
         override val tail: ListTerm<E>,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
+        termAttachments: TermAttachments,
+    ) : ListTerm<E>, ListTermImplBase<E>(termAttachments) {
 
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
@@ -563,20 +435,13 @@ abstract class TermBuilderBase(
         override val termChildren: List<Term> get() = listOf(head) + tail.termChildren // TODO: Optimize
         override val prefix: TermVar? get() = null
 
-        override fun equalsList(that: ListTerm<*>): Boolean {
-            // @formatter:off
-            return this.head == that.head
-                && this.tail == that.tail
-            // @formatter:on
-        }
-
         override val hash: Int = Objects.hash(head, tail)
     }
 
     /** List nil term (an empty list). */
     private inner class NilTermImpl(
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(attachments) {
+        termAttachments: TermAttachments,
+    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(termAttachments) {
 
         override val minSize: Int get() = 0
         override val size: Int? get() = null
@@ -586,13 +451,6 @@ abstract class TermBuilderBase(
         override val head: Nothing? get() = null
         override val tail: ListTerm<Nothing>? get() = null
 
-        override fun equalsList(that: ListTerm<*>): Boolean {
-            // @formatter:off
-            return this.head == that.head
-                && this.tail == that.tail
-            // @formatter:on
-        }
-
         override val hash: Int = 0
     }
 
@@ -600,8 +458,8 @@ abstract class TermBuilderBase(
     private inner class ConcTermImpl<E: Term>(
         override val prefix: TermVar,
         override val tail: ListTerm<E>,
-        attachments: TermAttachments = TermAttachments.empty(),
-    ) : ListTerm<E>, ListTermImplBase<E>(attachments) {
+        termAttachments: TermAttachments,
+    ) : ListTerm<E>, ListTermImplBase<E>(termAttachments) {
 
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
@@ -609,14 +467,30 @@ abstract class TermBuilderBase(
         override val termChildren: List<Term> get() = listOf(prefix) + tail.termChildren // TODO: Optimize
         override val head: E? get() = null
 
-        override fun equalsList(that: ListTerm<*>): Boolean {
+        override val hash: Int = Objects.hash(prefix, tail)
+    }
+
+    /** Term variable. */
+    private inner class TermVarImpl(
+        override val name: String,
+        termAttachments: TermAttachments,
+    ) : TermVar, TermImplBase(termAttachments) {
+
+        override val hash: Int = Objects.hash(name)
+
+        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+            if (that !is TermVar) return false
             // @formatter:off
-            return this.head == that.head
-                    && this.tail == that.tail
+            return (that !is TermVarImpl || this.hash == that.hash)
+                && this.name == that.name
+                && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
 
-        override val hash: Int = Objects.hash(prefix, tail)
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
+
     }
 
 }
