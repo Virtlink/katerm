@@ -24,14 +24,6 @@ private class MatcherVisitor(
     private val associations: MutableMap<TermVar, Term>
 ): TermVisitor1<Term, Boolean> {
 
-    override fun visitTerm(term: Term, arg: Term): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun visitValue(term: ValueTerm, arg: Term): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override fun visitInt(term: IntTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)

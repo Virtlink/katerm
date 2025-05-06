@@ -43,6 +43,18 @@ class TermAttachments private constructor(
      * @param pair The key/value pair to insert.
      * @return A new map with the specified attachment added.
      */
+    fun <T> add(key: Key<T>, attachment: T): TermAttachments {
+        return TermAttachments(attachments + (key as Key<*> to attachment as Any))
+    }
+
+    /**
+     * Inserts an attachment with the specified key/value pair into this map.
+     *
+     * If the key is already present, it is replaced.
+     *
+     * @param pair The key/value pair to insert.
+     * @return A new map with the specified attachment added.
+     */
     fun add(pair: Pair<Key<Any>, Any>): TermAttachments {
         require(pair.first.type.isInstance(pair.second)) {
             "The value ${pair.second} (${pair.second::class.java}) is not an instance of ${pair.first.type}"

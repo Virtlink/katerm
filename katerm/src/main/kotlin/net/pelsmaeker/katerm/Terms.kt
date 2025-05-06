@@ -45,7 +45,7 @@ interface Term {
      * @param visitor the visitor to accept
      * @return the result returned by the visitor
      */
-    fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitTerm(this)
+    fun <R> accept(visitor: TermVisitor<R>): R
 
     /**
      * Accepts a term visitor.
@@ -54,7 +54,7 @@ interface Term {
      * @param arg the argument to pass to the visitor
      * @return the result returned by the visitor
      */
-    fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitTerm(this, arg)
+    fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
 }
 
 fun Term?.equals(that: Term?, compareAttachments: Boolean): Boolean {
@@ -94,9 +94,9 @@ interface ValueTerm : Term {
 
     override val termChildren: List<Term> get() = emptyList()
 
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitValue(this)
+    override fun <R> accept(visitor: TermVisitor<R>): R
 
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitValue(this, arg)
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
 
 }
 

@@ -148,10 +148,6 @@ abstract class TermBuilderBase(
         override val termAttachments: TermAttachments,
     ): Term {
 
-        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitTerm(this)
-
-        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitTerm(this, arg)
-
         /**
          * An eager hash code calculation.
          *
@@ -261,10 +257,6 @@ abstract class TermBuilderBase(
                 && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
-
-        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitValue(this)
-
-        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitValue(this, arg)
 
     }
 

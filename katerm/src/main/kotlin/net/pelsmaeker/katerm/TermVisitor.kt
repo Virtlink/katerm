@@ -2,12 +2,10 @@ package net.pelsmaeker.katerm
 
 /**
  * Visits terms.
+ *
+ * @param R The return type of the visitor methods.
  */
-interface TermVisitor<R> {
-
-    fun visitTerm(term: Term): R
-
-    fun visitValue(term: ValueTerm): R
+interface TermVisitor<out R> {
 
     fun visitInt(term: IntTerm): R
 
@@ -27,12 +25,11 @@ interface TermVisitor<R> {
 
 /**
  * Visits terms. Supports one argument.
+ *
+ * @param A The type of the argument passed to the visitor methods.
+ * @param R The return type of the visitor methods.
  */
-interface TermVisitor1<A, R> {
-
-    fun visitTerm(term: Term, arg: A): R
-
-    fun visitValue(term: ValueTerm, arg: A): R
+interface TermVisitor1<in A, out R> {
 
     fun visitInt(term: IntTerm, arg: A): R
 

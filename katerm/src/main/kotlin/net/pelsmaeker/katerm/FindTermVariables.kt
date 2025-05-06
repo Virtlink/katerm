@@ -15,14 +15,6 @@ private class TermVariableVisitor(
     /** A mutable set of variables found. */
     private val variables: MutableSet<TermVar>
 ): TermVisitor<Unit> {
-    
-    override fun visitTerm(term: Term) {
-        TODO("Not yet implemented")
-    }
-
-    override fun visitValue(term: ValueTerm) {
-        TODO("Not yet implemented")
-    }
 
     override fun visitInt(term: IntTerm) {
         // Nothing to do.

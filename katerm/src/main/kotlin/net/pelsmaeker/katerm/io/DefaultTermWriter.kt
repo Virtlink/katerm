@@ -33,14 +33,6 @@ class DefaultTermWriter(
         // The remaining depth to print; or -1 to print all.
         private var depth = maxDepth
 
-        override fun visitTerm(term: Term) {
-            TODO("Not yet implemented")
-        }
-
-        override fun visitValue(term: ValueTerm) {
-            TODO("Not yet implemented")
-        }
-
         override fun visitInt(term: IntTerm): Unit = writer.run {
             // Print the integer value.
             append(term.value.toString())
