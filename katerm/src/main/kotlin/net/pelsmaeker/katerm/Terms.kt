@@ -8,6 +8,7 @@ import net.pelsmaeker.katerm.attachments.TermAttachments
  * Terms are immutable. To create or change a term, use a [TermBuilder].
  */
 interface Term {
+
     /** A list of child terms of the term. */
     val termChildren: List<Term>
 
@@ -16,6 +17,9 @@ interface Term {
 
     /** The free variables that occur in the term at any depth. This can be used for an 'occurs check'. */
     val termVars: Set<TermVar>
+
+    /** The kind of term. */
+    val termKind: TermKind
 
     /**
      * Determines whether this term and its subterms represent the same value
@@ -46,17 +50,17 @@ interface Term {
     /**
      * Accepts a term visitor.
      *
-     * @param visitor the visitor to accept
-     * @return the result returned by the visitor
+     * @param visitor The visitor to accept.
+     * @return The result returned by the visitor.
      */
     fun <R> accept(visitor: TermVisitor<R>): R
 
     /**
      * Accepts a term visitor.
      *
-     * @param visitor the visitor to accept
-     * @param arg the argument to pass to the visitor
-     * @return the result returned by the visitor
+     * @param visitor The visitor to accept.
+     * @param arg The argument to pass to the visitor.
+     * @return The result returned by the visitor.
      */
     fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
 }
@@ -82,14 +86,18 @@ fun Term?.equals(that: Term?, compareSubterms: Boolean, compareAttachments: Bool
     return this.equals(that, compareSubterms = compareSubterms, compareAttachments = compareAttachments)
 }
 
+
 /** A constructor application term. */
 interface ApplTerm : Term {
+
     /** The constructor name. */
     val termOp: String
     /** The constructor arity. */
     val termArity: Int
     /** The term arguments. */
     val termArgs: List<Term>
+
+    override val termKind: TermKind get() = TermKind.APPL
 
     override val termChildren: List<Term> get() = termArgs
 
@@ -98,6 +106,7 @@ interface ApplTerm : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 
 }
+
 
 /**
  * A value term.
@@ -108,6 +117,7 @@ interface ApplTerm : Term {
  * The value should be immutable.
  */
 interface ValueTerm : Term {
+
     /** The value of the term. */
     val value: Any
 
@@ -119,32 +129,45 @@ interface ValueTerm : Term {
 
 }
 
+
 /** An integer number term. */
 interface IntTerm : ValueTerm {
+
     override val value: Int
+
+    override val termKind: TermKind get() = TermKind.INT
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
 
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
 }
 
+
 /** A real number term. */
 interface RealTerm : ValueTerm {
+
     override val value: Double
+
+    override val termKind: TermKind get() = TermKind.REAL
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
 
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
 }
 
+
 /** A string term. */
 interface StringTerm : ValueTerm {
+
     override val value: String
+
+    override val termKind: TermKind get() = TermKind.STRING
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
 
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
+
 
 /**
  * An option term.
@@ -152,13 +175,20 @@ interface StringTerm : ValueTerm {
  * @param E The type of the element in the option.
  */
 interface OptionTerm<out E : Term> : Term {
+
     /** The term that is the element of the option; or `null` if the option is empty or a variable. */
     val element: E?
+
     /** The term variable that is in this option; or `null`. */
     val variable: TermVar?
 
+    /** Whether there is no value in the option (and no variable). */
     fun isEmpty(): Boolean = element == null && variable == null
+
+    /** Whether there is a value in the option (and no variable). */
     fun isPresent(): Boolean = element != null && variable == null
+
+    override val termKind: TermKind get() = TermKind.OPTION
 
     /** The child of the option. If the option contains a term variable, it is also returned here. */
     override val termChildren: List<Term>
@@ -168,25 +198,34 @@ interface OptionTerm<out E : Term> : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitOption(this, arg)
 }
 
+
 /**
  * A list term.
  *
  * @param E The type of the elements in the list.
  */
 interface ListTerm<out E: Term> : Term {
+
     /** The term variable that is the prefix of the list; or `null` when the list has no prefix variable. */
     val prefix: TermVar?
+
     /** The term that is the head of the list; or `null` when the list has a prefix variable or is empty. */
     val head: E?
+
     /** The list term that is the tail of the list; or `null` when the list is empty. */
     val tail: ListTerm<E>?
 
     /** The minimum number of elements in the list. This is the number of elements in [elements]. */
     val minSize: Int
+
     /** The number of elements in the list; or `null` if the list contains a term variable. */
     val size: Int?
+
     /** The elements in the list. If the list contains term variables, they are not included here. */
     val elements: List<E>
+
+    override val termKind: TermKind get() = TermKind.LIST
+
     /** The children of the list. If the list contains term variables, they are also included here. */
     override val termChildren: List<Term>
 
@@ -195,10 +234,14 @@ interface ListTerm<out E: Term> : Term {
     override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
 }
 
+
 /** A term variable. */
 interface TermVar: Term {
+
     /** The variable name. Any resource names should be encoded as part of the variable name. */
     val name: String
+
+    override val termKind: TermKind get() = TermKind.VAR
 
     override val termChildren: List<Term> get() = emptyList()
 

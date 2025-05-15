@@ -276,6 +276,8 @@ abstract class TermBuilderBase(
         termAttachments: TermAttachments,
     ) : IntTerm, ValueTermImplBase(termAttachments) {
 
+        final override val termKind: TermKind get() = TermKind.INT
+
         override val hash: Int = Objects.hash(value)
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
@@ -297,6 +299,8 @@ abstract class TermBuilderBase(
         override val value: Double,
         termAttachments: TermAttachments,
     ) : RealTerm, ValueTermImplBase(termAttachments) {
+
+        final override val termKind: TermKind get() = TermKind.REAL
 
         override val hash: Int = Objects.hash(value)
 
@@ -320,6 +324,8 @@ abstract class TermBuilderBase(
         override val value: String,
         termAttachments: TermAttachments,
     ) : StringTerm, ValueTermImplBase(termAttachments) {
+
+        final override val termKind: TermKind get() = TermKind.STRING
 
         override val hash: Int = Objects.hash(value)
 
@@ -481,6 +487,8 @@ abstract class TermBuilderBase(
         override val name: String,
         termAttachments: TermAttachments,
     ) : TermVar, TermImplBase(termAttachments) {
+
+        final override val termKind: TermKind get() = TermKind.VAR
 
         override val hash: Int = Objects.hash(name)
 
