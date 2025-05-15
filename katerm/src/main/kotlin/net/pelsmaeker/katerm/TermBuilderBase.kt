@@ -206,15 +206,15 @@ abstract class TermBuilderBase(
 
         abstract override val termArgs: List<Term>
 
-        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
         final override val termKind: TermKind get() = TermKind.APPL
 
+        final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ApplTerm) return false
             // @formatter:off
             return (that !is ApplTermBase || this.hash == that.hash)
                 && this.termArity == that.termArity
                 && this.termOp == that.termOp
-                && this.equalsSubterms(that, compareAttachments)
+                && (!compareSubterms || this.equalsSubterms(that, compareAttachments))
                 && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
@@ -234,7 +234,11 @@ abstract class TermBuilderBase(
          * @return `true` if this term has equal subterms as the specified term; otherwise, `false`.
          */
         protected open fun equalsSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
-            return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(b, compareAttachments) }
+            return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(
+                b,
+                compareSubterms = true,
+                compareAttachments = compareAttachments
+            ) }
         }
 
         override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
@@ -255,7 +259,7 @@ abstract class TermBuilderBase(
         /**
          * Override this method to customize or optimize the equality check.
          */
-        open override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        open override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ValueTerm) return false
             // @formatter:off
             return (that !is ValueTermImplBase || this.hash == that.hash)
@@ -274,7 +278,7 @@ abstract class TermBuilderBase(
 
         override val hash: Int = Objects.hash(value)
 
-        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is IntTerm) return false
             // @formatter:off
             return (that !is IntTermImpl || this.hash == that.hash)
@@ -296,7 +300,7 @@ abstract class TermBuilderBase(
 
         override val hash: Int = Objects.hash(value)
 
-        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is RealTerm) return false
             // @formatter:off
             return (that !is RealTermImpl || this.hash == that.hash)
@@ -319,7 +323,7 @@ abstract class TermBuilderBase(
 
         override val hash: Int = Objects.hash(value)
 
-        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is StringTerm) return false
             // @formatter:off
             return (that !is StringTermImpl || this.hash == that.hash)
@@ -338,12 +342,14 @@ abstract class TermBuilderBase(
         termAttachments: TermAttachments,
     ): OptionTerm<T>, TermImplBase(termAttachments) {
 
-        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        final override val termKind: TermKind get() = TermKind.OPTION
+
+        final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is OptionTerm<*>) return false
             // @formatter:off
             return (that !is OptionTermImplBase<*> || this.hash == that.hash)
-                && this.element.equals(that.element, compareAttachments)
-                && this.variable.equals(that.variable, compareAttachments)
+                && (!compareSubterms || this.element.equals(that.element, compareSubterms, compareAttachments))
+                && (!compareSubterms || this.variable.equals(that.variable, compareSubterms, compareAttachments))
                 && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
@@ -401,15 +407,17 @@ abstract class TermBuilderBase(
         termAttachments: TermAttachments,
     ): ListTerm<T>, TermImplBase(termAttachments) {
 
-        final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        final override val termKind: TermKind get() = TermKind.LIST
+
+        final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ListTerm<*>) return false
             // @formatter:off
             return (that !is ListTermImplBase<*> || this.hash == that.hash)
                 && this.minSize == that.minSize
                 && this.size == that.size
-                && this.head.equals(that.head, compareAttachments)
-                && this.tail.equals(that.tail, compareAttachments)
-                && this.prefix.equals(that.prefix, compareAttachments)
+                && (!compareSubterms || this.head.equals(that.head, compareSubterms, compareAttachments))
+                && (!compareSubterms || this.tail.equals(that.tail, compareSubterms, compareAttachments))
+                && (!compareSubterms || this.prefix.equals(that.prefix, compareSubterms, compareAttachments))
                 && (!compareAttachments || (this.termAttachments == that.termAttachments))
             // @formatter:on
         }
@@ -476,7 +484,7 @@ abstract class TermBuilderBase(
 
         override val hash: Int = Objects.hash(name)
 
-        override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is TermVar) return false
             // @formatter:off
             return (that !is TermVarImpl || this.hash == that.hash)
