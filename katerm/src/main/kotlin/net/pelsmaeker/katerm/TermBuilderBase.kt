@@ -148,6 +148,10 @@ abstract class TermBuilderBase(
         override val termAttachments: TermAttachments,
     ): Term {
 
+        private var _termVars: Set<TermVar>? = null
+        final override val termVars: Set<TermVar>
+            get() = _termVars ?: termChildren.flatMapTo(HashSet()) { it.termVars }.also { _termVars = it }
+
         /**
          * An eager hash code calculation.
          *
@@ -203,6 +207,8 @@ abstract class TermBuilderBase(
         abstract override val termArgs: List<Term>
 
         final override fun equals(that: Term, compareAttachments: Boolean): Boolean {
+        final override val termKind: TermKind get() = TermKind.APPL
+
             if (that !is ApplTerm) return false
             // @formatter:off
             return (that !is ApplTermBase || this.hash == that.hash)

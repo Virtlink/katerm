@@ -14,6 +14,9 @@ interface Term {
     /** The attachments of the term. */
     val termAttachments: TermAttachments
 
+    /** The free variables that occur in the term at any depth. This can be used for an 'occurs check'. */
+    val termVars: Set<TermVar>
+
     /**
      * Determines whether this term and its subterms represent the same value
      * as the given term and it subterms, regardless of the actual implementations
