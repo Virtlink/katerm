@@ -1,6 +1,7 @@
 package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
+import net.pelsmaeker.katerm.substitutions.Substitution
 
 /**
  * Builds terms.
@@ -8,6 +9,14 @@ import net.pelsmaeker.katerm.attachments.TermAttachments
  * Some types of terms don't accept separators because they cannot be pretty-printed.
  */
 interface TermBuilder {
+
+    /**
+     * Applies the substitution to the given term.
+     *
+     * @param term The term to apply the substitution to.
+     * @return The term with the substitution applied.
+     */
+    fun apply(substitution: Substitution, term: Term): Term
 
     /////////
     // Int //

@@ -1,6 +1,7 @@
 package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
+import net.pelsmaeker.katerm.substitutions.Substitution
 import java.util.*
 
 /**

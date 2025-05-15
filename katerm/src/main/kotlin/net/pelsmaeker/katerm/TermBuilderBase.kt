@@ -3,6 +3,7 @@ package net.pelsmaeker.katerm
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import net.pelsmaeker.katerm.io.DefaultTermWriter
 import net.pelsmaeker.katerm.io.TermTextWriter
+import net.pelsmaeker.katerm.substitutions.Substitution
 import java.util.*
 
 /**
@@ -13,6 +14,23 @@ import java.util.*
 abstract class TermBuilderBase(
     private val termPrinter: TermTextWriter = DefaultTermWriter(),
 ): TermBuilder {
+
+    override fun apply(substitution: Substitution, term: Term): Term {
+        // TODO: Support variables in Options and Lists
+        return when (term) {
+            is TermVar -> {
+                val mappedTerm = substitution[term]
+                if (mappedTerm !is TermVar) {
+                    // Also substitute in the mapped term.
+                    apply(substitution, mappedTerm)
+                } else term
+            }
+            is ApplTerm -> copyAppl(term, term.termArgs.map { apply(substitution, it) })
+            is OptionTerm<*> -> copyOption(term, term.element?.let { apply(substitution, it) })
+            is ListTerm<*> -> copyList(term, term.elements.map { apply(substitution, it) })
+            else -> term
+        }
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
