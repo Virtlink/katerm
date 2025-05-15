@@ -73,7 +73,7 @@ private class MatcherVisitor(
     }
 
     private fun associateSelf(term: Term): Boolean {
-        associations.putAll(term.variables.associateWith { it })
+        associations.putAll(term.termVars.associateWith { it })
         return true
     }
 

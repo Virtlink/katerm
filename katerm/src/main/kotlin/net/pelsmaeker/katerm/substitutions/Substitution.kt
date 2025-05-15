@@ -58,11 +58,11 @@ interface Substitution {
      *
      * This method checks whether the two terms are equal relative to this substitution.
      *
-     * @param term1 The first term to check.
-     * @param term2 The second term to check.
+     * @param left The first term to check.
+     * @param right The second term to check.
      * @return `true` if the terms are equal relative to this substitution; otherwise, `false`.
      */
-    fun areEqual(term1: Term, term2: Term): Boolean
+    fun areEqual(left: Term, right: Term): Boolean
 
     /**
      * Gets the set of free variables in the given term relative to this substitution.

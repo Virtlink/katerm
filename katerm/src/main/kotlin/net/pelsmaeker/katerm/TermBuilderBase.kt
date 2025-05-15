@@ -16,7 +16,6 @@ abstract class TermBuilderBase(
 ): TermBuilder {
 
     override fun apply(substitution: Substitution, term: Term): Term {
-        // TODO: Support variables in Options and Lists
         return when (term) {
             is TermVar -> {
                 val mappedTerm = substitution[term]
@@ -26,8 +25,14 @@ abstract class TermBuilderBase(
                 } else term
             }
             is ApplTerm -> copyAppl(term, term.termArgs.map { apply(substitution, it) })
-            is OptionTerm<*> -> copyOption(term, term.element?.let { apply(substitution, it) })
-            is ListTerm<*> -> copyList(term, term.elements.map { apply(substitution, it) })
+            is OptionTerm<*> -> {
+                if (term.variable != null) { TODO("Variables in OptionTerm are not yet supported.") }
+                copyOption(term, term.element?.let { apply(substitution, it) })
+            }
+            is ListTerm<*> -> {
+                if (term.prefix != null) { TODO("Variables in ListTerm are not yet supported.") }
+                copyList(term, term.elements.map { apply(substitution, it) })
+            }
             else -> term
         }
     }
@@ -40,8 +45,14 @@ abstract class TermBuilderBase(
             is RealTerm -> newReal(term.value, newAttachments) as T
             is StringTerm -> newString(term.value, newAttachments) as T
             is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
-            is OptionTerm<*> -> newOption(term.element, newAttachments) as T
-            is ListTerm<*> -> newList(term.elements, newAttachments) as T
+            is OptionTerm<*> -> {
+                if (term.variable != null) { TODO("Variables in OptionTerm are not yet supported.") }
+                newOption(term.element, newAttachments) as T
+            }
+            is ListTerm<*> -> {
+                if (term.prefix != null) { TODO("Variables in ListTerm are not yet supported.") }
+                newList(term.elements, newAttachments) as T
+            }
             is TermVar -> newVar(term.name, newAttachments) as T
             else -> throw IllegalArgumentException("Unknown term type: $term")
         }
