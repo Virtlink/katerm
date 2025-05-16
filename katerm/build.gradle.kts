@@ -6,6 +6,9 @@ plugins {
 }
 
 dependencies {
+    // Collections
+    implementation      (libs.kotlinx.immutablecollections)
+
     // Testing
     testImplementation  (libs.kotest)
     testImplementation  (libs.kotest.datatest)

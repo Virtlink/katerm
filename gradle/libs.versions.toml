@@ -6,6 +6,8 @@ gitversion                      = "3.2.0"           # https://github.com/palanti
 ben-manes-versions              = "0.52.0"          # https://github.com/ben-manes/gradle-versions-plugin
 nexuspublish                    = "2.0.0"           # https://github.com/gradle-nexus/publish-plugin/
 
+# Collections
+kotlinx-immutablecollections    = "0.4.0"           # https://github.com/Kotlin/kotlinx.collections.immutable
 # Utils
 jsr305                          = "3.0.2"           # https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 
@@ -24,6 +26,9 @@ nexuspublish                    = { id = "io.github.gradle-nexus.publish-plugin"
 
 
 [libraries]
+# Collections
+kotlinx-immutablecollections    = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm",     version.ref = "kotlinx-immutablecollections" }
+
 # Utils
 jsr305                          = { module = "com.google.code.findbugs:jsr305",                             version.ref = "jsr305" }
 
