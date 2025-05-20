@@ -5,4 +5,4 @@ package net.pelsmaeker.katerm.collections
  *
  * @param E The type of the elements in the disjoint sets.
  */
-interface ImmutableDisjointSets<E> : DisjointSets<E>
+interface ImmutableDisjointSet<E> : DisjointSet<E>

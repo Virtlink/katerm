@@ -1,14 +1,18 @@
 package net.pelsmaeker.katerm.collections
 
 import io.kotest.core.spec.style.funSpec
-import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.assume
+import io.kotest.property.checkAll
+import io.kotest.property.arbitrary.set
+import io.kotest.property.arbitrary.string
 
-fun testDisjointSetsTests(
-    newDisjointSet: (Set<Set<String>>) -> DisjointSets<String>,
+fun testDisjointSetTests(
+    newDisjointSet: (Set<Set<String>>) -> DisjointSet<String>,
 ) = funSpec {
 
-    context("isEmpty()") {
+    context("isEmpty") {
         test("should return true, when empty") {
             // Arrange
             val disjointSet = newDisjointSet(emptySet())
@@ -26,7 +30,7 @@ fun testDisjointSetsTests(
         }
     }
 
-    context("isNotEmpty()") {
+    context("isNotEmpty") {
         test("should return true, when not empty") {
             // Arrange
             val disjointSet = newDisjointSet(setOf(setOf("a", "b")))
@@ -102,8 +106,8 @@ fun testDisjointSetsTests(
         }
     }
 
-    context("find()") {
-        test("shoudl return null, when empty") {
+    context("find") {
+        test("should return null, when empty") {
             // Arrange
             val disjointSet = newDisjointSet(emptySet())
 
@@ -131,7 +135,7 @@ fun testDisjointSetsTests(
         }
 
         test("should return the representative, when the element is not a representative but is in a set") {
-// Arrange
+            // Arrange
             val firstSet = setOf("a", "b")
             val sets = setOf(firstSet, setOf("c"))
             val disjointSet = newDisjointSet(sets)
@@ -143,7 +147,7 @@ fun testDisjointSetsTests(
         }
     }
 
-    context("contains()") {
+    context("contains") {
         test("should return false, when empty") {
             // Arrange
             val disjointSet = newDisjointSet(emptySet())
@@ -184,7 +188,7 @@ fun testDisjointSetsTests(
         }
     }
 
-    context("inSameSet()") {
+    context("inSameSet") {
         test("should return false, when empty") {
             // Arrange
             val disjointSet = newDisjointSet(emptySet())
@@ -235,7 +239,7 @@ fun testDisjointSetsTests(
         }
     }
 
-    context("toSets()") {
+    context("toSets") {
         test("should return empty set, when empty") {
             // Arrange
             val disjointSet = newDisjointSet(emptySet())
@@ -254,4 +258,70 @@ fun testDisjointSetsTests(
         }
     }
 
+    context("property-based tests") {
+        test("all elements in toSets are contained in elements") {
+            checkAll(Arb.set(Arb.set(Arb.string(1..3), 1..4), 0..5)) { sets ->
+                // Skip test cases where sets are not disjoint
+                assume(areDisjoint(sets))
+
+                val ds = newDisjointSet(sets)
+                val allElements = ds.toSets().flatten().toSet()
+                ds.elements shouldBe allElements
+            }
+        }
+
+        test("find returns null for elements not in any set") {
+            checkAll(
+                Arb.set(Arb.set(Arb.string(1..3), 1..4), 0..5),
+                Arb.string(1..3)
+            ) { sets, element ->
+                // Skip test cases where sets are not disjoint
+                assume(areDisjoint(sets))
+
+                val ds = newDisjointSet(sets)
+                if (sets.flatten().none { it == element }) {
+                    ds.find(element) shouldBe null
+                }
+            }
+        }
+
+        test("inSameSet is reflexive for all elements") {
+            checkAll(Arb.set(Arb.set(Arb.string(1..3), 1..4), 0..5)) { sets ->
+                // Skip test cases where sets are not disjoint
+                assume(areDisjoint(sets))
+
+                val ds = newDisjointSet(sets)
+                ds.elements.forEach { e ->
+                    ds.inSameSet(e, e) shouldBe true
+                }
+            }
+        }
+
+        test("inSameSet is symmetric for all elements") {
+            checkAll(Arb.set(Arb.set(Arb.string(1..3), 2..4), 1..3)) { sets ->
+                // Skip test cases where sets are not disjoint
+                assume(areDisjoint(sets))
+
+                val ds = newDisjointSet(sets)
+                val elems = ds.elements.toList()
+                for (i in elems.indices) {
+                    for (j in elems.indices) {
+                        ds.inSameSet(elems[i], elems[j]) shouldBe ds.inSameSet(elems[j], elems[i])
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Helper function to check if sets are disjoint (no element appears in multiple sets)
+private fun areDisjoint(sets: Set<Set<String>>): Boolean {
+    val seen = mutableSetOf<String>()
+    for (set in sets) {
+        for (element in set) {
+            if (element in seen) return false
+            seen.add(element)
+        }
+    }
+    return true
 }
