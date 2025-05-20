@@ -5,9 +5,11 @@ package net.pelsmaeker.katerm.collections
  *
  * @property mappings Maps each representative to its value.
  */
-internal class MutableUnionFindMapImpl<E, V>(
-    private val mappings: MutableMap<E, V> = mutableMapOf(),
+class MutableUnionFindMapImpl<E, V> internal constructor(
+    private val mappings: MutableMap<E, V>,
 ) : MutableDisjointMap<E, V> {
+
+    constructor() : this(mutableMapOf())
 
     /** The underlying union-find data structure. */
     private val unionFind: MutableUnionFind<E> = MutableUnionFind<E>()
@@ -25,11 +27,13 @@ internal class MutableUnionFindMapImpl<E, V>(
     }
 
     override fun get(element: E): V? {
-        TODO("Not yet implemented")
+        val repr = unionFind.find(element)
+        return if (repr != null) mappings[repr] else null
     }
 
-    override fun getOrDefault(key: E, defaultValue: V): V {
-        TODO("Not yet implemented")
+    override fun getOrDefault(element: E, defaultValue: V): V {
+        val repr = unionFind.find(element)
+        return if (repr != null) mappings.getOrDefault(repr, defaultValue) else defaultValue
     }
 
     override fun set(element: E, value: V): V? {
@@ -61,20 +65,32 @@ internal class MutableUnionFindMapImpl<E, V>(
     }
 
     override fun compute(element: E, mapping: (E, V?) -> V): V {
-        TODO("Not yet implemented")
+        val repr = unionFind.find(element) ?: element
+        val existingValue = mappings[repr]
+        val newValue = mapping(repr, existingValue)
+        mappings[repr] = newValue
+        return newValue
     }
 
     override fun computeIfPresent(element: E, mapping: (E, V) -> V): V? {
-        TODO("Not yet implemented")
+        val repr = unionFind.find(element) ?: return null
+        val existingValue = mappings[repr] ?: return null
+        val newValue = mapping(repr, existingValue)
+        mappings[repr] = newValue
+        return newValue
     }
 
     override fun computeIfAbsent(element: E, mapping: (E) -> V): V {
-        TODO("Not yet implemented")
+        val repr = unionFind.find(element) ?: element
+        val existingValue = mappings[repr]
+        if (existingValue != null) return existingValue
+        val newValue = mapping(repr)
+        mappings[repr] = newValue
+        return newValue
     }
 
     override fun toString(): String {
-        val sets = toSets()
-        val setsString = if (sets.isNotEmpty()) sets.joinToString(", ") else "∅"
-        return "MutableDisjointSet($setsString)"
+        val map = toMap()
+        return "MutableDisjointSet($map)"
     }
 }

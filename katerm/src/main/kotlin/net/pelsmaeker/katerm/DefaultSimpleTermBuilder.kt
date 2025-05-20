@@ -7,7 +7,7 @@ import java.util.*
 /**
  * The default simple term builder.
  */
-class SimpleTermBuilder: TermBuilderBase() {
+open class SimpleTermBuilder: TermBuilderBase() {
 
     override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm {
         return SimpleApplTermImpl(op, args, attachments)
@@ -31,5 +31,7 @@ class SimpleTermBuilder: TermBuilderBase() {
         // The fields in the hash must match the fields in [equalsAppl]
         override val hash: Int = Objects.hash(termOp, termArgs)
     }
+
+    companion object : SimpleTermBuilder()
 
 }

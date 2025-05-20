@@ -2,41 +2,38 @@ package net.pelsmaeker.katerm.substitutions
 
 import net.pelsmaeker.katerm.Term
 import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.collections.MutableDisjointMap
+import net.pelsmaeker.katerm.collections.MutableUnionFindMapImpl
 
-class MutableUnionFindSubstitution(
-    private val roots: MutableMap<TermVar, Term>,
-    private val parents: MutableMap<TermVar, TermVar>,             // We replace this map when doing path compression.
-    private val ranks: MutableMap<TermVar, Int>,                   // We replace this map when doing path compression.
-): SubstitutionBase(), MutableSubstitution {
+class MutableUnionFindSubstitution: SubstitutionBase(), MutableSubstitution {
 
-    override fun isEmpty(): Boolean {
-        TODO("Not yet implemented")
-    }
+    private val disjointMap: MutableDisjointMap<TermVar, Term> = MutableUnionFindMapImpl()
 
-    override val variables: Set<TermVar>
-        get() = TODO("Not yet implemented")
+    override fun isEmpty(): Boolean = disjointMap.isEmpty()
+
+    override val variables: Set<TermVar> get() = disjointMap.elements
 
     override fun get(variable: TermVar): Term {
-        TODO("Not yet implemented")
+        return disjointMap[variable] ?: variable
     }
 
     override fun find(variable: TermVar): TermVar? {
-        TODO("Not yet implemented")
+        return disjointMap.find(variable)
     }
 
     override fun set(
         variable: TermVar,
         term: Term,
     ): Term? {
-        TODO("Not yet implemented")
-    }
-
-    override fun remove(variable: TermVar): Term? {
-        TODO("Not yet implemented")
+        return disjointMap.set(variable, term)
     }
 
     override fun clear() {
-        TODO("Not yet implemented")
+        disjointMap.clear()
+    }
+
+    override fun toString(): String {
+        return disjointMap.toString()
     }
 
 }

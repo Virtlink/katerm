@@ -18,14 +18,6 @@ interface MutableSubstitution : Substitution {
     operator fun set(variable: TermVar, term: Term): Term?
 
     /**
-     * Removes the mapping for the given variable.
-     *
-     * @param variable The variable to remove.
-     * @return The term that was mapped to the variable, or `null` if the variable was not mapped.
-     */
-    fun remove(variable: TermVar): Term?
-
-    /**
      * Clears all mappings in the substitution.
      */
     fun clear()

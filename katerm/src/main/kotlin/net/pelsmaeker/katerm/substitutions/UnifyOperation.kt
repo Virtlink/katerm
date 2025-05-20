@@ -55,6 +55,19 @@ fun Substitution.unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
 }
 
 /**
+ * Unifies two substitutions.
+ *
+ * @receiver The first substitution to unify.
+ * @param substitution The second substitution to unify.
+ * @return The resulting substitution, or `null` if unification fails.
+ */
+fun Substitution.unifyWith(substitution: Substitution): Substitution? {
+    val mutableSubstitution = this.toMutableSubstitution()
+    val success = UnifyOperation(substitution.variables.map { it to substitution[it] }, mutableSubstitution).unifyAll()
+    return mutableSubstitution.takeIf { success }
+}
+
+/**
  * Performs a unification operation, mutating the specified substitution to make the terms equal.
  *
  * @property substitution The substitution to mutate. If unification fails, the substitution is in an invalid intermediate state.
