@@ -58,6 +58,7 @@ abstract class TermBuilderBase(
         }
     }
 
+
     /////////
     // Int //
     /////////
@@ -70,6 +71,7 @@ abstract class TermBuilderBase(
         if (term.value == newValue) return term
         return newInt(newValue, term.termAttachments)
     }
+
 
     /////////
     // Real //
@@ -84,6 +86,7 @@ abstract class TermBuilderBase(
         return newReal(newValue, term.termAttachments)
     }
 
+
     ////////////
     // String //
     ////////////
@@ -97,6 +100,7 @@ abstract class TermBuilderBase(
         return newString(newValue, term.termAttachments)
     }
 
+
     //////////
     // Appl //
     //////////
@@ -109,6 +113,7 @@ abstract class TermBuilderBase(
         return newAppl(term.termOp, newArgs, term.termAttachments)
     }
 
+
     ////////////
     // Option //
     ////////////
@@ -120,10 +125,23 @@ abstract class TermBuilderBase(
         }
     }
 
+    override fun <E : Term> newOptionWithVar(variable: TermVar?, attachments: TermAttachments): OptionTerm<E> {
+        return when (variable) {
+            null -> NoneTermImpl(attachments) as OptionTerm<E>
+            else -> OptTermImpl(variable, attachments)
+        }
+    }
+
     override fun <E: Term> copyOption(term: OptionTerm<E>, newElement: E?): OptionTerm<E> {
         if (term.element == newElement) return term
         return newOption(newElement, term.termAttachments)
     }
+
+    override fun <E : Term> copyOptionWithVar(term: OptionTerm<E>, newVariable: TermVar?): OptionTerm<E> {
+        if (term.variable == newVariable) return term
+        return newOptionWithVar(newVariable, term.termAttachments)
+    }
+
 
     //////////
     // List //
@@ -143,10 +161,33 @@ abstract class TermBuilderBase(
         }
     }
 
+    override fun <E : Term> newList(head: E, tail: ListTerm<E>, attachments: TermAttachments): ListTerm<E> {
+        return ConsTermImpl(head, tail, attachments)
+    }
+
+    override fun <E : Term> newListWithVar(
+        variable: TermVar,
+        tail: ListTerm<E>,
+        attachments: TermAttachments,
+    ): ListTerm<E> {
+        return ConcTermImpl(variable, tail, attachments)
+    }
+
     override fun <E : Term> copyList(term: ListTerm<E>, newElements: List<E>): ListTerm<E> {
         if (term.elements == newElements) return term
         return newList(newElements, term.termAttachments)
     }
+
+    override fun <E : Term> copyList(term: ListTerm<E>, newHead: E, newTail: ListTerm<E>): ListTerm<E> {
+        if (term.head == newHead && term.tail == newTail) return term
+        return newList(newHead, newTail, term.termAttachments)
+    }
+
+    override fun <E : Term> copyListWithVar(term: ListTerm<E>, newPrefix: TermVar, newTail: ListTerm<E>): ListTerm<E> {
+        if (term.prefix == newPrefix && term.tail == newTail) return term
+        return newListWithVar(newPrefix, newTail, term.termAttachments)
+    }
+
 
     /////////
     // Var //
@@ -159,6 +200,7 @@ abstract class TermBuilderBase(
     override fun copyVar(term: TermVar, newName: String): TermVar {
         return newVar(newName, term.termAttachments)
     }
+
 
     //////////////////
     // Term Classes //
