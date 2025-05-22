@@ -50,16 +50,6 @@ class DefaultTermWriter(
             append('"')
         }
 
-//        override fun visitBlob(term: BlobTerm) = writer.run {
-//            // Print something like "<blob(java.lang.String@12ab34)>"
-//            val value = term.value
-//            write("<blob(")
-//            write(value::class.java.name)
-//            write('@'.code)
-//            write(term.value.hashCode().toString(16))
-//            write(")>")
-//        }
-
         override fun visitAppl(term: ApplTerm): Unit = writer.run {
             append(term.termOp)
             append('(')
@@ -67,22 +57,53 @@ class DefaultTermWriter(
             append(')')
         }
 
-        override fun visitList(term: ListTerm<Term>): Unit = writer.run {
-            append('[')
-            // TODO: Deal with variables in the list
-            writeSubtermList(term.elements)
-            append(']')
+        override fun visitConsList(term: ConsListTerm<Term>): Unit = writer.run {
+            append("[")
+            term.head.accept(this@Visitor)
+            var current: ListTerm<Term> = term.tail
+            while (true) {
+                when (current) {
+                    is ConsListTerm<*> -> {
+                        append(", ")
+                        current.head.accept(this@Visitor)
+                        current = current.tail
+                    }
+
+                    is NilListTerm -> {
+                        append("]")
+                        break
+                    }
+
+                    is TermVar -> {
+                        append(" | ")
+                        current.accept(this@Visitor)
+                        append("]")
+                        break
+                    }
+
+                    else -> error("Unexpected term in list tail: $current")
+                }
+            }
         }
 
-        override fun visitOption(term: OptionTerm<Term>): Unit = writer.run {
-            if (term.isPresent()) {
-                append("some ")
-                term.element!!.accept(this@Visitor)
-            } else if (term.isEmpty()) {
-                append("none")
-            } else {
-                TODO("Deal with a variable in the option")
-            }
+        override fun visitNilList(term: NilListTerm): Unit = writer.run {
+            append("[]")
+        }
+
+        override fun visitConcatList(term: ConcatListTerm<Term>): Unit = writer.run {
+            term.left.accept(this@Visitor)
+            append(" ++ ")
+            term.right.accept(this@Visitor)
+        }
+
+        override fun visitSomeOption(term: SomeOptionTerm<Term>): Unit = writer.run {
+            append("<")
+            term.element.accept(this@Visitor)
+            append(">")
+        }
+
+        override fun visitNoneOption(term: NoneOptionTerm): Unit = writer.run {
+            append("<>")
         }
 
         override fun visitVar(term: TermVar): Unit = writer.run {
@@ -91,12 +112,14 @@ class DefaultTermWriter(
             append(term.name)
         }
 
+        // TODO: Merge this with TermBuilderBase.escape()
         // TODO: Optimize to write the escaped string immediately to the writer
         private fun escape(s: String): String = s   // TODO: Optimize to go over the string only once
             .replace("\\", "\\\\")
             .replace("\"", "\\\"")
-            .replace("\r", "\\r")
             .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
         // TODO: Escape non-printable characters
 
         /**

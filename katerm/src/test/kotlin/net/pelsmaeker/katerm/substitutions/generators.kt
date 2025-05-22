@@ -12,6 +12,8 @@ import io.kotest.property.arbitrary.orNull
 import io.kotest.property.arbitrary.string
 import io.kotest.property.resolution.GlobalArbResolver
 import net.pelsmaeker.katerm.ApplTerm
+import net.pelsmaeker.katerm.ConcatListTerm
+import net.pelsmaeker.katerm.ConsListTerm
 import net.pelsmaeker.katerm.SimpleTermBuilder
 import net.pelsmaeker.katerm.Term
 import net.pelsmaeker.katerm.TermVar
@@ -19,6 +21,7 @@ import net.pelsmaeker.katerm.IntTerm
 import net.pelsmaeker.katerm.ListTerm
 import net.pelsmaeker.katerm.OptionTerm
 import net.pelsmaeker.katerm.RealTerm
+import net.pelsmaeker.katerm.SomeOptionTerm
 import net.pelsmaeker.katerm.StringTerm
 import net.pelsmaeker.katerm.TermBuilder
 import java.util.concurrent.atomic.AtomicInteger
@@ -218,17 +221,24 @@ private fun TermBuilder.addHolesToTerm(term: Term, chance: Double, random: Rando
         return hole
     } else {
         // Recursively add holes to the term
+        @Suppress("UNCHECKED_CAST")
         return when (term) {
             is ApplTerm -> {
                 val newArgs = term.termChildren.map { arg -> addHolesToTerm(arg, chance, random, freshVarProvider, holeMap) }
                 newAppl(term.termOp, newArgs)
             }
-            is ListTerm<*> -> {
-                val newElements = term.elements.map { element -> addHolesToTerm(element, chance, random, freshVarProvider, holeMap) }
-                newList(newElements)
+            is ConsListTerm<*> -> {
+                val newHead = addHolesToTerm(term.head, chance, random, freshVarProvider, holeMap)
+                val newTail = addHolesToTerm(term.tail, chance, random, freshVarProvider, holeMap) as ListTerm<*>
+                newList(newHead, newTail)
             }
-            is OptionTerm<*> -> {
-                val newElement = term.element?.let { addHolesToTerm(it, chance, random, freshVarProvider, holeMap) }
+            is ConcatListTerm<*> -> {
+                val newLeft = addHolesToTerm(term.left, chance, random, freshVarProvider, holeMap) as ListTerm<*>
+                val newRight = addHolesToTerm(term.right, chance, random, freshVarProvider, holeMap) as ListTerm<*>
+                concatLists(newLeft, newRight)
+            }
+            is SomeOptionTerm<*> -> {
+                val newElement = addHolesToTerm(term.element, chance, random, freshVarProvider, holeMap)
                 newOption(newElement)
             }
             else -> term

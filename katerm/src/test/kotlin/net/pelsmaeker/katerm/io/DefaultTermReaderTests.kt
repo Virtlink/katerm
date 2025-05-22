@@ -26,9 +26,9 @@ class DefaultTermReaderTests: FunSpec({
             "MyCons(10)" to newAppl("MyCons", newInt(10)),
             "MyCons(\"a\", 10)" to newAppl("MyCons", newString("a"), newInt(10)),
 
-            "[]" to newList<Term>(),
-            "[10]" to newList(newInt(10)),
-            "[\"a\", 10]" to newList(newString("a"), newInt(10)),
+            "[]" to newEmptyList(),
+            "[10]" to newList(listOf(newInt(10))),
+            "[\"a\", 10]" to newList(listOf(newString("a"), newInt(10))),
 
             "\"\"" to newString(""),
             "\"abc\"" to newString("abc"),
@@ -138,52 +138,52 @@ class DefaultTermReaderTests: FunSpec({
         // Assert
         term shouldBe builder.run {
             newAppl(
-                "Module", newAppl("ModuleDecl", newString("example1")), newList(
+                "Module", newAppl("ModuleDecl", newString("example1")), newList(listOf(
                     newAppl(
-                        "StrategyDecl", newString("repeat"), newList(
+                        "StrategyDecl", newString("repeat"), newList(listOf(
                             newAppl("TypeParamDef", newString("a"))
-                        ), newAppl(
-                            "Strategy", newList(
+                        )), newAppl(
+                            "Strategy", newList(listOf(
                                 newAppl(
                                     "StrategyNoArgs",
                                     newAppl("TypeName", newString("a")),
                                     newAppl("TypeName", newString("a"))
                                 )
-                            ), newAppl("TypeName", newString("a")), newAppl("TypeName", newString("a"))
+                            )), newAppl("TypeName", newString("a")), newAppl("TypeName", newString("a"))
                         )
                     ),
                     newAppl(
-                        "StrategyDef", newString("repeat"), newList(newAppl("ParamDef", newString("s"))),
+                        "StrategyDef", newString("repeat"), newList(listOf(newAppl("ParamDef", newString("s")))),
                         newAppl(
-                            "Call", newString("try"), newList(
+                            "Call", newString("try"), newList(listOf(
                                 newAppl(
                                     "Seq",
                                     newAppl("Var", newString("s")),
-                                    newAppl("Call", newString("repeat"), newList(newAppl("Var", newString("s"))))
+                                    newAppl("Call", newString("repeat"), newList(listOf(newAppl("Var", newString("s")))))
                                 )
-                            )
+                            ))
                         )
                     ), newAppl(
-                        "StrategyDecl", newString("try"), newList(newAppl("TypeParamDef", newString("a"))),
+                        "StrategyDecl", newString("try"), newList(listOf(newAppl("TypeParamDef", newString("a")))),
                         newAppl(
-                            "Strategy", newList(
+                            "Strategy", newList(listOf(
                                 newAppl(
                                     "StrategyNoArgs", newAppl("TypeName", newString("a")),
                                     newAppl("TypeName", newString("a"))
                                 )
-                            ), newAppl("TypeName", newString("a")),
+                            )), newAppl("TypeName", newString("a")),
                             newAppl("TypeName", newString("a"))
                         )
                     ), newAppl(
-                        "StrategyDef", newString("try"), newList(
+                        "StrategyDef", newString("try"), newList(listOf(
                             newAppl("ParamDef", newString("s"))
-                        ), newAppl(
-                            "Call", newString("glc"), newList(
+                        )), newAppl(
+                            "Call", newString("glc"), newList(listOf(
                                 newAppl("Var", newString("s")), newAppl("Id"), newAppl("Id")
-                            )
+                            ))
                         )
                     )
-                )
+                ))
             )
         }
     }

@@ -15,9 +15,15 @@ interface TermVisitor<out R> {
 
     fun visitAppl(term: ApplTerm): R
 
-    fun visitList(term: ListTerm<Term>): R
+    fun visitConsList(term: ConsListTerm<Term>): R
 
-    fun visitOption(term: OptionTerm<Term>): R
+    fun visitNilList(term: NilListTerm): R
+
+    fun visitConcatList(term: ConcatListTerm<Term>): R
+
+    fun visitSomeOption(term: SomeOptionTerm<Term>): R
+
+    fun visitNoneOption(term: NoneOptionTerm): R
 
     fun visitVar(term: TermVar): R
 
@@ -39,9 +45,15 @@ interface TermVisitor1<in A, out R> {
 
     fun visitAppl(term: ApplTerm, arg: A): R
 
-    fun visitList(term: ListTerm<Term>, arg: A): R
+    fun visitConsList(term: ConsListTerm<Term>, arg: A): R
 
-    fun visitOption(term: OptionTerm<Term>, arg: A): R
+    fun visitNilList(term: NilListTerm, arg: A): R
+
+    fun visitConcatList(term: ConcatListTerm<Term>, arg: A): R
+
+    fun visitSomeOption(term: SomeOptionTerm<Term>, arg: A): R
+
+    fun visitNoneOption(term: NoneOptionTerm, arg: A): R
 
     fun visitVar(term: TermVar, arg: A): R
 

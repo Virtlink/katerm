@@ -15,24 +15,23 @@ abstract class TermBuilderBase(
     private val termPrinter: TermTextWriter = DefaultTermWriter(),
 ): TermBuilder {
 
-    override fun apply(substitution: Substitution, term: Term): Term {
+    override fun apply(term: Term, substitution: Substitution): Term {
         return when (term) {
             is TermVar -> {
                 val mappedTerm = substitution[term]
-                if (mappedTerm !is TermVar) {
-                    // Also substitute in the mapped term.
-                    apply(substitution, mappedTerm)
-                } else term
+                mappedTerm as? TermVar ?: apply(mappedTerm, substitution)
             }
-            is ApplTerm -> copyAppl(term, term.termArgs.map { apply(substitution, it) })
-            is OptionTerm<*> -> {
-                if (term.variable != null) { TODO("Variables in OptionTerm are not yet supported.") }
-                copyOption(term, term.element?.let { apply(substitution, it) })
-            }
-            is ListTerm<*> -> {
-                if (term.prefix != null) { TODO("Variables in ListTerm are not yet supported.") }
-                copyList(term, term.elements.map { apply(substitution, it) })
-            }
+            is ApplTerm -> copyAppl(term, term.termArgs.map { apply(it, substitution) })
+            is SomeOptionTerm<*> -> copyOption(term, apply(term.element, substitution))
+            is ConsListTerm<*> -> copyList(
+                term,
+                apply(term.head, substitution),
+                apply(term.tail, substitution) as ListTerm<*>,
+            )
+            is ConcatListTerm<*> -> concatLists(
+                apply(term.left, substitution) as ListTerm<*>,
+                apply(term.right, substitution) as ListTerm<*>,
+            )
             else -> term
         }
     }
@@ -41,17 +40,17 @@ abstract class TermBuilderBase(
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
         if (term.termAttachments == newAttachments) return term
         return when (term) {
+            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
             is IntTerm -> newInt(term.value, newAttachments) as T
             is RealTerm -> newReal(term.value, newAttachments) as T
             is StringTerm -> newString(term.value, newAttachments) as T
-            is ApplTerm -> newAppl(term.termOp, term.termArgs, newAttachments) as T
-            is OptionTerm<*> -> {
-                if (term.variable != null) { TODO("Variables in OptionTerm are not yet supported.") }
-                newOption(term.element, newAttachments) as T
-            }
-            is ListTerm<*> -> {
-                if (term.prefix != null) { TODO("Variables in ListTerm are not yet supported.") }
-                newList(term.elements, newAttachments) as T
+            is SomeOptionTerm<*> -> newOption(term.element, newAttachments) as T
+            is NoneOptionTerm -> newEmptyOption(newAttachments) as T
+            is ConsListTerm<*> -> newList(term.head, term.tail, newAttachments) as T
+            is NilListTerm -> newEmptyList(newAttachments) as T
+            is ConcatListTerm<*> -> {
+                require(newAttachments.isEmpty()) { "Concatenation terms cannot have attachments." }
+                term
             }
             is TermVar -> newVar(term.name, newAttachments) as T
             else -> throw IllegalArgumentException("Unknown term type: $term")
@@ -107,7 +106,7 @@ abstract class TermBuilderBase(
 
     abstract override fun newAppl(op: String, args: List<Term>, attachments: TermAttachments): ApplTerm
 
-    open override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
+    override fun copyAppl(term: ApplTerm, newArgs: List<Term>): ApplTerm {
         // Can be overridden to provide a more efficient implementation.
         if (term.termArgs == newArgs) return term
         return newAppl(term.termOp, newArgs, term.termAttachments)
@@ -118,28 +117,20 @@ abstract class TermBuilderBase(
     // Option //
     ////////////
 
-    override fun <E: Term> newOption(element: E?, attachments: TermAttachments): OptionTerm<E> {
+    final override fun newEmptyOption(attachments: TermAttachments): NoneOptionTerm {
+        return NoneOptionTermImpl(attachments)
+    }
+
+    final override fun <E: Term> newOption(element: E?, attachments: TermAttachments): OptionTerm<E> {
         return when (element) {
-            null -> NoneTermImpl(attachments) as OptionTerm<E>
-            else -> SomeTermImpl(element, attachments)
+            null -> newEmptyOption(attachments)
+            else -> SomeOptionTermImpl(element, attachments)
         }
     }
 
-    override fun <E : Term> newOptionWithVar(variable: TermVar?, attachments: TermAttachments): OptionTerm<E> {
-        return when (variable) {
-            null -> NoneTermImpl(attachments) as OptionTerm<E>
-            else -> OptTermImpl(variable, attachments)
-        }
-    }
-
-    override fun <E: Term> copyOption(term: OptionTerm<E>, newElement: E?): OptionTerm<E> {
-        if (term.element == newElement) return term
+    final override fun <E: Term> copyOption(term: OptionTerm<E>, newElement: E?): OptionTerm<E> {
+        if (term is SomeOptionTerm<E> && term.element == newElement) return term
         return newOption(newElement, term.termAttachments)
-    }
-
-    override fun <E : Term> copyOptionWithVar(term: OptionTerm<E>, newVariable: TermVar?): OptionTerm<E> {
-        if (term.variable == newVariable) return term
-        return newOptionWithVar(newVariable, term.termAttachments)
     }
 
 
@@ -147,45 +138,46 @@ abstract class TermBuilderBase(
     // List //
     //////////
 
-    override fun <T : Term> newList(
-        elements: List<T>,
-        attachments: TermAttachments,
-    ): ListTerm<T> {
-        return if (elements.isNotEmpty()) {
-            // TODO: Enforce that all elements of a list share the same separators and attachments?
-            //  This would mean: no term sharing, or copying a tail of a list to another list
+    final override fun newEmptyList(attachments: TermAttachments): NilListTerm {
+        return NilListTermImpl(attachments)
+    }
 
-            ConsTermImpl(elements.first(), newList(elements.drop(1)), attachments)
+    final override fun <T : Term> newList(elements: List<T>): ListTerm<T> {
+        return if (elements.isNotEmpty()) {
+            newList(elements.first(), newList(elements.drop(1)))
         } else {
-            NilTermImpl(attachments)
+            newEmptyList()
         }
     }
 
-    override fun <E : Term> newList(head: E, tail: ListTerm<E>, attachments: TermAttachments): ListTerm<E> {
-        return ConsTermImpl(head, tail, attachments)
+    final override fun <E : Term> newList(head: E, tail: ListTerm<E>, attachments: TermAttachments): ListTerm<E> {
+        return ConsListTermImpl(head, tail, attachments)
     }
 
-    override fun <E : Term> newListWithVar(
-        variable: TermVar,
-        tail: ListTerm<E>,
-        attachments: TermAttachments,
-    ): ListTerm<E> {
-        return ConcTermImpl(variable, tail, attachments)
-    }
-
-    override fun <E : Term> copyList(term: ListTerm<E>, newElements: List<E>): ListTerm<E> {
-        if (term.elements == newElements) return term
-        return newList(newElements, term.termAttachments)
-    }
-
-    override fun <E : Term> copyList(term: ListTerm<E>, newHead: E, newTail: ListTerm<E>): ListTerm<E> {
-        if (term.head == newHead && term.tail == newTail) return term
+    final override fun <E : Term> copyList(term: ListTerm<E>, newHead: E, newTail: ListTerm<E>): ListTerm<E> {
+        if (term is ConsListTerm<*> && term.head == newHead && term.tail == newTail) return term
         return newList(newHead, newTail, term.termAttachments)
     }
 
-    override fun <E : Term> copyListWithVar(term: ListTerm<E>, newPrefix: TermVar, newTail: ListTerm<E>): ListTerm<E> {
-        if (term.prefix == newPrefix && term.tail == newTail) return term
-        return newListWithVar(newPrefix, newTail, term.termAttachments)
+    final override fun <E: Term> concatLists(leftList: ListTerm<E>, rightList: ListTerm<E>): ListTerm<E> {
+        return if (rightList is NilListTerm) {
+            // as ++ [] = as
+            leftList
+        } else {
+            when (leftList) {
+                // (a :: as) ++ bs = a :: (as ++ bs)
+                is ConsListTerm<E> -> newList(leftList.head, concatLists(leftList.tail, rightList), leftList.termAttachments)
+
+                // [] ++ bs = bs
+                is NilListTerm -> rightList
+
+                // ?xs ++ bs = ?xs ++ bs
+                is TermVar -> ConcatListTermImpl(leftList, rightList)
+
+                // (xs ++ as) ++ bs == xs ++ (as ++ bs)
+                is ConcatListTerm<E> -> ConcatListTermImpl<E>(leftList.left, concatLists(leftList.right, rightList))
+            }
+        }
     }
 
 
@@ -193,11 +185,11 @@ abstract class TermBuilderBase(
     // Var //
     /////////
 
-    override fun newVar(name: String, attachments: TermAttachments): TermVar {
+    final override fun newVar(name: String, attachments: TermAttachments): TermVar {
         return TermVarImpl(name, attachments)
     }
 
-    override fun copyVar(term: TermVar, newName: String): TermVar {
+    final override fun copyVar(term: TermVar, newName: String): TermVar {
         return newVar(newName, term.termAttachments)
     }
 
@@ -214,7 +206,6 @@ abstract class TermBuilderBase(
      *
      * @property termAttachments The attachments of the term.
      */
-    @Suppress("EqualsOrHashCode")
     protected abstract inner class TermImplBase(
         override val termAttachments: TermAttachments,
     ): Term {
@@ -222,22 +213,6 @@ abstract class TermBuilderBase(
         private var _termVars: Set<TermVar>? = null
         final override val termVars: Set<TermVar>
             get() = _termVars ?: termChildren.flatMapTo(HashSet()) { it.termVars }.also { _termVars = it }
-
-        /**
-         * An eager hash code calculation.
-         *
-         * Implement this field to compute and store the hash code of the term when the object is created.
-         * Do not include the hash code of the attachments.
-         */
-        protected abstract val hash: Int
-
-        /**
-         * Returns the hash code of the term, include the hash of the attachments.
-         *
-         * This cannot be overridden. Instead, implement the [hash] property
-         * by performing an eager hash calculation that includes the hash of the attachments.
-         */
-        final override fun hashCode(): Int = hash
 
         /**
          * Determines whether this term and its subterms represent the same value
@@ -259,6 +234,22 @@ abstract class TermBuilderBase(
         }
 
         /**
+         * An eager hash code calculation.
+         *
+         * Implement this field to compute and store the hash code of the term when the object is created.
+         * Do not include the hash code of the attachments.
+         */
+        protected abstract val hash: Int
+
+        /**
+         * Returns the hash code of the term, include the hash of the attachments.
+         *
+         * This cannot be overridden. Instead, implement the [hash] property
+         * by performing an eager hash calculation that includes the hash of the attachments.
+         */
+        final override fun hashCode(): Int = hash
+
+        /**
          * Returns a string representation of this term.
          *
          * Override this method to customize the string representation.
@@ -275,19 +266,32 @@ abstract class TermBuilderBase(
         termAttachments: TermAttachments,
     ) : ApplTerm, TermImplBase(termAttachments) {
 
+        /** The constructor name. */
+        abstract override val termOp: String
+
+        /**
+         * Override this property to optimize specifying the arity.
+         */
+        open override val termArity: Int get() = termArgs.size
+
         abstract override val termArgs: List<Term>
 
         final override val termKind: TermKind get() = TermKind.APPL
 
+        final override val termChildren: List<Term> get() = termArgs
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+
         final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ApplTerm) return false
-            // @formatter:off
-            return (that !is ApplTermBase || this.hash == that.hash)
-                && this.termArity == that.termArity
-                && this.termOp == that.termOp
-                && (!compareSubterms || this.equalsSubterms(that, compareAttachments))
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+            if (that is ApplTermBase && this.hash != that.hash) return false
+            if (this.termArity != that.termArity) return false
+            if (this.termOp != that.termOp) return false
+            if (compareSubterms && !this.equalSubterms(that, compareAttachments)) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
         }
 
         /**
@@ -304,7 +308,7 @@ abstract class TermBuilderBase(
          * @param compareAttachments Whether to compare the attachments.
          * @return `true` if this term has equal subterms as the specified term; otherwise, `false`.
          */
-        protected open fun equalsSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
+        protected open fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
             return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(
                 b,
                 compareSubterms = true,
@@ -312,272 +316,413 @@ abstract class TermBuilderBase(
             ) }
         }
 
-        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
-
-        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
-
-    }
-
-    protected abstract inner class ValueTermImplBase(
-        termAttachments: TermAttachments,
-    ) : ValueTerm, TermImplBase(termAttachments) {
-
-        /**
-         * Override this method to optimize the hash code calculation.
-         */
-        open override val hash: Int = Objects.hash(value)
-
-        /**
-         * Override this method to customize or optimize the equality check.
-         */
-        open override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is ValueTerm) return false
-            // @formatter:off
-            return (that !is ValueTermImplBase || this.hash == that.hash)
-                && this.value == that.value
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+        override fun toString(): String {
+            return "$termOp(${termArgs.joinToString(", ")})"
         }
-
     }
 
-    /** Integer value term. */
+    /**
+     * An integer value term.
+     *
+     * @property value The integer value.
+     * @param termAttachments The attachments of the term.
+     */
     private inner class IntTermImpl(
         override val value: Int,
         termAttachments: TermAttachments,
-    ) : IntTerm, ValueTermImplBase(termAttachments) {
+    ) : IntTerm, TermImplBase(termAttachments) {
 
-        final override val termKind: TermKind get() = TermKind.INT
+        override val termKind: TermKind get() = TermKind.VALUE_INT
 
-        override val hash: Int = Objects.hash(value)
-
-        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is IntTerm) return false
-            // @formatter:off
-            return (that !is IntTermImpl || this.hash == that.hash)
-                && this.value == that.value
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
-        }
+        override val termChildren: List<Term> get() = emptyList()
 
         override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
-    }
 
-    /** Real value term. */
-    private inner class RealTermImpl(
-        override val value: Double,
-        termAttachments: TermAttachments,
-    ) : RealTerm, ValueTermImplBase(termAttachments) {
-
-        final override val termKind: TermKind get() = TermKind.REAL
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is IntTerm) return false
+            if (that is IntTermImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
 
         override val hash: Int = Objects.hash(value)
 
-        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is RealTerm) return false
-            // @formatter:off
-            return (that !is RealTermImpl || this.hash == that.hash)
-                && this.value == that.value
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+        override fun toString(): String {
+            return value.toString()
         }
+
+    }
+
+    /**
+     * A real value term.
+     *
+     * @property value The real value.
+     * @param termAttachments The attachments of the term.
+     */
+    private inner class RealTermImpl(
+        override val value: Double,
+        termAttachments: TermAttachments,
+    ) : RealTerm, TermImplBase(termAttachments) {
+
+        override val termKind: TermKind get() = TermKind.VALUE_REAL
+
+        override val termChildren: List<Term> get() = emptyList()
 
         override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
 
-    }
-
-    /** String value term base class. */
-    private inner class StringTermImpl(
-        override val value: String,
-        termAttachments: TermAttachments,
-    ) : StringTerm, ValueTermImplBase(termAttachments) {
-
-        final override val termKind: TermKind get() = TermKind.STRING
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is RealTerm) return false
+            if (that is RealTermImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
 
         override val hash: Int = Objects.hash(value)
 
-        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is StringTerm) return false
-            // @formatter:off
-            return (that !is StringTermImpl || this.hash == that.hash)
-                && this.value == that.value
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+        override fun toString(): String {
+            return value.toString()
         }
+
+    }
+
+    /**
+     * A string value term.
+     *
+     * @property value The string value.
+     * @param termAttachments The attachments of the term.
+     */
+    private inner class StringTermImpl(
+        override val value: String,
+        termAttachments: TermAttachments,
+    ) : StringTerm, TermImplBase(termAttachments) {
+
+        override val termKind: TermKind get() = TermKind.VALUE_STRING
+
+        override val termChildren: List<Term> get() = emptyList()
 
         override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
-    }
 
-    /** Base class for option terms. */
-    private abstract inner class OptionTermImplBase<T: Term>(
-        termAttachments: TermAttachments,
-    ): OptionTerm<T>, TermImplBase(termAttachments) {
-
-        final override val termKind: TermKind get() = TermKind.OPTION
-
-        final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is OptionTerm<*>) return false
-            // @formatter:off
-            return (that !is OptionTermImplBase<*> || this.hash == that.hash)
-                && (!compareSubterms || this.element.equals(that.element, compareSubterms, compareAttachments))
-                && (!compareSubterms || this.variable.equals(that.variable, compareSubterms, compareAttachments))
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is StringTerm) return false
+            if (that is StringTermImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
         }
 
-        final override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitOption(this)
+        override val hash: Int = Objects.hash(value)
 
-        final override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitOption(this, arg)
+        override fun toString(): String {
+            return "\"${escape(value)}\""
+        }
+
+        private fun escape(s: String): String = s
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
 
     }
 
-    /** Option term with a value. */
-    private inner class SomeTermImpl<E: Term>(
+    /**
+     * A non-empty option term.
+     *
+     * @param E The type of the element in the option.
+     * @param element The term that is the element of the option.
+     * @param termAttachments The attachments of the term.
+     */
+    private inner class SomeOptionTermImpl<E: Term>(
         override val element: E,
         termAttachments: TermAttachments,
-    ) : OptionTerm<E>, OptionTermImplBase<E>(termAttachments) {
+    ) : SomeOptionTerm<E>, TermImplBase(termAttachments) {
 
-        override val variable: TermVar? get() = null
+        override fun isEmpty(): Boolean = false
+
+        override fun isNotEmpty(): Boolean = true
+
+        override val termKind: TermKind get() = TermKind.OPTION_SOME
 
         override val termChildren: List<Term> get() = listOf(element)
 
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitSomeOption(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitSomeOption(this, arg)
+
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is SomeOptionTerm<*>) return false
+            if (that is SomeOptionTermImpl<*> && this.hash != that.hash) return false
+            if (compareSubterms) {
+                if (!this.element.equals(that.element, compareSubterms = true, compareAttachments)) return false
+            }
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
+
         override val hash: Int = Objects.hash(element)
+
+        override fun toString(): String {
+            return "<${this.element}>"
+        }
 
     }
 
-    /** Option term without a value */
-    private inner class NoneTermImpl(
+    /**
+     * An empty option term.
+     *
+     * @param termAttachments The attachments of the term.
+     */
+    private inner class NoneOptionTermImpl(
         termAttachments: TermAttachments,
-    ) : OptionTerm<Nothing>, OptionTermImplBase<Nothing>(termAttachments) {
+    ) : NoneOptionTerm, TermImplBase(termAttachments) {
 
-        override val element: Nothing? get() = null
+        override fun isEmpty(): Boolean = true
 
-        override val variable: TermVar? get() = null
+        override fun isNotEmpty(): Boolean = false
+
+        override val termKind: TermKind get() = TermKind.OPTION_NONE
 
         override val termChildren: List<Term> get() = emptyList()
 
-        override val hash: Int = 0
-    }
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitNoneOption(this)
 
-    /** Option term with a variable. */
-    private inner class OptTermImpl<E: Term>(
-        override val variable: TermVar,
-        termAttachments: TermAttachments = TermAttachments.empty(),
-    ) : OptionTerm<E>, OptionTermImplBase<E>(termAttachments) {
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitNoneOption(this, arg)
 
-        override val element: E? get() = null
-
-        override val termChildren: List<Term> get() = listOf(variable)
-
-        override val hash: Int = Objects.hash(variable)
-    }
-
-    /** Base class for list terms. */
-    @Suppress("EqualsOrHashCode")
-    private abstract inner class ListTermImplBase<T: Term>(
-        termAttachments: TermAttachments,
-    ): ListTerm<T>, TermImplBase(termAttachments) {
-
-        final override val termKind: TermKind get() = TermKind.LIST
-
-        final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
-            if (that !is ListTerm<*>) return false
-            // @formatter:off
-            return (that !is ListTermImplBase<*> || this.hash == that.hash)
-                && this.minSize == that.minSize
-                && this.size == that.size
-                && (!compareSubterms || this.head.equals(that.head, compareSubterms, compareAttachments))
-                && (!compareSubterms || this.tail.equals(that.tail, compareSubterms, compareAttachments))
-                && (!compareSubterms || this.prefix.equals(that.prefix, compareSubterms, compareAttachments))
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is NoneOptionTerm) return false
+            if (that is NoneOptionTermImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
         }
 
-        final override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
+        override val hash: Int = 0
 
-        final override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
-
+        override fun toString(): String {
+            return "<>"
+        }
     }
 
-    /** List cons term (a list head with a tail). */
-    private inner class ConsTermImpl<E: Term>(
+
+    /**
+     * List cons term (a list head with a tail).
+     *
+     * @property head The head of the list.
+     * @property tail The tail of the list. It cannot be a concatenation.
+     */
+    private inner class ConsListTermImpl<E: Term>(
         override val head: E,
         override val tail: ListTerm<E>,
         termAttachments: TermAttachments,
-    ) : ListTerm<E>, ListTermImplBase<E>(termAttachments) {
+    ) : ConsListTerm<E>, TermImplBase(termAttachments) {
 
-        override val minSize: Int = 1 + tail.minSize
-        override val size: Int? = tail.size?.let { 1 + it }
-        override val elements: List<E> get() = listOf(head) + tail.elements // TODO: Optimize
-        override val termChildren: List<Term> get() = listOf(head, tail) // TODO: Optimize
-        override val prefix: TermVar? get() = null
-        override fun isListTailVar(): Boolean = false
+        init {
+            require(tail !is ConcatListTerm<E>) {
+                "The tail list must not be a concatenation."
+            }
+        }
+
+        override val termChildren: List<Term> get() = listOf(head, tail)
+
+        override val termKind: TermKind get() = TermKind.LIST_CONS
+
+        override fun isEmpty(): Boolean = false
+
+        override fun isNotEmpty(): Boolean = true
+
+        override val minSize: Int get() = 1 + tail.minSize
+
+        override val size: Int? get() = tail.size?.let { 1 + it }
+
+        override val elements: List<E> get() = listOf(head) + tail.elements
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitConsList(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConsList(this, arg)
 
         override val hash: Int = Objects.hash(head, tail)
+
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is ConsListTerm<*>) return false
+            if (that is ConsListTermImpl<*> && this.hash != that.hash) return false
+            if (compareSubterms) {
+                if (!this.head.equals(that.head, compareSubterms = true, compareAttachments)) return false
+                if (!this.tail.equals(that.tail, compareSubterms = true, compareAttachments)) return false
+            }
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
+
+        override fun toString(): String = buildString {
+            append("[")
+            append(head)
+            var current: ListTerm<Term>? = tail
+            while (current != null) {
+                if (current.isEmpty()) {
+                    append("]")
+                    return@buildString
+                } else if (current is ConsListTerm<*>) {
+                    append(", ")
+                    append(current.head)
+                    current = current.tail
+                } else if (current is TermVar) {
+                    append(" | ")
+                    append(current)
+                    append("]")
+                    return@buildString
+                } else {
+                    append("]")
+                    append(current)
+                    break
+                }
+            }
+            append("]")
+        }
     }
 
-    /** List nil term (an empty list). */
-    private inner class NilTermImpl(
+    /**
+     * An empty list.
+     *
+     * @param termAttachments The attachments of the term.
+     */
+    private inner class NilListTermImpl(
         termAttachments: TermAttachments,
-    ) : ListTerm<Nothing>, ListTermImplBase<Nothing>(termAttachments) {
+    ) : NilListTerm, TermImplBase(termAttachments) {
+
+        override val termChildren: List<Term> get() = emptyList()
+
+        override val termKind: TermKind get() = TermKind.LIST_NIL
+
+        override fun isEmpty(): Boolean = true
+
+        override fun isNotEmpty(): Boolean = false
 
         override val minSize: Int get() = 0
-        override val size: Int? get() = null
+
+        override val size: Int get() = 0
+
         override val elements: List<Nothing> get() = emptyList()
-        override val termChildren: List<Term> get() = emptyList()
-        override val prefix: TermVar? get() = null
-        override val head: Nothing? get() = null
-        override val tail: ListTerm<Nothing>? get() = null
-        override fun isListTailVar(): Boolean = false
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitNilList(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitNilList(this, arg)
 
         override val hash: Int = 0
+
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is NilListTerm) return false
+            if (that is NilListTermImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
+
+        override fun toString(): String {
+            return "[]"
+        }
     }
 
-    /** Concat variable with list (a term variable and a tail). */
-    private inner class ConcTermImpl<E: Term>(
-        override val prefix: TermVar,
-        override val tail: ListTerm<E>,
-        termAttachments: TermAttachments,
-    ) : ListTerm<E>, ListTermImplBase<E>(termAttachments) {
+    /**
+     * A concatenation of two lists.
+     *
+     * A concatenation cannot have term attachments.
+     *
+     * @property left The left list.
+     * @property right The right list.
+     */
+    private inner class ConcatListTermImpl<E: Term>(
+        override val left: ListTerm<E>,
+        override val right: ListTerm<E>,
+    ) : ConcatListTerm<E>, TermImplBase(TermAttachments.empty()) {
 
-        override val minSize: Int = 1 + tail.minSize
-        override val size: Int? = tail.size?.let { 1 + it }
-        override val elements: List<E> get() = tail.elements
-        override val termChildren: List<Term> get() = listOf(prefix, tail) // TODO: Optimize
-        override val head: E? get() = null
-        override fun isListTailVar(): Boolean = true
+        init {
+            require(left is TermVar || (left is ConsListTerm<E> && left.tail is TermVar)) {
+                "The left list must be a variable or have a variable as the tail."
+            }
+            require(right.size != 0) {
+                "The right list must not be empty."
+            }
+        }
 
-        override val hash: Int = Objects.hash(prefix, tail)
+        override val termChildren: List<Term> get() = listOf(left, right)
+
+        override val termKind: TermKind get() = TermKind.LIST_CONCAT
+
+        override fun isEmpty(): Boolean = false
+
+        override fun isNotEmpty(): Boolean = left.isNotEmpty() && right.isNotEmpty()
+
+        override val minSize: Int get() = left.minSize + right.minSize
+
+        override val size: Int? get() = null
+
+        override val elements: List<E> get() = left.elements + right.elements
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitConcatList(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConcatList(this, arg)
+
+        override val hash: Int = Objects.hash(left, right)
+
+        override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
+            if (that !is ConcatListTerm<*>) return false
+            if (that is ConcatListTermImpl<*> && this.hash != that.hash) return false
+            if (compareSubterms) {
+                if (!this.left.equals(that.left, compareSubterms = true, compareAttachments)) return false
+                if (!this.right.equals(that.right, compareSubterms = true, compareAttachments)) return false
+            }
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
+        }
+
+        override fun toString(): String {
+            return "$left ++ $right"
+        }
     }
 
-    /** Term variable. */
+    /**
+     * A term variable.
+     *
+     * @property name The variable name. Any resource names should be encoded as part of the variable name.
+     */
     private inner class TermVarImpl(
         override val name: String,
         termAttachments: TermAttachments,
     ) : TermVar, TermImplBase(termAttachments) {
 
-        final override val termKind: TermKind get() = TermKind.VAR
+        override val termKind: TermKind get() = TermKind.VAR
+
+        override val termChildren: List<Term> get() = emptyList()
+
+        override fun isEmpty(): Boolean = false
+
+        override fun isNotEmpty(): Boolean = false
+
+        override val minSize: Int get() = 0
+
+        override val size: Int? get() = null
+
+        override val elements: List<Nothing> get() = emptyList()
+
+        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
+
+        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 
         override val hash: Int = Objects.hash(name)
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is TermVar) return false
-            // @formatter:off
-            return (that !is TermVarImpl || this.hash == that.hash)
-                && this.name == that.name
-                && (!compareAttachments || (this.termAttachments == that.termAttachments))
-            // @formatter:on
+            if (that is TermVarImpl && this.hash != that.hash) return false
+            if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
+            return true
         }
 
-        override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
-
-        override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
+        override fun toString(): String {
+            return "?$name"
+        }
 
     }
 

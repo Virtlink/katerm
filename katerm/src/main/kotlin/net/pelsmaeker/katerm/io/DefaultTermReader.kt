@@ -51,12 +51,15 @@ class DefaultTermReader(
      * @return the read term
      */
     private fun readList(reader: PushbackReader): ListTerm<Term> = reader.run {
+        // TODO: Be able to read term variables and concatenated lists.
         readExpected("list", '[')
 
         val terms = readTermSequence(reader, ',', ']')
         val attachments = readAttachments(reader)
 
-        return termFactory.newList(terms, attachments)
+        return terms.foldRight(termFactory.newEmptyList() as ListTerm<Term>) { term, acc ->
+            termFactory.newList(term, acc)
+        }.let { termFactory.withAttachments(it, attachments) }
     }
 
     /**

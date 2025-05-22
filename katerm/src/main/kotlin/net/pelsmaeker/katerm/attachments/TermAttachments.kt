@@ -19,6 +19,16 @@ class TermAttachments private constructor(
     )
 
     /**
+     * Whether there are no term attachments.
+     */
+    fun isEmpty(): Boolean = attachments.isEmpty()
+
+    /**
+     * Whether there are term attachments.
+     */
+    fun isNotEmpty(): Boolean = attachments.isNotEmpty()
+
+    /**
      * Gets the attachment with the specified key.
      *
      * @param key The key of the attachment.

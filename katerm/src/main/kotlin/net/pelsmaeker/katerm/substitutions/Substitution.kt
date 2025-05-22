@@ -93,6 +93,6 @@ interface Substitution {
      * @return The term with the substitution applied.
      */
     fun apply(term: Term, termBuilder: TermBuilder): Term =
-        termBuilder.apply(this, term)
+        termBuilder.apply(term, this)
 
 }

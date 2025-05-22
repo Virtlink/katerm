@@ -52,17 +52,38 @@ private class MatcherVisitor(
         else -> false
     }
 
-    override fun visitList(term: ListTerm<*>, pattern: Term): Boolean = when {
+    override fun visitConsList(term: ConsListTerm<Term>, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is ListTerm<*> -> acceptAll(term.elements, pattern.elements)
+        pattern is ConsListTerm<*> -> { accept(term.head, pattern.head); accept(term.tail, pattern.tail) }
         else -> false
     }
 
-    override fun visitOption(term: OptionTerm<Term>, pattern: Term): Boolean = when {
+    override fun visitNilList(term: NilListTerm, pattern: Term): Boolean = when {
         term === pattern -> associateSelf(term)
         pattern is TermVar -> associate(term, pattern)
-        pattern is OptionTerm<*> -> accept(term.element, pattern.element)
+        pattern is NilListTerm -> true
+        else -> false
+    }
+
+    override fun visitConcatList(term: ConcatListTerm<Term>, pattern: Term): Boolean = when {
+        term === pattern -> associateSelf(term)
+        pattern is TermVar -> associate(term, pattern)
+        pattern is ConcatListTerm<*> -> { accept(term.left, pattern.left); accept(term.right, pattern.right) }
+        else -> false
+    }
+
+    override fun visitSomeOption(term: SomeOptionTerm<Term>, pattern: Term): Boolean = when {
+        term === pattern -> associateSelf(term)
+        pattern is TermVar -> associate(term, pattern)
+        pattern is SomeOptionTerm<*> -> accept(term.element, pattern.element)
+        else -> false
+    }
+
+    override fun visitNoneOption(term: NoneOptionTerm, pattern: Term): Boolean = when {
+        term === pattern -> associateSelf(term)
+        pattern is TermVar -> associate(term, pattern)
+        pattern is NoneOptionTerm -> true
         else -> false
     }
 

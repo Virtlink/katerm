@@ -93,17 +93,17 @@ interface ApplTerm : Term {
     /** The constructor name. */
     val termOp: String
     /** The constructor arity. */
-    val termArity: Int
+    val termArity: Int  //get() = termArgs.size
     /** The term arguments. */
     val termArgs: List<Term>
 
-    override val termKind: TermKind get() = TermKind.APPL
-
-    override val termChildren: List<Term> get() = termArgs
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+//    override val termKind: TermKind get() = TermKind.APPL
+//
+//    override val termChildren: List<Term> get() = termArgs
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
 
 }
 
@@ -121,12 +121,6 @@ interface ValueTerm : Term {
     /** The value of the term. */
     val value: Any
 
-    override val termChildren: List<Term> get() = emptyList()
-
-    override fun <R> accept(visitor: TermVisitor<R>): R
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R
-
 }
 
 
@@ -135,11 +129,11 @@ interface IntTerm : ValueTerm {
 
     override val value: Int
 
-    override val termKind: TermKind get() = TermKind.INT
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
+//    override val termKind: TermKind get() = TermKind.VALUE_INT
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitInt(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitInt(this, arg)
 }
 
 
@@ -148,11 +142,11 @@ interface RealTerm : ValueTerm {
 
     override val value: Double
 
-    override val termKind: TermKind get() = TermKind.REAL
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
+//    override val termKind: TermKind get() = TermKind.VALUE_REAL
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitReal(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitReal(this, arg)
 }
 
 
@@ -161,11 +155,11 @@ interface StringTerm : ValueTerm {
 
     override val value: String
 
-    override val termKind: TermKind get() = TermKind.STRING
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
+//    override val termKind: TermKind get() = TermKind.VALUE_STRING
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitString(this, arg)
 }
 
 
@@ -174,29 +168,67 @@ interface StringTerm : ValueTerm {
  *
  * @param E The type of the element in the option.
  */
-interface OptionTerm<out E : Term> : Term {
+sealed interface OptionTerm<out E : Term> : Term {
 
-    /** The term that is the element of the option; or `null` if the option is empty or a variable. */
-    val element: E?
+    /**
+     * Whether the option is definitely empty (and not just an option variable).
+     *
+     * Note that [isNotEmpty] is not the inverse of [isEmpty]. It is possible for both to be false.
+     */
+    fun isEmpty(): Boolean
 
-    /** The term variable that is in this option; or `null`. */
-    val variable: TermVar?
+    /**
+     * Whether the option is definitely not empty (and not just an option variable).
+     *
+     * Note that [isNotEmpty] is not the inverse of [isEmpty]. It is possible for both to be false.
+     */
+    fun isNotEmpty(): Boolean
 
-    /** Whether there is no value in the option (and no variable). */
-    fun isEmpty(): Boolean = element == null && variable == null
-
-    /** Whether there is a value in the option (and no variable). */
-    fun isPresent(): Boolean = element != null && variable == null
-
-    override val termKind: TermKind get() = TermKind.OPTION
-
-    /** The child of the option. If the option contains a term variable, it is also returned here. */
-    override val termChildren: List<Term>
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitOption(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitOption(this, arg)
 }
+
+/**
+ * A non-empty option term.
+ *
+ * @param E The type of the element in the option.
+ */
+interface SomeOptionTerm<out E : Term> : OptionTerm<E> {
+
+    /** The term that is the element of the option. */
+    val element: E
+
+//    override fun isEmpty(): Boolean = false
+//
+//    override fun isNotEmpty(): Boolean = true
+//
+//    override val termKind: TermKind get() = TermKind.OPTION_SOME
+//
+//    override val termChildren: List<Term> get() = listOf(element)
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitSomeOption(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitSomeOption(this, arg)
+
+}
+
+/**
+ * An empty option term.
+ */
+interface NoneOptionTerm : OptionTerm<Nothing> {
+
+//    override fun isEmpty(): Boolean = true
+//
+//    override fun isNotEmpty(): Boolean = false
+//
+//    override val termKind: TermKind get() = TermKind.OPTION_NONE
+//
+//    override val termChildren: List<Term> get() = emptyList()
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitNoneOption(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitNoneOption(this, arg)
+
+}
+
 
 
 /**
@@ -204,51 +236,144 @@ interface OptionTerm<out E : Term> : Term {
  *
  * @param E The type of the elements in the list.
  */
-interface ListTerm<out E: Term> : Term {
+sealed interface ListTerm<out E: Term> : Term {
 
-    /** The term variable that is the prefix of the list; or `null` when the list has no prefix variable. */
-    val prefix: TermVar?
+    /**
+     * Whether the list is definitely empty (and contains no list variables).
+     *
+     * Note that [isNotEmpty] is not the inverse of [isEmpty]. It is possible for both to be false.
+     */
+    fun isEmpty(): Boolean
 
-    /** The term that is the head of the list; or `null` when the list has a prefix variable or is empty. */
-    val head: E?
-
-    /** The list term that is the tail of the list; or `null` when the list is empty. */
-    val tail: ListTerm<E>?
+    /**
+     * Whether the list is definitely not empty (and not just a list variable).
+     *
+     * Note that [isNotEmpty] is not the inverse of [isEmpty]. It is possible for both to be false.
+     */
+    fun isNotEmpty(): Boolean
 
     /** The minimum number of elements in the list. This is the number of elements in [elements]. */
     val minSize: Int
 
-    /** The number of elements in the list; or `null` if the list contains a term variable. */
+    /** The number of elements in the list; or `null` if the list contains one or more term variables. */
     val size: Int?
 
     /** The elements in the list. If the list contains term variables, they are not included here. */
     val elements: List<E>
 
-    /** Whether the list represents a list tail variable. */
-    fun isListTailVar(): Boolean
-
-    override val termKind: TermKind get() = TermKind.LIST
-
-    /** The children of the list. If the list contains term variables, they are also included here. */
-    override val termChildren: List<Term>
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitList(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitList(this, arg)
 }
 
 
-/** A term variable. */
-interface TermVar: Term {
+/** A non-empty list. */
+interface ConsListTerm<out E: Term> : ListTerm<E> {
+
+    /** The head of the list. */
+    val head: E
+
+    /** The tail of the list. It cannot be a concatenation. */
+    val tail: ListTerm<E>
+
+//    override val termChildren: List<Term> get() = listOf(head, tail)
+//
+//    override val termKind: TermKind get() = TermKind.LIST_CONS
+//
+//    override fun isEmpty(): Boolean = false
+//
+//    override fun isNotEmpty(): Boolean = true
+//
+//    override val minSize: Int get() = 1 + tail.minSize
+//
+//    override val size: Int? get() = tail.size?.let { 1 + it }
+//
+//    override val elements: List<E> get() = listOf(head) + tail.elements
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitConsList(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConsList(this, arg)
+
+}
+
+
+/** An empty list. */
+interface NilListTerm : ListTerm<Nothing> {
+
+//    override val termChildren: List<Term> get() = emptyList()
+//
+//    override val termKind: TermKind get() = TermKind.LIST_NIL
+//
+//    override fun isEmpty(): Boolean = true
+//
+//    override fun isNotEmpty(): Boolean = false
+//
+//    override val minSize: Int get() = 0
+//
+//    override val size: Int? get() = 0
+//
+//    override val elements: List<Nothing> get() = emptyList()
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitNilList(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitNilList(this, arg)
+
+}
+
+
+/**
+ * A concatenation of two lists.
+ *
+ * A concatenation cannot have term attachments.
+ */
+interface ConcatListTerm<out E: Term> : ListTerm<E> {
+
+    /** The left list term. It cannot be a concatenation or empty list. */
+    val left: ListTerm<E>
+
+    /** The right list term. It cannot be an empty list. */
+    val right: ListTerm<E>
+
+//    override val termChildren: List<Term> get() = listOf(left, right)
+//
+//    override val termKind: TermKind get() = TermKind.LIST_CONCAT
+//
+//    override fun isEmpty(): Boolean = left.isEmpty() && right.isEmpty()     // This is always false
+//
+//    override fun isNotEmpty(): Boolean = left.isNotEmpty() && right.isNotEmpty()
+//
+//    override val minSize: Int get() = left.minSize + right.minSize
+//
+//    override val size: Int? get() = left.size?.let { leftSize -> right.size?.let { rightSize -> leftSize + rightSize} }
+//
+//    override val elements: List<E> get() = left.elements + right.elements
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitConcList(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConcList(this, arg)
+
+}
+
+
+/** A term variable or list term variable. */
+interface TermVar: Term, ListTerm<Nothing>, OptionTerm<Nothing> {
 
     /** The variable name. Any resource names should be encoded as part of the variable name. */
     val name: String
 
-    override val termKind: TermKind get() = TermKind.VAR
+//    override val termKind: TermKind get() = TermKind.VAR
+//
+//    override val termChildren: List<Term> get() = emptyList()
+//
+//    override fun isEmpty(): Boolean = false
+//
+//    override fun isNotEmpty(): Boolean = false
+//
+//    override val minSize: Int get() = 0
+//
+//    override val size: Int? get() = null
+//
+//    override val elements: List<Nothing> get() = emptyList()
+//
+//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
+//
+//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 
-    override val termChildren: List<Term> get() = emptyList()
-
-    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitVar(this)
-
-    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 }

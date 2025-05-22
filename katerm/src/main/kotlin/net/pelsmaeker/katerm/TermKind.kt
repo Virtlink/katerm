@@ -2,24 +2,34 @@ package net.pelsmaeker.katerm
 
 /** Specifies the kind of [Term]. */
 enum class TermKind {
-    /** A variable. */
+
+    /** A variable, list variable, or option variable. */
     VAR,
 
-    /** An integer. */
-    INT,
+    /** An integer value. */
+    VALUE_INT,
 
-    /** A real number. */
-    REAL,
+    /** A real number value. */
+    VALUE_REAL,
 
-    /** A string. */
-    STRING,
+    /** A string value. */
+    VALUE_STRING,
 
     /** A constructor application. */
     APPL,
 
-    /** An option. */
-    OPTION,
+    /** A option with some value. */
+    OPTION_SOME,
 
-    /** A list. */
-    LIST,
+    /** An option with no value. */
+    OPTION_NONE,
+
+    /** An empty list. */
+    LIST_NIL,
+
+    /** A non-empty list. */
+    LIST_CONS,
+
+    /** A concatenation of two lists. */
+    LIST_CONCAT,
 }

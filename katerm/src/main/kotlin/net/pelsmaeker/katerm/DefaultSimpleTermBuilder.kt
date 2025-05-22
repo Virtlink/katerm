@@ -1,7 +1,6 @@
 package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
-import net.pelsmaeker.katerm.substitutions.Substitution
 import java.util.*
 
 /**
@@ -24,8 +23,8 @@ open class SimpleTermBuilder: TermBuilderBase() {
 
         override val termArgs: List<Term> = termArgs.toList() // Safety copy.
 
-        override fun equalsSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
-            return super.equalsSubterms(that, compareAttachments)
+        override fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
+            return super.equalSubterms(that, compareAttachments)
         }
 
         // The fields in the hash must match the fields in [equalsAppl]

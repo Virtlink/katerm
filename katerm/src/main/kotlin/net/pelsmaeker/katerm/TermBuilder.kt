@@ -14,9 +14,10 @@ interface TermBuilder {
      * Applies the substitution to the given term.
      *
      * @param term The term to apply the substitution to.
+     * @param substitution The substitution to apply.
      * @return The term with the substitution applied.
      */
-    fun apply(substitution: Substitution, term: Term): Term
+    fun apply(term: Term, substitution: Substitution): Term
 
 
     /////////
@@ -187,11 +188,18 @@ interface TermBuilder {
     /**
      * Creates a new empty option term with no attachments.
      *
-     * @param E The type of the element in the option.
      * @return The created term.
      */
-    fun <E: Term> newEmptyOption(): OptionTerm<E> =
-        newOption(null)
+    fun newEmptyOption(): NoneOptionTerm =
+        newEmptyOption(TermAttachments.empty())
+
+    /**
+     * Creates a new empty option term with the specified attachments.
+     *
+     * @param attachments The attachments of the term.
+     * @return The created term.
+     */
+    fun newEmptyOption(attachments: TermAttachments): NoneOptionTerm
 
     /**
      * Creates a new option term with the specified element and no attachments.
@@ -214,26 +222,6 @@ interface TermBuilder {
     fun <E: Term> newOption(element: E?, attachments: TermAttachments): OptionTerm<E>
 
     /**
-     * Creates a new option term with the specified variable and no attachments.
-     *
-     * @param E The type of the element in the option.
-     * @param variable The variable in the option; or `null` if the option is empty.
-     * @return The created term.
-     */
-    fun <E: Term> newOptionWithVar(variable: TermVar?): OptionTerm<E> =
-        newOptionWithVar(variable, TermAttachments.empty())
-
-    /**
-     * Creates a new option term with the specified variable and attachments.
-     *
-     * @param E The type of the element in the option.
-     * @param variable The variable in the option; or `null` if the option is empty.
-     * @param attachments The attachments of the term.
-     * @return The created term.
-     */
-    fun <E: Term> newOptionWithVar(variable: TermVar?, attachments: TermAttachments): OptionTerm<E>
-
-    /**
      * Create a copy of the specified option term with the specified new element and the same attachments.
      *
      * Calling this method can be more efficient than deconstructing and rebuilding a term.
@@ -245,66 +233,42 @@ interface TermBuilder {
      */
     fun <E: Term> copyOption(term: OptionTerm<E>, newElement: E?): OptionTerm<E>
 
-    /**
-     * Create a copy of the specified option term with the specified new variable and the same attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param E The type of the element in the option.
-     * @param term The term to copy.
-     * @param newVariable The variable in the option; or `null` if the option is empty.
-     * @return The copy of the term, but with the new variable.
-     */
-    fun <E: Term> copyOptionWithVar(term: OptionTerm<E>, newVariable: TermVar?): OptionTerm<E>
-
 
     //////////
     // List //
     //////////
 
-//    /**
-//     * Creates a new list term with the specified elements and no attachments.
-//     *
-//     * @param E The type of the elements in the list.
-//     * @param elements The elements in the list.
-//     * @return The created term.
-//     */
-//    fun <E: Term> newList(vararg elements: E): ListTerm<E> =
-//        newList(elements.asList(), TermAttachments.empty())
-
     /**
      * Creates a new empty list term with no attachments.
      *
-     * @param E The type of the elements in the list.
      * @return The created term.
      */
-    fun <E: Term> newEmptyList(): ListTerm<E> =
-        newList(emptyList())
+    fun newEmptyList(): NilListTerm =
+        newEmptyList(TermAttachments.empty())
+
+    /**
+     * Creates a new empty list term with the specified attachments.
+     *
+     * @param attachments The attachments of the term.
+     * @return The created term.
+     */
+    fun newEmptyList(attachments: TermAttachments): NilListTerm
 
     /**
      * Creates a new list term with the specified elements and no attachments.
      *
-     * @param E The type of the elements in the list.
-     * @param elements The elements in the list.
-     * @return The created term.
-     */
-    fun <E: Term> newList(elements: List<E>): ListTerm<E> =
-        newList(elements, TermAttachments.empty())
-
-    /**
-     * Creates a new list term with the specified elements and attachments.
+     * If you want to specify the attachments, use [newList] with the head and tail.
      *
-     * @param E The type of the elements in the list.
+     * @param E The type of elements in the list.
      * @param elements The elements in the list.
-     * @param attachments The attachments of the term.
      * @return The created term.
      */
-    fun <E: Term> newList(elements: List<E>, attachments: TermAttachments): ListTerm<E>
+    fun <E: Term> newList(elements: List<E>): ListTerm<E>
 
     /**
      * Creates a new list term with the specified head and tail, but no attachments.
      *
-     * @param E The type of the elements in the list.
+     * @param E The type of elements in the list.
      * @param head The head of the list.
      * @param tail The tail of the list.
      * @return The created term.
@@ -315,7 +279,7 @@ interface TermBuilder {
     /**
      * Creates a new list term with the specified head, tail, and attachments.
      *
-     * @param E The type of the elements in the list.
+     * @param E The type of elements in the list.
      * @param head The head of the list.
      * @param tail The tail of the list.
      * @param attachments The attachments of the term.
@@ -324,57 +288,11 @@ interface TermBuilder {
     fun <E: Term> newList(head: E, tail: ListTerm<E>, attachments: TermAttachments): ListTerm<E>
 
     /**
-     * Creates a new list term with the specified variable prefix and tail, but no attachments.
-     *
-     * @param E The type of the elements in the list.
-     * @param variable The variable as the prefix of the list.
-     * @param tail The tail of the list.
-     * @return The created term.
-     */
-    fun <E: Term> newListWithVar(variable: TermVar, tail: ListTerm<E>): ListTerm<E> =
-        newListWithVar(variable, tail, TermAttachments.empty())
-
-    /**
-     * Creates a new list term with the specified variable prefix and tail, elements and attachments.
-     *
-     * @param E The type of the elements in the list.
-     * @param variable The variable as the prefix of the list.
-     * @param tail The tail of the list.
-     * @param attachments The attachments of the term.
-     * @return The created term.
-     */
-    fun <E: Term> newListWithVar(variable: TermVar, tail: ListTerm<E>, attachments: TermAttachments): ListTerm<E>
-
-//    /**
-//     * Create a copy of the specified list term with the specified new elements and the same attachments.
-//     *
-//     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-//     *
-//     * @param E The type of the elements in the list.
-//     * @param term The term to copy.
-//     * @param newElements The new elements of the list.
-//     * @return The copy of the term, but with the new elements.
-//     */
-//    fun <E: Term> copyList(term: ListTerm<E>, vararg newElements: E): ListTerm<E> = copyList(term, newElements.asList())
-
-    /**
      * Create a copy of the specified list term with the specified new elements and the same attachments.
      *
      * Calling this method can be more efficient than deconstructing and rebuilding a term.
      *
-     * @param E The type of the elements in the list.
-     * @param term The term to copy.
-     * @param newElements The new elements of the list.
-     * @return The copy of the term, but with the new elements.
-     */
-    fun <E: Term> copyList(term: ListTerm<E>, newElements: List<E>): ListTerm<E>
-
-    /**
-     * Create a copy of the specified list term with the specified new elements and the same attachments.
-     *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
-     *
-     * @param E The type of the elements in the list.
+     * @param E The type of elements in the list.
      * @param term The term to copy.
      * @param newHead The new head of the list.
      * @param newTail The new tail of the list.
@@ -383,17 +301,16 @@ interface TermBuilder {
     fun <E: Term> copyList(term: ListTerm<E>, newHead: E, newTail: ListTerm<E>): ListTerm<E>
 
     /**
-     * Create a copy of the specified list term with the specified new elements and the same attachments.
+     * Concatenates two list terms into a new list term.
      *
-     * Calling this method can be more efficient than deconstructing and rebuilding a term.
+     * Concatenations cannot have term arguments.
      *
-     * @param E The type of the elements in the list.
-     * @param term The term to copy.
-     * @param newPrefix The new prefix of the list.
-     * @param newTail The new tail of the list.
-     * @return The copy of the term, but with the new elements.
+     * @param E The type of elements in the list.
+     * @param leftList The first list term.
+     * @param rightList The second list term.
+     * @return The concatenated list term.
      */
-    fun <E: Term> copyListWithVar(term: ListTerm<E>, newPrefix: TermVar, newTail: ListTerm<E>): ListTerm<E>
+    fun <E: Term> concatLists(leftList: ListTerm<E>, rightList: ListTerm<E>): ListTerm<E>
 
 
     /////////
