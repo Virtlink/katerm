@@ -515,8 +515,9 @@ abstract class TermBuilderBase(
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
         override val elements: List<E> get() = listOf(head) + tail.elements // TODO: Optimize
-        override val termChildren: List<Term> get() = listOf(head) + tail.termChildren // TODO: Optimize
+        override val termChildren: List<Term> get() = listOf(head, tail) // TODO: Optimize
         override val prefix: TermVar? get() = null
+        override fun isListTailVar(): Boolean = false
 
         override val hash: Int = Objects.hash(head, tail)
     }
@@ -533,6 +534,7 @@ abstract class TermBuilderBase(
         override val prefix: TermVar? get() = null
         override val head: Nothing? get() = null
         override val tail: ListTerm<Nothing>? get() = null
+        override fun isListTailVar(): Boolean = false
 
         override val hash: Int = 0
     }
@@ -547,8 +549,9 @@ abstract class TermBuilderBase(
         override val minSize: Int = 1 + tail.minSize
         override val size: Int? = tail.size?.let { 1 + it }
         override val elements: List<E> get() = tail.elements
-        override val termChildren: List<Term> get() = listOf(prefix) + tail.termChildren // TODO: Optimize
+        override val termChildren: List<Term> get() = listOf(prefix, tail) // TODO: Optimize
         override val head: E? get() = null
+        override fun isListTailVar(): Boolean = true
 
         override val hash: Int = Objects.hash(prefix, tail)
     }

@@ -1,5 +1,6 @@
 package net.pelsmaeker.katerm.substitutions
 
+import net.pelsmaeker.katerm.ListTerm
 import net.pelsmaeker.katerm.Term
 import net.pelsmaeker.katerm.TermVar
 
@@ -35,9 +36,7 @@ fun unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
  * @return A substitution that makes the terms equal, or `null` if unification fails.
  */
 fun Substitution.unify(left: Term, right: Term): Substitution? {
-    val mutableSubstitution = this.toMutableSubstitution()
-    val success = UnifyOperation(left, right, mutableSubstitution).unifyAll()
-    return mutableSubstitution.takeIf { success }
+    return unifyAll(listOf(left to right))
 }
 
 /**
@@ -50,8 +49,12 @@ fun Substitution.unify(left: Term, right: Term): Substitution? {
  */
 fun Substitution.unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
     val mutableSubstitution = this.toMutableSubstitution()
-    val success = UnifyOperation(pairs, mutableSubstitution).unifyAll()
-    return mutableSubstitution.takeIf { success }
+    try {
+        UnifyOperation(pairs, mutableSubstitution).unifyAll()
+    } catch (_: UnificationError) {
+        return null
+    }
+    return mutableSubstitution
 }
 
 /**
@@ -62,9 +65,7 @@ fun Substitution.unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
  * @return The resulting substitution, or `null` if unification fails.
  */
 fun Substitution.unifyWith(substitution: Substitution): Substitution? {
-    val mutableSubstitution = this.toMutableSubstitution()
-    val success = UnifyOperation(substitution.variables.map { it to substitution[it] }, mutableSubstitution).unifyAll()
-    return mutableSubstitution.takeIf { success }
+    return unifyAll(substitution.variables.map { it to substitution[it] })
 }
 
 /**
@@ -86,71 +87,105 @@ private class UnifyOperation(
         worklist.addAll(pairs)
     }
 
+//    /**
+//     * Unifies all terms in the worklist.
+//     *
+//     * When this method returns `true`, the unification succeeded and the [substitution] was modified such that
+//     * it makes all terms in the worklist equal modulo attachments.
+//     *
+//     * When this method returns `false`, the unification failed and [substitution] is in an invalid intermediate state.
+//     *
+//     * @return `true` if the unification was successful; otherwise, `false`.
+//     */
+//    fun unifyAll(): Boolean {
+//        try {
+//            unifyAll()
+//        } catch (e: UnificationError) {
+//            return false
+//        }
+//        return true
+//    }
+
     /**
      * Unifies all terms in the worklist.
      *
-     * When this method returns `true`, the unification succeeded and the [substitution] was modified such that
+     * When this method throws, the unification succeeded and the [substitution] was modified such that
      * it makes all terms in the worklist equal modulo attachments.
      *
-     * When this method returns `false`, the unification failed and [substitution] is in an invalid intermediate state.
+     * When this method throws, the unification failed and [substitution] is in an invalid intermediate state.
      *
-     * @return `true` if the unification was successful; otherwise, `false`.
+     * @throws UnificationError If the unification fails.
      */
-    fun unifyAll(): Boolean {
+    fun unifyAll() {
         while (worklist.isNotEmpty()) {
             val (term1, term2) = worklist.removeFirst()
 
-            when {
-                // If the terms are already equal, continue.
-                // This includes the cases where both terms are variables or literals and are equal.
-                term1 == term2 -> continue
+            try {
+                when {
+                    // If the terms are already equal, continue.
+                    // This includes the cases where both terms are variables or literals and are equal.
+                    term1 == term2 -> continue
 
-                // If term1 is a variable, substitute it
-                term1 is TermVar -> {
-                    val mappedTerm = substitution[term1]
-                    if (mappedTerm !is TermVar) {
-                        // Unify the mapped term with term2
-                        worklist.add(Pair(mappedTerm, term2))
-                    } else {
-                        // Substitute variable term1 with term2
-                        if (occursCheck(term2, term1)) return false
-                        substitution[term1] = term2
+                    // If term1 is a variable: ?x
+                    term1 is TermVar -> {
+                        val mappedTerm = substitution[term1]
+                        // ?x |-> x'
+                        if (mappedTerm !is TermVar) {
+                            // Unify the mapped term with term2: unify (x', term2)
+                            worklist.add(Pair(mappedTerm, term2))
+                        } else {
+                            // Substitute variable term1 with term2
+                            occursCheck(term2, term1)?.let { return it }
+                            substitution[term1] = term2
+                        }
+                    }
+
+                    // If term2 is a variable ?y
+                    term2 is TermVar -> {
+                        val mappedTerm = substitution[term2]
+                        if (mappedTerm !is TermVar) {
+                            // Unify the mapped term with term1
+                            worklist.add(Pair(mappedTerm, term1))
+                        } else {
+                            // Substitute variable term2 with term1
+                            occursCheck(term1, term2)?.let { return it }
+                            substitution[term2] = term1
+                        }
+                    }
+
+                    // If term1 is a list ?xs :: []
+//                    term1 is ListTerm<*> && term1.prefix != null -> {
+//                        check(term1.isListTailVar()) { "Cannot unify a list `term1` that has elements after its tail variable." }
+//                        val prefixVar = term1.prefix!!
+//
+//                        val mappedListTerm = substitution[prefixVar]
+//                        check(mappedListTerm is ListTerm<*> && mappedListTerm is TermVar)
+//                    }
+
+                    // Otherwise, the terms must compare equal (modulo subterms) and we unify their subterms
+                    else -> {
+                        check(term1.equals(term2, compareSubterms = false, compareAttachments = false)) { "Terms are not equal (modulo subterms and attachments)." }
+
+                        worklist.addAll(term1.termChildren.zip(term2.termChildren))
                     }
                 }
-
-                // If term2 is a variable, substitute it
-                term2 is TermVar -> {
-                    val mappedTerm = substitution[term2]
-                    if (mappedTerm !is TermVar) {
-                        // Unify the mapped term with term1
-                        worklist.add(Pair(mappedTerm, term1))
-                    } else {
-                        // Substitute variable term2 with term1
-                        if (occursCheck(term1, term2)) return false
-                        substitution[term2] = term1
-                    }
-                }
-
-                // Otherwise, the terms must compare equal (modulo subterms) and we unify their subterms
-                else -> {
-                    if (!term1.equals(term2, compareSubterms = false, compareAttachments = false)) return false
-                    worklist.addAll(term1.termChildren.zip(term2.termChildren))
-                }
+            } catch (e: Throwable) {
+                throw UnificationError(term1, term2, e.message ?: "Unspecified error of type ${e::class.simpleName}")
             }
         }
-
-        return true
     }
 
     /**
-     * Checks if the variable occurs in the term (occurs check).
+     * Checks that the variable doesn't occur in the term (occurs check).
      *
      * @param term The term to check against.
-     * @param variable The variable to check.
-     * @return `true` if the variable occurs in the term; otherwise, `false`.
+     * @param variable The variable to check
+     * @throws IllegalStateException If the variable occurs in the term.
      */
-    private fun occursCheck(term: Term, variable: TermVar): Boolean {
-        return variable == term || term.termVars.contains(variable)
+    private fun occursCheck(term: Term, variable: TermVar) {
+        val repr = substitution.find(variable)
+        val occurs = term.termVars.firstOrNull { substitution.find(it) == repr }
+        check(occurs == null) { "Occurs check failed: $variable occurs as $occurs in the term (both represented by $repr)." }
     }
 
 }

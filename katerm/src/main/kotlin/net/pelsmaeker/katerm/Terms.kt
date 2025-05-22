@@ -224,6 +224,9 @@ interface ListTerm<out E: Term> : Term {
     /** The elements in the list. If the list contains term variables, they are not included here. */
     val elements: List<E>
 
+    /** Whether the list represents a list tail variable. */
+    fun isListTailVar(): Boolean
+
     override val termKind: TermKind get() = TermKind.LIST
 
     /** The children of the list. If the list contains term variables, they are also included here. */
