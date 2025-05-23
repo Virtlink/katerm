@@ -142,9 +142,9 @@ abstract class TermBuilderBase(
         return NilListTermImpl(attachments)
     }
 
-    final override fun <T : Term> newList(elements: List<T>): ListTerm<T> {
+    final override fun <T : Term> newListOf(elements: List<T>): ListTerm<T> {
         return if (elements.isNotEmpty()) {
-            newList(elements.first(), newList(elements.drop(1)))
+            newList(elements.first(), newListOf(elements.drop(1)))
         } else {
             newEmptyList()
         }

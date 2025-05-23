@@ -27,8 +27,8 @@ class DefaultTermReaderTests: FunSpec({
             "MyCons(\"a\", 10)" to newAppl("MyCons", newString("a"), newInt(10)),
 
             "[]" to newEmptyList(),
-            "[10]" to newList(listOf(newInt(10))),
-            "[\"a\", 10]" to newList(listOf(newString("a"), newInt(10))),
+            "[10]" to newListOf(listOf(newInt(10))),
+            "[\"a\", 10]" to newListOf(listOf(newString("a"), newInt(10))),
 
             "\"\"" to newString(""),
             "\"abc\"" to newString("abc"),
@@ -138,12 +138,12 @@ class DefaultTermReaderTests: FunSpec({
         // Assert
         term shouldBe builder.run {
             newAppl(
-                "Module", newAppl("ModuleDecl", newString("example1")), newList(listOf(
+                "Module", newAppl("ModuleDecl", newString("example1")), newListOf(listOf(
                     newAppl(
-                        "StrategyDecl", newString("repeat"), newList(listOf(
+                        "StrategyDecl", newString("repeat"), newListOf(listOf(
                             newAppl("TypeParamDef", newString("a"))
                         )), newAppl(
-                            "Strategy", newList(listOf(
+                            "Strategy", newListOf(listOf(
                                 newAppl(
                                     "StrategyNoArgs",
                                     newAppl("TypeName", newString("a")),
@@ -153,20 +153,20 @@ class DefaultTermReaderTests: FunSpec({
                         )
                     ),
                     newAppl(
-                        "StrategyDef", newString("repeat"), newList(listOf(newAppl("ParamDef", newString("s")))),
+                        "StrategyDef", newString("repeat"), newListOf(listOf(newAppl("ParamDef", newString("s")))),
                         newAppl(
-                            "Call", newString("try"), newList(listOf(
+                            "Call", newString("try"), newListOf(listOf(
                                 newAppl(
                                     "Seq",
                                     newAppl("Var", newString("s")),
-                                    newAppl("Call", newString("repeat"), newList(listOf(newAppl("Var", newString("s")))))
+                                    newAppl("Call", newString("repeat"), newListOf(listOf(newAppl("Var", newString("s")))))
                                 )
                             ))
                         )
                     ), newAppl(
-                        "StrategyDecl", newString("try"), newList(listOf(newAppl("TypeParamDef", newString("a")))),
+                        "StrategyDecl", newString("try"), newListOf(listOf(newAppl("TypeParamDef", newString("a")))),
                         newAppl(
-                            "Strategy", newList(listOf(
+                            "Strategy", newListOf(listOf(
                                 newAppl(
                                     "StrategyNoArgs", newAppl("TypeName", newString("a")),
                                     newAppl("TypeName", newString("a"))
@@ -175,10 +175,10 @@ class DefaultTermReaderTests: FunSpec({
                             newAppl("TypeName", newString("a"))
                         )
                     ), newAppl(
-                        "StrategyDef", newString("try"), newList(listOf(
+                        "StrategyDef", newString("try"), newListOf(listOf(
                             newAppl("ParamDef", newString("s"))
                         )), newAppl(
-                            "Call", newString("glc"), newList(listOf(
+                            "Call", newString("glc"), newListOf(listOf(
                                 newAppl("Var", newString("s")), newAppl("Id"), newAppl("Id")
                             ))
                         )

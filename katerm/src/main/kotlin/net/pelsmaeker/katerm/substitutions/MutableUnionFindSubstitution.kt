@@ -32,6 +32,10 @@ class MutableUnionFindSubstitution: SubstitutionBase(), MutableSubstitution {
         disjointMap.clear()
     }
 
+    override fun toMap(): Map<Set<TermVar>, Term> {
+        return disjointMap.toMap()
+    }
+
     override fun toString(): String {
         return disjointMap.toString()
     }

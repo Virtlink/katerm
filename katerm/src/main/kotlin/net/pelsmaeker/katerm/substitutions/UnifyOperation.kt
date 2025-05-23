@@ -135,7 +135,7 @@ private class UnifyOperation(
                             worklist.add(Pair(mappedTerm, term2))
                         } else {
                             // Substitute variable term1 with term2
-                            occursCheck(term2, term1)?.let { return it }
+                            occursCheck(term2, term1)
                             substitution[term1] = term2
                         }
                     }
@@ -148,19 +148,10 @@ private class UnifyOperation(
                             worklist.add(Pair(mappedTerm, term1))
                         } else {
                             // Substitute variable term2 with term1
-                            occursCheck(term1, term2)?.let { return it }
+                            occursCheck(term1, term2)
                             substitution[term2] = term1
                         }
                     }
-
-                    // If term1 is a list ?xs :: []
-//                    term1 is ListTerm<*> && term1.prefix != null -> {
-//                        check(term1.isListTailVar()) { "Cannot unify a list `term1` that has elements after its tail variable." }
-//                        val prefixVar = term1.prefix!!
-//
-//                        val mappedListTerm = substitution[prefixVar]
-//                        check(mappedListTerm is ListTerm<*> && mappedListTerm is TermVar)
-//                    }
 
                     // Otherwise, the terms must compare equal (modulo subterms) and we unify their subterms
                     else -> {

@@ -87,7 +87,7 @@ fun testSimpleTermBuilder(
             )
 
             // Act
-            val result = builder.newList(elements)
+            val result = builder.newListOf(elements)
 
             // Assert
             result.elements shouldBe elements
@@ -99,7 +99,7 @@ fun testSimpleTermBuilder(
             val elements = emptyList<Term>()
 
             // Act
-            val result = builder.newList(elements)
+            val result = builder.newListOf(elements)
 
             // Assert
             result.elements shouldBe elements
@@ -114,7 +114,7 @@ fun testSimpleTermBuilder(
             )
 
             // Act
-            val result = builder.newList(elements)
+            val result = builder.newListOf(elements)
 
             // Assert
             result.elements shouldBe elements

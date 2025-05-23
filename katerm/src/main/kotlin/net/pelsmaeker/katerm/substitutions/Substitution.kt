@@ -86,6 +86,13 @@ interface Substitution {
     fun isGround(term: Term): Boolean
 
     /**
+     * Transforms the substitution into a map of variable sets to terms.
+     *
+     * @return A map where the keys are sets of variables and the values are terms.
+     */
+    fun toMap(): Map<Set<TermVar>, Term>
+
+    /**
      * Applies the substitution to the given term.
      *
      * @param term The term to apply the substitution to.

@@ -141,7 +141,11 @@ fun Substitution.toPersistentSubstitution(): PersistentSubstitution {
  * @return The mutable substitution.
  */
 fun Substitution.toMutableSubstitution(): MutableSubstitution {
-    return TODO()
+    val newSubstitution = MutableUnionFindSubstitution()
+    this.variables.forEach { variable ->
+        newSubstitution[variable] = this[variable]
+    }
+    return newSubstitution
 }
 
 /**
@@ -158,6 +162,9 @@ internal object EmptySubstitution : SubstitutionBase(), ImmutableSubstitution {
     override fun get(variable: TermVar): Term = variable
 
     override fun find(variable: TermVar): TermVar? = null
+
+    override fun toMap(): Map<Set<TermVar>, Term> =
+        emptyMap()
 
     override fun toString(): String = "∅"
 
@@ -185,6 +192,9 @@ internal class SingletonSubstitution(
 
     override fun find(variable: TermVar): TermVar? =
         if (variable == from) from else null
+
+    override fun toMap(): Map<Set<TermVar>, Term> =
+        mapOf(setOf(from) to to)
 
     override fun toString(): String =
         "{$from |-> $to}"

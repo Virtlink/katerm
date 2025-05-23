@@ -133,11 +133,11 @@ fun Arb.Companion.listTerm(maxDepth: Int = 3): Arb<ListTerm<Term>> {
     return arbitrary(
         edgecaseFn = { rs: RandomSource ->
             val elements = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).edgecase(rs) ?: emptyList() else emptyList()
-            testTermBuilder.newList(elements)
+            testTermBuilder.newListOf(elements)
         },
         sampleFn = { rs: RandomSource ->
             val elements = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).next(rs) else emptyList()
-            testTermBuilder.newList(elements)
+            testTermBuilder.newListOf(elements)
         }
     )
 }

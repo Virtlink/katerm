@@ -254,6 +254,8 @@ interface TermBuilder {
      */
     fun newEmptyList(attachments: TermAttachments): NilListTerm
 
+
+
     /**
      * Creates a new list term with the specified elements and no attachments.
      *
@@ -263,7 +265,19 @@ interface TermBuilder {
      * @param elements The elements in the list.
      * @return The created term.
      */
-    fun <E: Term> newList(elements: List<E>): ListTerm<E>
+    fun <E: Term> newListOf(vararg elements: E): ListTerm<E> =
+        newListOf(elements.asList())
+
+    /**
+     * Creates a new list term with the specified elements and no attachments.
+     *
+     * If you want to specify the attachments, use [newList] with the head and tail.
+     *
+     * @param E The type of elements in the list.
+     * @param elements The elements in the list.
+     * @return The created term.
+     */
+    fun <E: Term> newListOf(elements: List<E>): ListTerm<E>
 
     /**
      * Creates a new list term with the specified head and tail, but no attachments.
