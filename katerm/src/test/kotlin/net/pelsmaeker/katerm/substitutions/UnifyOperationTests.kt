@@ -14,7 +14,9 @@ class UnifyOperationTests: FunSpec({
             nameFn = { (pair, substitution) -> "unify(${pair.first}, ${pair.second}) -> " + (substitution?.let { "$it" } ?: "⊥") },
             withTermBuilder(testTermBuilder) {
                 listOf(
-                    // Int and another term
+                    /////////////
+                    // IntTerm //
+                    /////////////
                     Pair(
                         int(42),
                         int(42)
@@ -80,6 +82,22 @@ class UnifyOperationTests: FunSpec({
                         !"X"..!"XS"
                     ) to null,
                     Pair(
+                        int(42),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        int(42),
+                        "Foo"(int(42))
+                    ) to null,
+                    Pair(
+                        int(42),
+                        "Foo"(int(42), string("A"))
+                    ) to null,
+                    Pair(
+                        int(42),
+                        "Foo"("Bar"(int(42)), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
                         int(1337),
                         int(42)
                     ) to null,
@@ -143,8 +161,27 @@ class UnifyOperationTests: FunSpec({
                         int(1337),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        int(1337),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        int(1337),
+                        "Foo"(int(1337))
+                    ) to null,
+                    Pair(
+                        int(1337),
+                        "Foo"(int(1337), string("A"))
+                    ) to null,
+                    Pair(
+                        int(1337),
+                        "Foo"("Bar"(int(1337)), "Baz"("Qux"()))
+                    ) to null,
 
-                    // Real and another term
+
+                    //////////////
+                    // RealTerm //
+                    //////////////
                     Pair(
                         real(3.14),
                         int(42)
@@ -210,6 +247,22 @@ class UnifyOperationTests: FunSpec({
                         !"X"..!"XS"
                     ) to null,
                     Pair(
+                        real(3.14),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        real(3.14),
+                        "Foo"(real(3.14))
+                    ) to null,
+                    Pair(
+                        real(3.14),
+                        "Foo"(real(3.14), string("A"))
+                    ) to null,
+                    Pair(
+                        real(3.14),
+                        "Foo"("Bar"(real(3.14)), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
                         real(6.28),
                         int(42)
                     ) to null,
@@ -263,7 +316,6 @@ class UnifyOperationTests: FunSpec({
                     ) to mapOf(
                         setOf(!"X") to real(6.28),
                     ),
-
                     Pair(
                         real(6.28),
                         !"Y"
@@ -274,8 +326,27 @@ class UnifyOperationTests: FunSpec({
                         real(6.28),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        real(6.28),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        real(6.28),
+                        "Foo"(real(6.28))
+                    ) to null,
+                    Pair(
+                        real(6.28),
+                        "Foo"(real(6.28), string("A"))
+                    ) to null,
+                    Pair(
+                        real(6.28),
+                        "Foo"("Bar"(real(6.28)), "Baz"("Qux"()))
+                    ) to null,
 
-                    // String and another term
+
+                    ////////////////
+                    // StringTerm //
+                    ////////////////
                     Pair(
                         string("A"),
                         int(42)
@@ -341,6 +412,22 @@ class UnifyOperationTests: FunSpec({
                         !"X"..!"XS"
                     ) to null,
                     Pair(
+                        string("A"),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        string("A"),
+                        "Foo"(string("A"))
+                    ) to null,
+                    Pair(
+                        string("A"),
+                        "Foo"(string("A"), string("A"))
+                    ) to null,
+                    Pair(
+                        string("A"),
+                        "Foo"("Bar"(string("A")), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
                         string("B"),
                         int(42)
                     ) to null,
@@ -404,8 +491,27 @@ class UnifyOperationTests: FunSpec({
                         string("B"),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        string("B"),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        string("B"),
+                        "Foo"(string("B"))
+                    ) to null,
+                    Pair(
+                        string("B"),
+                        "Foo"(string("B"), string("A"))
+                    ) to null,
+                    Pair(
+                        string("B"),
+                        "Foo"("Bar"(string("B")), "Baz"("Qux"()))
+                    ) to null,
 
-                    // Empty list and another term
+
+                    ////////////////////
+                    // Empty ListTerm //
+                    ////////////////////
                     Pair(
                         list(),
                         int(42)
@@ -470,8 +576,27 @@ class UnifyOperationTests: FunSpec({
                         list(),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        list(),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        list(),
+                        "Foo"(list())
+                    ) to null,
+                    Pair(
+                        list(),
+                        "Foo"(list(), string("A"))
+                    ) to null,
+                    Pair(
+                        list(),
+                        "Foo"("Bar"(list()), "Baz"("Qux"()))
+                    ) to null,
 
-                    // List with a single term and another term
+
+                    ////////////////////////
+                    // Singleton ListTerm //
+                    ////////////////////////
                     Pair(
                         list(int(42)),
                         int(42)
@@ -551,8 +676,27 @@ class UnifyOperationTests: FunSpec({
                         list(!"X"..!"XS"),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        list("Foo"()),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        list("Foo"(int(1))),
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        list("Foo"(int(1), string("A"))),
+                        "Foo"(list(), string("A"))
+                    ) to null,
+                    Pair(
+                        list("Foo"("Bar"(int(1)), "Baz"("Qux"()))),
+                        "Foo"("Bar"(list()), "Baz"("Qux"()))
+                    ) to null,
 
-                    // List with multiple terms and another term
+
+                    //////////////
+                    // ListTerm //
+                    //////////////
                     Pair(
                         list(int(42), int(42)),
                         int(42)
@@ -632,8 +776,27 @@ class UnifyOperationTests: FunSpec({
                         list(!"X"..!"XS", int(42)),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        list("Foo"(), int(42)),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        list("Foo"(int(1)), int(42)),
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        list("Foo"(int(1), string("A")), int(42)),
+                        "Foo"(int(1), string("A"))
+                    ) to null,
+                    Pair(
+                        list("Foo"("Bar"(int(1)), "Baz"("Qux"())), int(42)),
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
 
-                    // Empty option and another term
+
+                    //////////////////////
+                    // Empty OptionTerm //
+                    //////////////////////
                     Pair(
                         none(),
                         int(42)
@@ -698,8 +861,27 @@ class UnifyOperationTests: FunSpec({
                         none(),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        none(),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        none(),
+                        "Foo"(none())
+                    ) to null,
+                    Pair(
+                        none(),
+                        "Foo"(none(), string("A"))
+                    ) to null,
+                    Pair(
+                        none(),
+                        "Foo"("Bar"(none()), "Baz"("Qux"()))
+                    ) to null,
 
-                    // Non-empty option and another term
+
+                    ////////////////
+                    // OptionTerm //
+                    ////////////////
                     Pair(
                         some(int(42)),
                         int(42)
@@ -776,8 +958,27 @@ class UnifyOperationTests: FunSpec({
                         some(!"X"..!"XS"),
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        some("Foo"()),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        some("Foo"(int(1))),
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        some("Foo"(int(1), string("A"))),
+                        "Foo"(list(), string("A"))
+                    ) to null,
+                    Pair(
+                        some("Foo"("Bar"(int(1)), "Baz"("Qux"()))),
+                        "Foo"("Bar"(list()), "Baz"("Qux"()))
+                    ) to null,
 
-                    // A variable and another term
+
+                    /////////////
+                    // TermVar //
+                    /////////////
                     Pair(
                         !"X",
                         int(42)
@@ -880,8 +1081,47 @@ class UnifyOperationTests: FunSpec({
                         !"X",
                         !"X"..!"XS"
                     ) to null,
+                    Pair(
+                        !"X",
+                        "Foo"()
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(),
+                    ),
+                    Pair(
+                        !"X",
+                        "Foo"(int(1))
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(int(1)),
+                    ),
+                    Pair(
+                        !"X",
+                        "Foo"(int(1), string("A"))
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(int(1), string("A")),
+                    ),
+                    Pair(
+                        !"X",
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"("Bar"(int(1)), "Baz"("Qux"())),
+                    ),
+                    Pair(
+                        !"X",
+                        "Foo"(!"X")
+                    ) to null,
+                    Pair(
+                        !"X",
+                        "Foo"(!"X", string("A"))
+                    ) to null,
+                    Pair(
+                        !"X",
+                        "Foo"("Bar"(!"X"), "Baz"("Qux"()))
+                    ) to null,
 
-                    // A list of a variable head and a variable tail, and another term
+
+                    ///////////////////
+                    // List TermVars //
+                    ///////////////////
                     Pair(
                         !"X"..!"XS",
                         int(42)
@@ -963,12 +1203,357 @@ class UnifyOperationTests: FunSpec({
                         !"X"..!"XS",
                         !"Y"
                     ) to mapOf(
-                        setOf(!"Y") to (!"X"..!"XS")
+                        setOf(!"Y") to (!"X"..!"XS"),
                     ),
                     Pair(
                         !"X"..!"XS",
                         !"X"..!"XS"
                     ) to emptyMap(),
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"(int(1), string("A"))
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"(!"X"..!"XS")
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"(!"X"..!"XS", string("A"))
+                    ) to null,
+                    Pair(
+                        !"X"..!"XS",
+                        "Foo"("Bar"(!"X"..!"XS"), "Baz"("Qux"()))
+                    ) to null,
+
+
+
+
+                    ////////////////
+                    // ApplTerm`0 //
+                    ////////////////
+                    Pair(
+                        "Foo"(),
+                        int(42)
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        int(1337)
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        real(3.14)
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        real(6.28)
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        string("A")
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        string("B")
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        list()
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        list(list())
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        list(list(), int(42))
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        list(list(), int(1337))
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        none()
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        some(list())
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        !"X"
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(),
+                    ),
+                    Pair(
+                        "Foo"(),
+                        !"Y"
+                    ) to mapOf(
+                        setOf(!"Y") to "Foo"(),
+                    ),
+                    Pair(
+                        "Foo"(),
+                        !"X"..!"XS"
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        "Foo"()
+                    ) to emptyMap(),
+                    Pair(
+                        "Foo"(),
+                        "Foo"(string("B"))
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        "Foo"(string("B"), string("A"))
+                    ) to null,
+                    Pair(
+                        "Foo"(),
+                        "Foo"("Bar"(string("B")), "Baz"("Qux"()))
+                    ) to null,
+
+
+                    ////////////////
+                    // ApplTerm`1 //
+                    ////////////////
+                    Pair(
+                        "Foo"(int(42)),
+                        int(42)
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1337)),
+                        int(1337)
+                    ) to null,
+                    Pair(
+                        "Foo"(real(3.14)),
+                        real(3.14)
+                    ) to null,
+                    Pair(
+                        "Foo"(real(6.28)),
+                        real(6.28)
+                    ) to null,
+                    Pair(
+                        "Foo"(string("A")),
+                        string("A")
+                    ) to null,
+                    Pair(
+                        "Foo"(string("B")),
+                        string("B")
+                    ) to null,
+                    Pair(
+                        "Foo"(list()),
+                        list()
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1))),
+                        list(list(int(1)))
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1), int(42))),
+                        list(list(int(1)), int(42))
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1), int(1337))),
+                        list(list(int(1)), int(1337))
+                    ) to null,
+                    Pair(
+                        "Foo"(none()),
+                        none()
+                    ) to null,
+                    Pair(
+                        "Foo"(some(int(1))),
+                        some(list(int(1)))
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1)),
+                        !"X"
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(int(1)),
+                    ),
+                    Pair(
+                        "Foo"(int(1)),
+                        !"Y"
+                    ) to mapOf(
+                        setOf(!"Y") to "Foo"(int(1)),
+                    ),
+                    Pair(
+                        "Foo"(int(1)),
+                        !"X"..!"XS"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"),
+                        !"X"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"Y"),
+                        !"Y"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"..!"XS"),
+                        !"X"..!"XS"
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1)),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1)),
+                        "Foo"(int(1))
+                    ) to emptyMap(),
+                    Pair(
+                        "Foo"(int(1)),
+                        "Foo"(int(1), string("A"))
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1)),
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"),
+                        "Foo"(int(1))
+                    ) to mapOf(
+                        setOf(!"X") to int(1),
+                    ),
+                    Pair(
+                        "Foo"(!"X"),
+                        "Foo"(int(1), string("A"))
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"),
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
+
+
+                    ////////////////
+                    // ApplTerm`2 //
+                    ////////////////
+                    Pair(
+                        "Foo"(int(42), int(42)),
+                        int(42)
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1337), int(42)),
+                        int(1337)
+                    ) to null,
+                    Pair(
+                        "Foo"(real(3.14), int(42)),
+                        real(3.14)
+                    ) to null,
+                    Pair(
+                        "Foo"(real(6.28), int(42)),
+                        real(6.28)
+                    ) to null,
+                    Pair(
+                        "Foo"(string("A"), int(42)),
+                        string("A")
+                    ) to null,
+                    Pair(
+                        "Foo"(string("B"), int(42)),
+                        string("B")
+                    ) to null,
+                    Pair(
+                        "Foo"(list(), int(42)),
+                        list()
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1)), int(42)),
+                        list(list(int(1), int(42)))
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1), int(42)), int(42)),
+                        list(list(int(1), int(42)), int(42))
+                    ) to null,
+                    Pair(
+                        "Foo"(list(int(1), int(1337)), int(42)),
+                        list(list(int(1), int(42)), int(1337))
+                    ) to null,
+                    Pair(
+                        "Foo"(none(), int(42)),
+                        none()
+                    ) to null,
+                    Pair(
+                        "Foo"(some(int(1)), int(42)),
+                        some(list(int(1), int(42)))
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        !"X"
+                    ) to mapOf(
+                        setOf(!"X") to "Foo"(int(1), int(42)),
+                    ),
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        !"Y"
+                    ) to mapOf(
+                        setOf(!"Y") to "Foo"(int(1), int(42)),
+                    ),
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        !"X"..!"XS"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X", int(42)),
+                        !"X"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"Y", int(42)),
+                        !"Y"
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X"..!"XS", int(42)),
+                        !"X"..!"XS"
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        "Foo"(int(1), int(42))
+                    ) to emptyMap(),
+                    Pair(
+                        "Foo"(int(1), int(42)),
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X", int(42)),
+                        "Foo"()
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X", int(42)),
+                        "Foo"(int(1))
+                    ) to null,
+                    Pair(
+                        "Foo"(!"X", int(42)),
+                        "Foo"(int(1), int(42))
+                    ) to mapOf(
+                        setOf(!"X") to int(1),
+                    ),
+                    Pair(
+                        "Foo"(!"X", int(42)),
+                        "Foo"("Bar"(int(1)), "Baz"("Qux"()))
+                    ) to null,
 
                 )
             }
