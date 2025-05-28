@@ -234,20 +234,16 @@ abstract class TermBuilderBase(
         }
 
         /**
-         * An eager hash code calculation.
+         * Returns a hash code value for the term, including its subterms and attachments.
          *
-         * Implement this field to compute and store the hash code of the term when the object is created.
-         * Do not include the hash code of the attachments.
+         * This cannot be overridden. Instead, implement the [hashCode] function and perform an eager
+         * hash code calculation for the subterms when the term is constructed.
+         *
+         * @return A hash code value for the term, including its subterms and attachments.
          */
-        protected abstract val hash: Int
+        final override fun hashCode(): Int = hashCode(compareSubterms = true, compareAttachments = true)
 
-        /**
-         * Returns the hash code of the term, include the hash of the attachments.
-         *
-         * This cannot be overridden. Instead, implement the [hash] property
-         * by performing an eager hash calculation that includes the hash of the attachments.
-         */
-        final override fun hashCode(): Int = hash
+        abstract override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int
 
         /**
          * Returns a string representation of this term.
@@ -286,7 +282,7 @@ abstract class TermBuilderBase(
 
         final override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ApplTerm) return false
-            if (that is ApplTermBase && this.hash != that.hash) return false
+            if (that is ApplTermBase && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (this.termArity != that.termArity) return false
             if (this.termOp != that.termOp) return false
             if (compareSubterms && !this.equalSubterms(that, compareAttachments)) return false
@@ -294,10 +290,18 @@ abstract class TermBuilderBase(
             return true
         }
 
-        /**
-         * Override this method to optimize the hash code calculation.
-         */
-        open override val hash: Int = Objects.hash(termOp, termArgs)
+        /** Override this field to optimize the hash code calculation. */
+        protected open val subtermHash: Int = Objects.hash(termArgs)
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name
+                termOp,
+                termArity,
+                if (compareSubterms) subtermHash else 0,            // Use the precomputed subterm hash if comparing subterms
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         /**
          * Checks whether this term and the given term have equal subterms.
@@ -309,11 +313,7 @@ abstract class TermBuilderBase(
          * @return `true` if this term has equal subterms as the specified term; otherwise, `false`.
          */
         protected open fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
-            return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(
-                b,
-                compareSubterms = true,
-                compareAttachments = compareAttachments
-            ) }
+            return (this.termArgs zip that.termArgs).all { (a, b) -> a.equals(b, compareSubterms = true, compareAttachments) }
         }
 
         override fun toString(): String {
@@ -342,12 +342,18 @@ abstract class TermBuilderBase(
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is IntTerm) return false
-            if (that is IntTermImpl && this.hash != that.hash) return false
+            if (that is IntTermImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
         }
 
-        override val hash: Int = Objects.hash(value)
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,
+                value,
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         override fun toString(): String {
             return value.toString()
@@ -376,12 +382,18 @@ abstract class TermBuilderBase(
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is RealTerm) return false
-            if (that is RealTermImpl && this.hash != that.hash) return false
+            if (that is RealTermImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
         }
 
-        override val hash: Int = Objects.hash(value)
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,
+                value,
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         override fun toString(): String {
             return value.toString()
@@ -410,12 +422,18 @@ abstract class TermBuilderBase(
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is StringTerm) return false
-            if (that is StringTermImpl && this.hash != that.hash) return false
+            if (that is StringTermImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
         }
 
-        override val hash: Int = Objects.hash(value)
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,
+                value,
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         override fun toString(): String {
             return "\"${escape(value)}\""
@@ -456,7 +474,7 @@ abstract class TermBuilderBase(
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is SomeOptionTerm<*>) return false
-            if (that is SomeOptionTermImpl<*> && this.hash != that.hash) return false
+            if (that is SomeOptionTermImpl<*> && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareSubterms) {
                 if (!this.element.equals(that.element, compareSubterms = true, compareAttachments)) return false
             }
@@ -464,7 +482,15 @@ abstract class TermBuilderBase(
             return true
         }
 
-        override val hash: Int = Objects.hash(element)
+        private val subtermHash: Int = Objects.hash(element)
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name to make minimal hash of SomeOptionTerm and NoneOptionTerm different
+                if (compareSubterms) subtermHash else 0,
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         override fun toString(): String {
             return "<${this.element}>"
@@ -495,12 +521,17 @@ abstract class TermBuilderBase(
 
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is NoneOptionTerm) return false
-            if (that is NoneOptionTermImpl && this.hash != that.hash) return false
+            if (that is NoneOptionTermImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
         }
 
-        override val hash: Int = 0
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name to make minimal hash of SomeOptionTerm and NoneOptionTerm different
+                if (compareAttachments) termAttachments else null
+            )
+        }
 
         override fun toString(): String {
             return "<>"
@@ -544,17 +575,25 @@ abstract class TermBuilderBase(
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConsList(this, arg)
 
-        override val hash: Int = Objects.hash(head, tail)
-
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ConsListTerm<*>) return false
-            if (that is ConsListTermImpl<*> && this.hash != that.hash) return false
+            if (that is ConsListTermImpl<*> && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareSubterms) {
                 if (!this.head.equals(that.head, compareSubterms = true, compareAttachments)) return false
                 if (!this.tail.equals(that.tail, compareSubterms = true, compareAttachments)) return false
             }
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
+        }
+
+        private val subtermHash: Int = Objects.hash(head, tail)
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name
+                if (compareSubterms) subtermHash else 0,
+                if (compareAttachments) termAttachments else null
+            )
         }
 
         override fun toString(): String = buildString {
@@ -611,13 +650,18 @@ abstract class TermBuilderBase(
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitNilList(this, arg)
 
-        override val hash: Int = 0
-
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is NilListTerm) return false
-            if (that is NilListTermImpl && this.hash != that.hash) return false
+            if (that is NilListTermImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
+        }
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name
+                if (compareAttachments) termAttachments else null
+            )
         }
 
         override fun toString(): String {
@@ -665,17 +709,25 @@ abstract class TermBuilderBase(
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitConcatList(this, arg)
 
-        override val hash: Int = Objects.hash(left, right)
-
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is ConcatListTerm<*>) return false
-            if (that is ConcatListTermImpl<*> && this.hash != that.hash) return false
+            if (that is ConcatListTermImpl<*> && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareSubterms) {
                 if (!this.left.equals(that.left, compareSubterms = true, compareAttachments)) return false
                 if (!this.right.equals(that.right, compareSubterms = true, compareAttachments)) return false
             }
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
+        }
+
+        private val subtermHash: Int = Objects.hash(left, right)
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name
+                if (compareSubterms) subtermHash else 0,
+                if (compareAttachments) termAttachments else null
+            )
         }
 
         override fun toString(): String {
@@ -711,13 +763,19 @@ abstract class TermBuilderBase(
 
         override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitVar(this, arg)
 
-        override val hash: Int = Objects.hash(name)
-
         override fun equals(that: Term, compareSubterms: Boolean, compareAttachments: Boolean): Boolean {
             if (that !is TermVar) return false
-            if (that is TermVarImpl && this.hash != that.hash) return false
+            if (that is TermVarImpl && this.hashCode(compareSubterms, compareAttachments) != that.hashCode(compareSubterms, compareAttachments)) return false
             if (compareAttachments && (this.termAttachments != that.termAttachments)) return false
             return true
+        }
+
+        override fun hashCode(compareSubterms: Boolean, compareAttachments: Boolean): Int {
+            return Objects.hash(
+                this::class.java,                                   // Hash the class name
+                name,
+                if (compareAttachments) termAttachments else null
+            )
         }
 
         override fun toString(): String {

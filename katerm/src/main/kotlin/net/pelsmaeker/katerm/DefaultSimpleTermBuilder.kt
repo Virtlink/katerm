@@ -28,7 +28,9 @@ open class SimpleTermBuilder: TermBuilderBase() {
         }
 
         // The fields in the hash must match the fields in [equalsAppl]
-        override val hash: Int = Objects.hash(termOp, termArgs)
+        override val subtermHash: Int = Objects.hash(termArgs)
+
+
     }
 
     companion object : SimpleTermBuilder()
