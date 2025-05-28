@@ -853,7 +853,9 @@ class UnifyOperationTests: FunSpec({
                     Pair(
                         !"X",
                         none()
-                    ) to null,
+                    ) to mapOf(
+                        setOf(!"X") to none(),
+                    ),
                     Pair(
                         !"X",
                         some(int(1))
@@ -867,11 +869,13 @@ class UnifyOperationTests: FunSpec({
                     Pair(
                         !"X",
                         !"X"
-                    ) to emptyMap(), // Is this correct?
+                    ) to emptyMap(),
                     Pair(
                         !"X",
                         !"Y"
-                    ) to emptyMap(), // Is this correct?
+                    ) to mapOf(
+                        setOf(!"X") to !"Y",
+                    ),
                     Pair(
                         !"X",
                         !"X"..!"XS"
@@ -964,7 +968,7 @@ class UnifyOperationTests: FunSpec({
                     Pair(
                         !"X"..!"XS",
                         !"X"..!"XS"
-                    ) to emptyMap(), // Is this correct?
+                    ) to emptyMap(),
 
                 )
             }
@@ -980,24 +984,21 @@ class UnifyOperationTests: FunSpec({
         }
     }
 
-    test("test 1") {
-        withTermBuilder(testTermBuilder) {
-            // Arrange
-            val (left, right) = Pair<Term, Term>(
-                !"X"..!"XS",
-                list(int(1))
-            )
-            val substitution = mapOf(
-                setOf(!"X") to int(1),
-                setOf(!"XS") to list(),
-            )
-
-            // Act
-            val result = unify(left, right)
-
-            // Assert
-            result?.toMap() shouldBe substitution
-        }
-    }
+//    test("test 1") {
+//        withTermBuilder(testTermBuilder) {
+//            // Arrange
+//            val (left, right) = Pair<Term, Term>(
+//                !"X",
+//                none()
+//            )
+//            val substitution = null
+//
+//            // Act
+//            val result = unify(left, right)
+//
+//            // Assert
+//            result?.toMap() shouldBe substitution
+//        }
+//    }
 
 })
