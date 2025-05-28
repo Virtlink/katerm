@@ -211,7 +211,7 @@ abstract class TermBuilderBase(
     ): Term {
 
         private var _termVars: Set<TermVar>? = null
-        final override val termVars: Set<TermVar>
+        override val termVars: Set<TermVar>
             get() = _termVars ?: termChildren.flatMapTo(HashSet()) { it.termVars }.also { _termVars = it }
 
         /**
@@ -748,6 +748,8 @@ abstract class TermBuilderBase(
         override val termKind: TermKind get() = TermKind.VAR
 
         override val termChildren: List<Term> get() = emptyList()
+
+        override val termVars: Set<TermVar> get() = setOf(this)
 
         override fun isEmpty(): Boolean = false
 

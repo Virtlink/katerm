@@ -174,8 +174,8 @@ private class UnifyOperation(
      * @throws IllegalStateException If the variable occurs in the term.
      */
     private fun occursCheck(term: Term, variable: TermVar) {
-        val repr = substitution.find(variable)
-        val occurs = term.termVars.firstOrNull { substitution.find(it) == repr }
+        val repr = substitution.find(variable) ?: variable
+        val occurs = term.termVars.firstOrNull { (substitution.find(it) ?: it) == repr }
         check(occurs == null) { "Occurs check failed: $variable occurs as $occurs in the term (both represented by $repr)." }
     }
 
