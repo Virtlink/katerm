@@ -1569,21 +1569,16 @@ class UnifyOperationTests: FunSpec({
         }
     }
 
-//    test("test 1") {
-//        withTermBuilder(testTermBuilder) {
-//            // Arrange
-//            val (left, right) = Pair<Term, Term>(
-//                !"X",
-//                none()
-//            )
-//            val substitution = null
-//
-//            // Act
-//            val result = unify(left, right)
-//
-//            // Assert
-//            result?.toMap() shouldBe substitution
-//        }
-//    }
+    test("test 1") {
+        withTermBuilder(testTermBuilder) {
+            // Arrange
+            val term1 = "Foo"("Bar"(), list(int(1), string("A")))
+            val term2 = "Foo"(!"x", !"y"..list(string("B")))
+
+            println(term1)
+            println(term2)
+            println(unify(term1, term2))
+        }
+    }
 
 })
