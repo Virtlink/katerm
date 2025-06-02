@@ -3,9 +3,10 @@ package net.pelsmaeker.katerm
 import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import net.pelsmaeker.katerm.terms.SimpleTermBuilder
 import net.pelsmaeker.katerm.terms.Term
 
-/** Tests the [SimpleTermBuilder] interface. */
+/** Tests the [net.pelsmaeker.katerm.terms.SimpleTermBuilder] interface. */
 fun testSimpleTermBuilder(
     create: () -> SimpleTermBuilder,
 ) = funSpec {

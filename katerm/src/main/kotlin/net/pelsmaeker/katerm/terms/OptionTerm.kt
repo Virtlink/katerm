@@ -3,6 +3,8 @@ package net.pelsmaeker.katerm.terms
 /**
  * An option term.
  *
+ * Note: a [TermVar] is also an [OptionTerm], so take care when matching against this interface type.
+ *
  * @param E The type of the element in the option.
  */
 sealed interface OptionTerm<out E : Term> : Term {

@@ -1,7 +1,7 @@
 package net.pelsmaeker.katerm.substitutions
 
 import net.pelsmaeker.katerm.terms.Term
-import net.pelsmaeker.katerm.TermBuilder
+import net.pelsmaeker.katerm.terms.TermBuilder
 import net.pelsmaeker.katerm.terms.TermVar
 
 /**

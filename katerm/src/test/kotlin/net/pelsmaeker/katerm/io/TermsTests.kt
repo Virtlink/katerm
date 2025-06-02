@@ -3,7 +3,7 @@ package net.pelsmaeker.katerm.io
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
-import net.pelsmaeker.katerm.SimpleTermBuilder
+import net.pelsmaeker.katerm.terms.SimpleTermBuilder
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.attachments.TermAttachments
 

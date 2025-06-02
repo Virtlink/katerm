@@ -1,8 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 
 /**
@@ -15,8 +12,6 @@ class StringTerm internal constructor(
     override val value: String,
     termAttachments: TermAttachments,
 ) : ValueTerm(termAttachments) {
-
-    override val termKind: TermKind get() = TermKind.VALUE_STRING
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
 

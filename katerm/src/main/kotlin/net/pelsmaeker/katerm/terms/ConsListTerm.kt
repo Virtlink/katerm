@@ -1,8 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
@@ -24,8 +21,6 @@ class ConsListTerm<out E: Term> internal constructor(
     }
 
     override val termChildren: List<Term> get() = listOf(head, tail)
-
-    override val termKind: TermKind get() = TermKind.LIST_CONS
 
     private var _termVars: Set<TermVar>? = null
     override val termVars: Set<TermVar> get() = _termVars ?: (head.termVars + tail.termVars).also { _termVars = it }

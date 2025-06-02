@@ -1,8 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
@@ -22,8 +19,6 @@ abstract class ApplTermBase protected constructor(
     abstract override val termArgs: List<Term>
 
     final override val isTermVar: Boolean get() = false
-
-    final override val termKind: TermKind get() = TermKind.APPL
 
     final override val termChildren: List<Term> get() = termArgs
 

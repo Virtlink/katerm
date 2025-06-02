@@ -1,8 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
@@ -16,8 +13,6 @@ class NilListTerm internal constructor(
 ) : ListTerm<Nothing> {
 
     override val termChildren: List<Term> get() = emptyList()
-
-    override val termKind: TermKind get() = TermKind.LIST_NIL
 
     override val termVars: Set<TermVar> get() = emptySet()
 

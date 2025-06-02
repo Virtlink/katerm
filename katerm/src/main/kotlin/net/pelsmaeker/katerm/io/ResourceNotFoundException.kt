@@ -9,4 +9,7 @@ class ResourceNotFoundException @JvmOverloads constructor(
     val resourcePath: String,
     message: String? = null,
     cause: Throwable? = null
-): IOException(message ?: "The requested resource was not found at: $resourcePath", cause)
+): IOException(
+    message ?: "The requested resource was not found at: $resourcePath",
+    cause,
+)

@@ -1,6 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
@@ -20,8 +19,6 @@ abstract class ValueTerm protected constructor(
 
     /** The value of the term. */
     abstract val value: Any
-
-    abstract override val termKind: TermKind
 
     final override val termChildren: List<Term> get() = emptyList()
 

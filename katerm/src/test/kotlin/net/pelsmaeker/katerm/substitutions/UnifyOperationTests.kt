@@ -5,7 +5,7 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermVar
-import net.pelsmaeker.katerm.withTermBuilder
+import net.pelsmaeker.katerm.terms.withTermBuilder
 
 class UnifyOperationTests: FunSpec({
 

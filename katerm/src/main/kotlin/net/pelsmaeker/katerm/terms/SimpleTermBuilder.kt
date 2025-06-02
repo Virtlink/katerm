@@ -1,9 +1,6 @@
-package net.pelsmaeker.katerm
+package net.pelsmaeker.katerm.terms
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
-import net.pelsmaeker.katerm.terms.ApplTerm
-import net.pelsmaeker.katerm.terms.ApplTermBase
-import net.pelsmaeker.katerm.terms.Term
 import java.util.*
 
 /**

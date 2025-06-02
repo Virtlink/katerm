@@ -13,4 +13,6 @@ class UnificationError(
     val term1: Term,
     val term2: Term,
     message: String,
-) : Exception("Unification error: $message\nTerm 1: $term1\nTerm 2: $term2")
+) : Exception(
+    "Unification error: $message\nTerm 1: $term1\nTerm 2: $term2",
+)

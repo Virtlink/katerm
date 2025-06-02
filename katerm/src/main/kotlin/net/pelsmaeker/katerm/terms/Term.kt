@@ -1,14 +1,11 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 
 /**
  * A term.
  *
- * Terms are immutable. To create or change a term, use a [net.pelsmaeker.katerm.TermBuilder].
+ * Terms are immutable. To create or change a term, use a [TermBuilder].
  */
 interface Term {
 
@@ -20,9 +17,6 @@ interface Term {
 
     /** The free variables that occur in the term at any depth. This can be used for an 'occurs check'. */
     val termVars: Set<TermVar>
-
-    /** The kind of term. */
-    val termKind: TermKind
 
     /** Whether this term is a variable or a list/option variable. */
     val isTermVar: Boolean

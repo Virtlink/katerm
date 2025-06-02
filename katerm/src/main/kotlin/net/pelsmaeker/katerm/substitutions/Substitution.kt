@@ -6,7 +6,7 @@ import net.pelsmaeker.katerm.terms.ConsListTerm
 import net.pelsmaeker.katerm.terms.ListTerm
 import net.pelsmaeker.katerm.terms.SomeOptionTerm
 import net.pelsmaeker.katerm.terms.Term
-import net.pelsmaeker.katerm.TermBuilder
+import net.pelsmaeker.katerm.terms.TermBuilder
 import net.pelsmaeker.katerm.terms.TermVar
 
 /**

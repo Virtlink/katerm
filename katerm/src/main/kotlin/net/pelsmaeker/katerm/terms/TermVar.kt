@@ -1,13 +1,12 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
 /**
  * A (list/option) term variable.
+ *
+ * Note: a [TermVar] is also a [ListTerm] and an [OptionTerm], so take care when matching against this interface type.
  *
  * @property name The variable name. Any resource names should be encoded as part of the variable name.
  * @property termAttachments The attachments of the term.
@@ -16,8 +15,6 @@ class TermVar internal constructor(
     val name: String,
     override val termAttachments: TermAttachments,
 ) : Term, ListTerm<Nothing>, OptionTerm<Nothing> {
-
-    override val termKind: TermKind get() = TermKind.VAR
 
     override val termChildren: List<Term> get() = emptyList()
 

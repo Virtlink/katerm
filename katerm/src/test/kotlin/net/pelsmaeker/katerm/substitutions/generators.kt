@@ -14,7 +14,7 @@ import io.kotest.property.resolution.GlobalArbResolver
 import net.pelsmaeker.katerm.terms.ApplTerm
 import net.pelsmaeker.katerm.terms.ConcatListTerm
 import net.pelsmaeker.katerm.terms.ConsListTerm
-import net.pelsmaeker.katerm.SimpleTermBuilder
+import net.pelsmaeker.katerm.terms.SimpleTermBuilder
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermVar
 import net.pelsmaeker.katerm.terms.IntTerm
@@ -23,7 +23,7 @@ import net.pelsmaeker.katerm.terms.OptionTerm
 import net.pelsmaeker.katerm.terms.RealTerm
 import net.pelsmaeker.katerm.terms.SomeOptionTerm
 import net.pelsmaeker.katerm.terms.StringTerm
-import net.pelsmaeker.katerm.TermBuilder
+import net.pelsmaeker.katerm.terms.TermBuilder
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 import kotlin.reflect.typeOf

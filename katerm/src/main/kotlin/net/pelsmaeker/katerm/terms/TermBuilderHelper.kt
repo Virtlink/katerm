@@ -1,40 +1,5 @@
-package net.pelsmaeker.katerm
+package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.terms.ApplTerm
-import net.pelsmaeker.katerm.terms.IntTerm
-import net.pelsmaeker.katerm.terms.ListTerm
-import net.pelsmaeker.katerm.terms.NilListTerm
-import net.pelsmaeker.katerm.terms.NoneOptionTerm
-import net.pelsmaeker.katerm.terms.OptionTerm
-import net.pelsmaeker.katerm.terms.RealTerm
-import net.pelsmaeker.katerm.terms.StringTerm
-import net.pelsmaeker.katerm.terms.Term
-import net.pelsmaeker.katerm.terms.TermVar
-
-/**
- * Helper function to build a term using a [TermBuilderHelper].
- *
- * @param termBuilder The [TermBuilder] to use for building the term.
- * @param body The lambda that defines the term structure.
- * @return The built term.
- */
-inline fun <R> withTermBuilder(
-    termBuilder: TermBuilder = SimpleTermBuilder(),
-    body: TermBuilderHelper.() -> R,
-): R = with(TermBuilderHelper(termBuilder), body)
-
-/**
- * Helper function to build a term using a [TermBuilderHelper].
- *
- * @param termBuilder The [TermBuilder] to use for building the term.
- * @param body The lambda that defines the term structure.
- * @return The built term.
- */
-@Suppress("FunctionName")
-inline fun <R : Term> T(
-    termBuilder: TermBuilder = SimpleTermBuilder(),
-    body: TermBuilderHelper.() -> R,
-): R = withTermBuilder(termBuilder, body)
 
 /**
  * Helper class to build terms using a [TermBuilder].

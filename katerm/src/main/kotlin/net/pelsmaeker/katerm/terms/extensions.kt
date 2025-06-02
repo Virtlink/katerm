@@ -22,3 +22,15 @@ fun Term?.equals(that: Term?, compareSubterms: Boolean, compareAttachments: Bool
 }
 
 
+
+/**
+ * Helper function to build a term using a [TermBuilderHelper].
+ *
+ * @param termBuilder The [TermBuilder] to use for building the term.
+ * @param body The lambda that defines the term structure.
+ * @return The built term.
+ */
+inline fun <R> withTermBuilder(
+    termBuilder: TermBuilder = SimpleTermBuilder(),
+    body: TermBuilderHelper.() -> R,
+): R = with(TermBuilderHelper(termBuilder), body)

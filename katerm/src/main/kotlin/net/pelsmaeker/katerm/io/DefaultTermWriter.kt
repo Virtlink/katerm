@@ -1,6 +1,5 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.*
 import net.pelsmaeker.katerm.terms.ApplTerm
 import net.pelsmaeker.katerm.terms.ConcatListTerm
 import net.pelsmaeker.katerm.terms.ConsListTerm
@@ -13,6 +12,7 @@ import net.pelsmaeker.katerm.terms.SomeOptionTerm
 import net.pelsmaeker.katerm.terms.StringTerm
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermVar
+import net.pelsmaeker.katerm.terms.TermVisitor
 import java.io.Writer
 
 /**
@@ -22,12 +22,6 @@ import java.io.Writer
  */
 class DefaultTermWriter(
     val maxDepth: Int = -1,
-    // TODO: Print multiline pretty.
-//    /** Whether to print a multiline tree. */
-//    private val multiline: Boolean = true,
-    // TODO: Print attachments.
-//    /** Whether to print attachments. */
-//    private val printAttachments: Boolean = true,
 ): TermTextWriter {
 
     override fun write(term: Term, writer: Writer) {

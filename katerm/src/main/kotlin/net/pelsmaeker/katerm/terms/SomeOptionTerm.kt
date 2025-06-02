@@ -1,8 +1,5 @@
 package net.pelsmaeker.katerm.terms
 
-import net.pelsmaeker.katerm.TermKind
-import net.pelsmaeker.katerm.TermVisitor
-import net.pelsmaeker.katerm.TermVisitor1
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import java.util.Objects
 
@@ -21,8 +18,6 @@ class SomeOptionTerm<out E: Term> internal constructor(
     override fun isEmpty(): Boolean = false
 
     override fun isNotEmpty(): Boolean = true
-
-    override val termKind: TermKind get() = TermKind.OPTION_SOME
 
     override val termChildren: List<Term> get() = listOf(element)
 

@@ -3,6 +3,8 @@ package net.pelsmaeker.katerm.terms
 /**
  * A list term.
  *
+ * Note: a [TermVar] is also a [ListTerm], so take care when matching against this interface type.
+ *
  * @param E The type of the elements in the list.
  */
 sealed interface ListTerm<out E: Term> : Term {

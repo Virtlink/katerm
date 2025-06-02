@@ -1,19 +1,19 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.*
 import net.pelsmaeker.katerm.annotations.TermAnnotationKey
 import net.pelsmaeker.katerm.attachments.TermAttachments
 import net.pelsmaeker.katerm.terms.ApplTerm
 import net.pelsmaeker.katerm.terms.ListTerm
 import net.pelsmaeker.katerm.terms.StringTerm
 import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermBuilder
 import java.io.*
 
 /**
  * An ATerm reader.
  */
 class DefaultTermReader(
-    private val termFactory: SimpleTermBuilder
+    private val termFactory: TermBuilder
 ): TermReader, TermTextReader {
 
     override fun read(reader: Reader): Term? {

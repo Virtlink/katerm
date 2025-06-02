@@ -19,14 +19,6 @@ interface PersistentSubstitution : ImmutableSubstitution {
     fun set(variable: TermVar, term: Term): PersistentSubstitution
 
     /**
-     * Returns a new substitution without the mapping for the given variable.
-     *
-     * @param variable The variable to remove.
-     * @return A new substitution without the specified mapping; or `this` if the mapping is unchanged.
-     */
-    fun remove(variable: TermVar): PersistentSubstitution
-
-    /**
      * Returns a new substitution with all mappings cleared.
      *
      * @return A new empty substitution.

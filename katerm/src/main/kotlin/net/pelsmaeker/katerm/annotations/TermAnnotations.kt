@@ -7,8 +7,6 @@ import net.pelsmaeker.katerm.terms.Term
  */
 interface TermAnnotations: Set<Term> {
 
-    // TODO: Add methods for matching, etc...
-
     companion object {
         /** Gets an empty term annotations object. */
         fun empty(): TermAnnotations = EmptyTermAnnotations
