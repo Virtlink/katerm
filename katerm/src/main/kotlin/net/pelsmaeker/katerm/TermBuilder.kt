@@ -1,12 +1,9 @@
 package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
-import net.pelsmaeker.katerm.substitutions.Substitution
 
 /**
  * Builds terms.
- *
- * Some types of terms don't accept separators because they cannot be pretty-printed.
  */
 interface TermBuilder {
 

@@ -114,7 +114,7 @@ interface Substitution {
     fun apply(term: Term): Term {
         return when (term) {
             is TermVar -> {
-                val mappedTerm = this[term]
+                val mappedTerm = this.get(term, instantiate = false)
                 mappedTerm as? TermVar ?: apply(mappedTerm)
             }
             is ApplTerm -> termBuilder.copyAppl(term, term.termArgs.map { apply(it) })

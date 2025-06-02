@@ -3,6 +3,7 @@ package net.pelsmaeker.katerm.collections
 import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
 import io.kotest.property.assume
 import io.kotest.property.checkAll
 import io.kotest.property.arbitrary.set

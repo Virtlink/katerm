@@ -17,19 +17,18 @@ open class SimpleTermBuilder: TermBuilderBase() {
         override val termOp: String,
         termArgs: List<Term>,
         attachments: TermAttachments = TermAttachments.empty(),
-    ) : ApplTerm, ApplTermBase(attachments) {
+    ) : ApplTermBase(attachments) {
 
         override val termArity: Int = termArgs.size
 
         override val termArgs: List<Term> = termArgs.toList() // Safety copy.
 
         override fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
-            return super.equalSubterms(that, compareAttachments)
+            return this.termArgs == that.termArgs
         }
 
-        // The fields in the hash must match the fields in [equalsAppl]
-        override val subtermHash: Int = Objects.hash(termArgs)
-
+        // The fields in the hash must match the fields in [equalSubterms]
+        override val subtermsHashCode: Int = Objects.hash(this.termArgs)
 
     }
 
