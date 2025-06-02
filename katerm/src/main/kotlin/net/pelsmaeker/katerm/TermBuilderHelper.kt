@@ -32,7 +32,7 @@ inline fun <R : Term> T(
  */
 class TermBuilderHelper(
     private val termBuilder : TermBuilder,
-) {
+): TermBuilder by termBuilder {
 
     /**
      * Creates a new term variable with the given name.

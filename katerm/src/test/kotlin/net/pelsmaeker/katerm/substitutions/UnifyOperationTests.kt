@@ -1555,6 +1555,26 @@ class UnifyOperationTests: FunSpec({
                         "Foo"("Bar"(int(1)), "Baz"("Qux"()))
                     ) to null,
 
+
+                    //////////
+                    // Misc //
+                    //////////
+                    Pair(
+                        !"X"..list(string("A")),
+                        int(42)..!"XS"
+                    ) to mapOf(
+                        setOf(!"X") to int(42),
+                        setOf(!"XS") to list(string("A")),
+                    ),
+                    Pair(
+                        !"Y"..list("Foo"(!"X")),
+                        "Foo"(!"X")..list("Foo"(string("A")))
+                    ) to mapOf(
+                        setOf(!"X") to string("A"),
+                        setOf(!"Y") to "Foo"(string("A")),
+                    ),
+
+
                 )
             }
         ) { (pair, substitution) ->
@@ -1562,7 +1582,7 @@ class UnifyOperationTests: FunSpec({
             val (left, right) = pair
 
             // Act
-            val result = unify(left, right)
+            val result = testTermBuilder.unify(left, right)
 
             // Assert
             result?.toMap() shouldBe substitution
@@ -1572,12 +1592,19 @@ class UnifyOperationTests: FunSpec({
     test("test 1") {
         withTermBuilder(testTermBuilder) {
             // Arrange
-            val term1 = "Foo"("Bar"(), list(int(1), string("A")))
-            val term2 = "Foo"(!"x", !"y"..list(string("B")))
+            val (left, right) = Pair(
+                int(42),
+                !"X"
+            )
+            val substitution = mapOf(
+                setOf(!"X") to int(42),
+            )
 
-            println(term1)
-            println(term2)
-            println(unify(term1, term2))
+            // Act
+            val result = testTermBuilder.unify(left, right)
+
+            // Assert
+            result?.toMap() shouldBe substitution
         }
     }
 

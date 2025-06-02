@@ -10,15 +10,6 @@ import net.pelsmaeker.katerm.substitutions.Substitution
  */
 interface TermBuilder {
 
-    /**
-     * Applies the substitution to the given term.
-     *
-     * @param term The term to apply the substitution to.
-     * @param substitution The substitution to apply.
-     * @return The term with the substitution applied.
-     */
-    fun apply(term: Term, substitution: Substitution): Term
-
 
     /////////
     // Int //

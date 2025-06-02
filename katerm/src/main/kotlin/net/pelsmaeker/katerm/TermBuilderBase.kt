@@ -15,27 +15,6 @@ abstract class TermBuilderBase(
     private val termPrinter: TermTextWriter = DefaultTermWriter(),
 ): TermBuilder {
 
-    override fun apply(term: Term, substitution: Substitution): Term {
-        return when (term) {
-            is TermVar -> {
-                val mappedTerm = substitution[term]
-                mappedTerm as? TermVar ?: apply(mappedTerm, substitution)
-            }
-            is ApplTerm -> copyAppl(term, term.termArgs.map { apply(it, substitution) })
-            is SomeOptionTerm<*> -> copyOption(term, apply(term.element, substitution))
-            is ConsListTerm<*> -> copyList(
-                term,
-                apply(term.head, substitution),
-                apply(term.tail, substitution) as ListTerm<*>,
-            )
-            is ConcatListTerm<*> -> concatLists(
-                apply(term.left, substitution) as ListTerm<*>,
-                apply(term.right, substitution) as ListTerm<*>,
-            )
-            else -> term
-        }
-    }
-
     @Suppress("UNCHECKED_CAST")
     override fun <T : Term> withAttachments(term: T, newAttachments: TermAttachments): T {
         if (term.termAttachments == newAttachments) return term

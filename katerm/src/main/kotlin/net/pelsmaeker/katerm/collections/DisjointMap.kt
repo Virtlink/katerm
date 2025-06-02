@@ -38,7 +38,7 @@ interface DisjointMap<E, out V> : DisjointSet<E> {
      *
      * @param element The element whose set to change the mapping of.
      * @param defaultValue The default value to return if the element is not in any set.
-     * @return The value asociated with the set that contains the specified element;
+     * @return The value associated with the set that contains the specified element;
      * or the default value if the element is not in any set.
      */
     fun getOrDefault(element: E, defaultValue: @UnsafeVariance V): V

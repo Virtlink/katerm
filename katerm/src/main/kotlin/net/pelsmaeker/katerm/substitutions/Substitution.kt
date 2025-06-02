@@ -1,5 +1,10 @@
 package net.pelsmaeker.katerm.substitutions
 
+import net.pelsmaeker.katerm.ApplTerm
+import net.pelsmaeker.katerm.ConcatListTerm
+import net.pelsmaeker.katerm.ConsListTerm
+import net.pelsmaeker.katerm.ListTerm
+import net.pelsmaeker.katerm.SomeOptionTerm
 import net.pelsmaeker.katerm.Term
 import net.pelsmaeker.katerm.TermBuilder
 import net.pelsmaeker.katerm.TermVar
@@ -8,6 +13,11 @@ import net.pelsmaeker.katerm.TermVar
  * A substitution is a mapping of variables to terms.
  */
 interface Substitution {
+
+    /**
+     * The term builder used to create/instantiate terms.
+     */
+    val termBuilder: TermBuilder
 
     /**
      * Determines whether the substitution is empty.
@@ -29,12 +39,13 @@ interface Substitution {
     val variables: Set<TermVar>
 
     /**
-     * Gets the term that the given variable is mapped to.
+     * Gets the fully-instantiated term that the given variable is mapped to.
      *
      * @param variable The variable to look up.
+     * @param instantiate If `true`, the term will be fully instantiated; otherwise, `false`.
      * @return The term the variable is mapped to, or the variable itself if the variable is not in the substitution.
      */
-    operator fun get(variable: TermVar): Term
+    operator fun get(variable: TermVar, instantiate: Boolean = true): Term
 
     /**
      * Find the representative variable for the given variable.
@@ -88,18 +99,37 @@ interface Substitution {
     /**
      * Transforms the substitution into a map of variable sets to terms.
      *
+     * @param instantiate If `true`, the variables in the substitution will be fully instantiated;
+     * otherwise, they can remain as variables.
      * @return A map where the keys are sets of variables and the values are terms.
      */
-    fun toMap(): Map<Set<TermVar>, Term>
+    fun toMap(instantiate: Boolean = true): Map<Set<TermVar>, Term>
 
     /**
      * Applies the substitution to the given term.
      *
      * @param term The term to apply the substitution to.
-     * @param termBuilder The term builder to use for creating new terms.
      * @return The term with the substitution applied.
      */
-    fun apply(term: Term, termBuilder: TermBuilder): Term =
-        termBuilder.apply(term, this)
+    fun apply(term: Term): Term {
+        return when (term) {
+            is TermVar -> {
+                val mappedTerm = this[term]
+                mappedTerm as? TermVar ?: apply(mappedTerm)
+            }
+            is ApplTerm -> termBuilder.copyAppl(term, term.termArgs.map { apply(it) })
+            is SomeOptionTerm<*> -> termBuilder.copyOption(term, apply(term.element))
+            is ConsListTerm<*> -> termBuilder.copyList(
+                term,
+                apply(term.head),
+                apply(term.tail) as ListTerm<*>,
+            )
+            is ConcatListTerm<*> -> termBuilder.concatLists(
+                apply(term.left) as ListTerm<*>,
+                apply(term.right) as ListTerm<*>,
+            )
+            else -> term
+        }
+    }
 
 }

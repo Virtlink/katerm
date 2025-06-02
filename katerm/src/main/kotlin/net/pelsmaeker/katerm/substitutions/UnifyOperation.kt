@@ -2,6 +2,7 @@ package net.pelsmaeker.katerm.substitutions
 
 import net.pelsmaeker.katerm.ListTerm
 import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.TermBuilder
 import net.pelsmaeker.katerm.TermVar
 
 /**
@@ -11,7 +12,7 @@ import net.pelsmaeker.katerm.TermVar
  * @param right The second term to unify.
  * @return A substitution that makes the terms equal, or `null` if unification fails.
  */
-fun unify(left: Term, right: Term): Substitution? {
+fun TermBuilder.unify(left: Term, right: Term): Substitution? {
     return emptySubstitution().unify(left, right)
 }
 
@@ -22,7 +23,7 @@ fun unify(left: Term, right: Term): Substitution? {
  * @param pairs The pairs of terms to unify.
  * @return A substitution that makes the terms equal, or `null` if unification fails.
  */
-fun unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
+fun TermBuilder.unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
     return emptySubstitution().unifyAll(pairs)
 }
 
@@ -87,25 +88,6 @@ private class UnifyOperation(
         worklist.addAll(pairs)
     }
 
-//    /**
-//     * Unifies all terms in the worklist.
-//     *
-//     * When this method returns `true`, the unification succeeded and the [substitution] was modified such that
-//     * it makes all terms in the worklist equal modulo attachments.
-//     *
-//     * When this method returns `false`, the unification failed and [substitution] is in an invalid intermediate state.
-//     *
-//     * @return `true` if the unification was successful; otherwise, `false`.
-//     */
-//    fun unifyAll(): Boolean {
-//        try {
-//            unifyAll()
-//        } catch (e: UnificationError) {
-//            return false
-//        }
-//        return true
-//    }
-
     /**
      * Unifies all terms in the worklist.
      *
@@ -130,26 +112,26 @@ private class UnifyOperation(
                     term1 is TermVar -> {
                         val mappedTerm = substitution[term1]
                         // ?x |-> x'
-                        if (mappedTerm !is TermVar) {
-                            // Unify the mapped term with term2: unify (x', term2)
-                            worklist.add(Pair(mappedTerm, term2))
-                        } else {
+                        if (mappedTerm is TermVar) {
                             // Substitute variable term1 with term2
                             occursCheck(term2, term1)
                             substitution[term1] = term2
+                        } else {
+                            // Unify the mapped term with term2: unify (x', term2)
+                            worklist.add(Pair(mappedTerm, term2))
                         }
                     }
 
                     // If term2 is a variable ?y
                     term2 is TermVar -> {
                         val mappedTerm = substitution[term2]
-                        if (mappedTerm !is TermVar) {
-                            // Unify the mapped term with term1
-                            worklist.add(Pair(mappedTerm, term1))
-                        } else {
+                        if (mappedTerm is TermVar) {
                             // Substitute variable term2 with term1
                             occursCheck(term1, term2)
                             substitution[term2] = term1
+                        } else {
+                            // Unify the mapped term with term1
+                            worklist.add(Pair(mappedTerm, term1))
                         }
                     }
 
