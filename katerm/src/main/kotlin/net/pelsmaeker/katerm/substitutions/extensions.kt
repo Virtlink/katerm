@@ -1,9 +1,8 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.TermBuilder
-import net.pelsmaeker.katerm.TermBuilderHelper
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * Returns a new empty substitution.

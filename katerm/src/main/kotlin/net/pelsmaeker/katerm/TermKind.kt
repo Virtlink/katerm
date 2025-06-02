@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm
 
-/** Specifies the kind of [Term]. */
+/** Specifies the kind of [net.pelsmaeker.katerm.terms.Term]. */
 enum class TermKind {
 
     /** A variable, list variable, or option variable. */

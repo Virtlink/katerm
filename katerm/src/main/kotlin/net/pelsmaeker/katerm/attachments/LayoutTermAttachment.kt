@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm.attachments
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 
 /**
  * Annotates a term with layout information.

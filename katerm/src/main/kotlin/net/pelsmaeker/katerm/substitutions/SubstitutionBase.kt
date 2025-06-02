@@ -1,13 +1,11 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.ApplTerm
-import net.pelsmaeker.katerm.ConcatListTerm
-import net.pelsmaeker.katerm.ConsListTerm
-import net.pelsmaeker.katerm.ListTerm
-import net.pelsmaeker.katerm.OptionTerm
-import net.pelsmaeker.katerm.SomeOptionTerm
-import net.pelsmaeker.katerm.Term
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.ApplTerm
+import net.pelsmaeker.katerm.terms.ConcatListTerm
+import net.pelsmaeker.katerm.terms.ConsListTerm
+import net.pelsmaeker.katerm.terms.SomeOptionTerm
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * Base class for implementations of [Substitution].

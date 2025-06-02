@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm.attachments
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.TextSpan
 
 /**

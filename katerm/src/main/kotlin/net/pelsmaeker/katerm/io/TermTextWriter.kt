@@ -1,7 +1,6 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.Term
-import java.io.ByteArrayOutputStream
+import net.pelsmaeker.katerm.terms.Term
 import java.io.OutputStream
 import java.io.StringWriter
 import java.io.Writer

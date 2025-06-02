@@ -1,5 +1,7 @@
 package net.pelsmaeker.katerm
 
+import net.pelsmaeker.katerm.terms.Term
+
 /**
  * Matches terms.
  */

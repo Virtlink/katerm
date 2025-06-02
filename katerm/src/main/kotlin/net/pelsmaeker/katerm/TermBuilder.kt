@@ -1,6 +1,16 @@
 package net.pelsmaeker.katerm
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
+import net.pelsmaeker.katerm.terms.ApplTerm
+import net.pelsmaeker.katerm.terms.IntTerm
+import net.pelsmaeker.katerm.terms.ListTerm
+import net.pelsmaeker.katerm.terms.NilListTerm
+import net.pelsmaeker.katerm.terms.NoneOptionTerm
+import net.pelsmaeker.katerm.terms.OptionTerm
+import net.pelsmaeker.katerm.terms.RealTerm
+import net.pelsmaeker.katerm.terms.StringTerm
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * Builds terms.

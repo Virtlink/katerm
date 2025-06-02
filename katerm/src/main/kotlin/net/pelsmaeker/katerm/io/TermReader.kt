@@ -1,12 +1,9 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.io.Reader
-import java.io.StringReader
-import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.reflect.KClass

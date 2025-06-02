@@ -1,8 +1,8 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.TermBuilder
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.TermVar
 import net.pelsmaeker.katerm.collections.MutableDisjointMap
 import net.pelsmaeker.katerm.collections.MutableUnionFindMapImpl
 import java.util.LinkedHashSet

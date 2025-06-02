@@ -1,6 +1,18 @@
 package net.pelsmaeker.katerm.io
 
 import net.pelsmaeker.katerm.*
+import net.pelsmaeker.katerm.terms.ApplTerm
+import net.pelsmaeker.katerm.terms.ConcatListTerm
+import net.pelsmaeker.katerm.terms.ConsListTerm
+import net.pelsmaeker.katerm.terms.IntTerm
+import net.pelsmaeker.katerm.terms.ListTerm
+import net.pelsmaeker.katerm.terms.NilListTerm
+import net.pelsmaeker.katerm.terms.NoneOptionTerm
+import net.pelsmaeker.katerm.terms.RealTerm
+import net.pelsmaeker.katerm.terms.SomeOptionTerm
+import net.pelsmaeker.katerm.terms.StringTerm
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 import java.io.Writer
 
 /**

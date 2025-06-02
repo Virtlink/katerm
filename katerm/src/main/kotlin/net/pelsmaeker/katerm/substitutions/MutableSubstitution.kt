@@ -1,7 +1,7 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.Term
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * A mutable substitution is a mapping of variables to terms that can be modified.

@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import java.io.IOException
 import java.io.InputStream
 import java.io.Reader

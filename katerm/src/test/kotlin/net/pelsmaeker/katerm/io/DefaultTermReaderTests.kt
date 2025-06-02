@@ -4,9 +4,9 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.SimpleTermBuilder
-import net.pelsmaeker.katerm.*
 import net.pelsmaeker.katerm.annotations.TermAnnotationKey
 import net.pelsmaeker.katerm.attachments.TermAttachments
+import net.pelsmaeker.katerm.terms.Term
 
 /**
  * Tests the [DefaultTermReader] class.

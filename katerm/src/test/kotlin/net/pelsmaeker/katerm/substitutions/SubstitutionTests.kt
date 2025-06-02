@@ -3,8 +3,8 @@ package net.pelsmaeker.katerm.substitutions
 import io.kotest.core.spec.style.funSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.checkAll
-import net.pelsmaeker.katerm.Term
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 import io.kotest.core.test.TestScope
 import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.property.assume

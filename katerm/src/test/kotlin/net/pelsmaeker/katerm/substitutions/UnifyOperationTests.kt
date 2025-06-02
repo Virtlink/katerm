@@ -3,8 +3,8 @@ package net.pelsmaeker.katerm.substitutions
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
-import net.pelsmaeker.katerm.Term
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.TermVar
 import net.pelsmaeker.katerm.withTermBuilder
 
 class UnifyOperationTests: FunSpec({

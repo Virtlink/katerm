@@ -1,9 +1,8 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.ListTerm
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.TermBuilder
-import net.pelsmaeker.katerm.TermVar
+import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * Unifies two terms, and returns a substitution that makes them equal.

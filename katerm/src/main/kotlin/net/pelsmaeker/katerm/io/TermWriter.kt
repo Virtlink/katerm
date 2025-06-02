@@ -1,11 +1,8 @@
 package net.pelsmaeker.katerm.io
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
-import java.io.StringWriter
-import java.io.Writer
-import java.nio.charset.Charset
 
 /**
  * Writes a term.

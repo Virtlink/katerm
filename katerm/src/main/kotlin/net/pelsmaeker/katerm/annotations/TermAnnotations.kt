@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm.annotations
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 
 /**
  * Holds a set of term annotations for a term.

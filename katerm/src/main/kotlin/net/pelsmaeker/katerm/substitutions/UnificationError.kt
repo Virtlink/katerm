@@ -1,6 +1,6 @@
 package net.pelsmaeker.katerm.substitutions
 
-import net.pelsmaeker.katerm.Term
+import net.pelsmaeker.katerm.terms.Term
 
 /**
  * A unification error.
