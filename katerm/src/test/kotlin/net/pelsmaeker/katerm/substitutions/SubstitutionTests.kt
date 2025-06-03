@@ -8,6 +8,8 @@ import net.pelsmaeker.katerm.terms.TermVar
 import io.kotest.core.test.TestScope
 import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.property.assume
+import net.pelsmaeker.katerm.registerTermArbs
+import net.pelsmaeker.katerm.testTermBuilder
 
 /**
  * Tests the implementation of the [Substitution] interface.

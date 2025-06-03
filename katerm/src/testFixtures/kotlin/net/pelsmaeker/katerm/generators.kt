@@ -1,4 +1,4 @@
-package net.pelsmaeker.katerm.substitutions
+package net.pelsmaeker.katerm
 
 import io.kotest.property.Arb
 import io.kotest.property.RandomSource
