@@ -9,12 +9,12 @@ import java.util.Objects
  * @property termAttachments The attachments of the term.
  */
 abstract class ApplTermBase protected constructor(
-    override val termAttachments: TermAttachments,
+    override val termAttachments: TermAttachments = TermAttachments.empty(),
 ) : ApplTerm {
 
     abstract override val termOp: String
 
-    abstract override val termArity: Int
+    open override val termArity: Int get() = termArgs.size
 
     abstract override val termArgs: List<Term>
 
@@ -55,15 +55,23 @@ abstract class ApplTermBase protected constructor(
      * @param compareAttachments Whether to compare the attachments of the subterms.
      * @return `true` if this term has equal subterms as the specified term; otherwise, `false`.
      */
-    protected abstract fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean
+    protected open fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
+        if (this.termArity != that.termArity) return false
+        for (i in this.termArgs.indices) {
+            if (!this.termArgs[i].equals(that.termArgs[i], compareSubterms = true, compareAttachments = compareAttachments)) {
+                return false
+            }
+        }
+        return true
+    }
 
     /**
      * Pre-computes the hash code for the subterms of this term.
      *
-     * If [equalSubterms] returns `true` for two appl terms,
+     * If [equalSubterms] returns `true` for two Appl terms,
      * then this method must return the same hash code value for both list of subterms.
      */
-    protected abstract val subtermsHashCode: Int
+    protected open val subtermsHashCode: Int = Objects.hash(termArgs)
 
     final override fun hashCode(): Int = hashCode(compareSubterms = true, compareAttachments = true)
 
