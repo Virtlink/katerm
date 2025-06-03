@@ -32,8 +32,8 @@ allprojects {
         mavenCentral()
     }
 
-    task<DependencyReportTask>("allDependencies") {}
-    task<BuildEnvironmentReportTask>("allBuildEnvironment") {}
+    tasks.register<DependencyReportTask>("allDependencies") {}
+    tasks.register<BuildEnvironmentReportTask>("allBuildEnvironment") {}
 }
 
 subprojects {
@@ -64,8 +64,9 @@ subprojects {
     }
 
     tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn", "-Xcontext-receivers")
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 
