@@ -1,13 +1,14 @@
 package net.pelsmaeker.katerm.terms
 
 import net.pelsmaeker.katerm.attachments.TermAttachments
+import net.pelsmaeker.katerm.substitutions.OccursCheckFailedException
 
 /**
  * A term.
  *
  * Terms are immutable. To create or change a term, use a [TermBuilder].
  */
-interface Term {
+interface Term : TermContext {
 
     /** A list of child terms of the term. */
     val termChildren: List<Term>
@@ -16,7 +17,7 @@ interface Term {
     val termAttachments: TermAttachments
 
     /** The free variables that occur in the term at any depth. This can be used for an 'occurs check'. */
-    val termVars: Set<TermVar>
+    override val termVars: Set<TermVar>
 
     /** Whether this term is a variable or a list/option variable. */
     val isTermVar: Boolean

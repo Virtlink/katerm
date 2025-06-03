@@ -7,12 +7,13 @@ import net.pelsmaeker.katerm.terms.ListTerm
 import net.pelsmaeker.katerm.terms.SomeOptionTerm
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermBuilder
+import net.pelsmaeker.katerm.terms.TermContext
 import net.pelsmaeker.katerm.terms.TermVar
 
 /**
  * A substitution is a mapping of variables to terms.
  */
-interface Substitution {
+interface Substitution : TermContext {
 
     /**
      * The term builder used to create/instantiate terms.
@@ -36,7 +37,7 @@ interface Substitution {
     /**
      * The set of variables in the substitution.
      */
-    val variables: Set<TermVar>
+    override val termVars: Set<TermVar>
 
     /**
      * Gets the fully-instantiated term that the given variable is mapped to.
@@ -115,6 +116,7 @@ interface Substitution {
         return when (term) {
             is TermVar -> {
                 val mappedTerm = this.get(term, instantiate = false)
+                if (term in mappedTerm.termVars) throw OccursCheckFailedException(term, term, term, mappedTerm)
                 mappedTerm as? TermVar ?: apply(mappedTerm)
             }
             is ApplTerm -> termBuilder.copyAppl(term, term.termArgs.map { apply(it) })

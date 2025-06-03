@@ -65,7 +65,7 @@ fun Substitution.unifyAll(pairs: Iterable<Pair<Term, Term>>): Substitution? {
  * @return The resulting substitution, or `null` if unification fails.
  */
 fun Substitution.unifyWith(substitution: Substitution): Substitution? {
-    return unifyAll(substitution.variables.map { it to substitution[it] })
+    return unifyAll(substitution.termVars.map { it to substitution[it] })
 }
 
 /**
@@ -156,8 +156,8 @@ private class UnifyOperation(
      */
     private fun occursCheck(term: Term, variable: TermVar) {
         val repr = substitution.find(variable) ?: variable
-        val occurs = term.termVars.firstOrNull { (substitution.find(it) ?: it) == repr }
-        check(occurs == null) { "Occurs check failed: $variable occurs as $occurs in the term (both represented by $repr)." }
+        val occurrence = term.termVars.firstOrNull { (substitution.find(it) ?: it) == repr }
+        if(occurrence != null) throw OccursCheckFailedException(variable, occurrence, repr, term)
     }
 
 }

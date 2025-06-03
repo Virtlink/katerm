@@ -6,7 +6,7 @@ package net.pelsmaeker.katerm.terms
  *
  * @property termBuilder The [TermBuilder] used to create terms.
  */
-class TermBuilderHelper(
+open class TermBuilderHelper(
     private val termBuilder : TermBuilder,
 ): TermBuilder by termBuilder {
 

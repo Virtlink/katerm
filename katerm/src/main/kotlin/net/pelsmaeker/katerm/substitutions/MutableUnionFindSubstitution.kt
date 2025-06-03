@@ -20,7 +20,7 @@ class MutableUnionFindSubstitution(
 
     override fun isEmpty(): Boolean = disjointMap.isEmpty()
 
-    override val variables: Set<TermVar> get() = disjointMap.elements
+    override val termVars: Set<TermVar> get() = disjointMap.elements
 
     override fun get(variable: TermVar, instantiate: Boolean): Term {
         val term = disjointMap.getOrDefault(variable, variable)

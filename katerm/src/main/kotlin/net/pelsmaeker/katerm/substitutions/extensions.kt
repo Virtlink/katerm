@@ -153,7 +153,7 @@ fun Substitution.toPersistentSubstitution(): PersistentSubstitution {
  */
 fun Substitution.toMutableSubstitution(): MutableSubstitution {
     val newSubstitution = MutableUnionFindSubstitution(this.termBuilder)
-    this.variables.forEach { variable ->
+    this.termVars.forEach { variable ->
         newSubstitution[variable] = this[variable]
     }
     return newSubstitution
@@ -171,7 +171,7 @@ internal class EmptySubstitution(
     override fun isEmpty(): Boolean =
         true
 
-    override val variables: Set<TermVar> get() =
+    override val termVars: Set<TermVar> get() =
         emptySet()
 
     override fun get(variable: TermVar, instantiate: Boolean): Term = variable
@@ -201,7 +201,7 @@ internal class SingletonSubstitution(
     override fun isEmpty(): Boolean =
         false
 
-    override val variables: Set<TermVar> get() =
+    override val termVars: Set<TermVar> get() =
         setOf(from)
 
     override fun get(variable: TermVar, instantiate: Boolean): Term =

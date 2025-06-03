@@ -101,7 +101,7 @@ fun testSubstitution(
                 val substitution = builder(pairs)
 
                 // Act/Assert
-                substitution.variables shouldBe setOf(newVar("x"), newVar("a"))
+                substitution.termVars shouldBe setOf(newVar("x"), newVar("a"))
             }
         }
 
@@ -117,7 +117,7 @@ fun testSubstitution(
                 val substitution = builder(pairs)
 
                 // Act/Assert
-                substitution.variables shouldBe setOf(
+                substitution.termVars shouldBe setOf(
                     newVar("a"), newVar("b"), newVar("c"), newVar("d"),
                 )
             }
@@ -129,7 +129,7 @@ fun testSubstitution(
             val substitution = builder(pairs)
 
             // Act/Assert
-            substitution.variables shouldBe emptySet()
+            substitution.termVars shouldBe emptySet()
         }
     }
 
