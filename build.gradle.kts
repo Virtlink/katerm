@@ -13,6 +13,12 @@ plugins {
     alias(libs.plugins.nexuspublish)        // Publish on Maven Central
 }
 
+buildscript {
+    dependencies {
+        classpath(libs.kotlin.gradlePlugin)
+    }
+}
+
 allprojects {
     apply(plugin = "com.palantir.git-version")
     apply(plugin = "com.github.ben-manes.versions")
