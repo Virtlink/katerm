@@ -116,7 +116,7 @@ interface Substitution : TermContext {
         return when (term) {
             is TermVar -> {
                 val mappedTerm = this.get(term, instantiate = false)
-                if (term in mappedTerm.termVars) throw OccursCheckFailedException(term, term, term, mappedTerm)
+                if (mappedTerm !is TermVar && term in mappedTerm.termVars) throw OccursCheckFailedException(term, term, term, mappedTerm)
                 mappedTerm as? TermVar ?: apply(mappedTerm)
             }
             is ApplTerm -> termBuilder.copyAppl(term, term.termArgs.map { apply(it) })
