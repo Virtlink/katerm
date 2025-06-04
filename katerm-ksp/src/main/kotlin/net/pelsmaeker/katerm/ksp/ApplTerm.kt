@@ -5,4 +5,6 @@ package net.pelsmaeker.katerm.ksp
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-annotation class GenerateApplTerm()
+annotation class GenerateApplTerm(
+    val op: String,
+)

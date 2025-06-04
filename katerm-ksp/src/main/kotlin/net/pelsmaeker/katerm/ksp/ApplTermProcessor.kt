@@ -1,12 +1,24 @@
+@file:OptIn(KspExperimental::class)
+
 package net.pelsmaeker.katerm.ksp
 
+import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.getAnnotationsByType
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Variance
+import net.pelsmaeker.katerm.terms.Term
+import net.pelsmaeker.katerm.terms.StringTerm
+import net.pelsmaeker.katerm.terms.ListTerm
+import kotlin.text.StringBuilder
 
 class ApplTermProcessor(
     private val codeGenerator: CodeGenerator,
@@ -17,32 +29,179 @@ class ApplTermProcessor(
         // Find symbols annotated with @ApplTerm
         val symbols = resolver.getSymbolsWithAnnotation(GenerateApplTerm::class.qualifiedName!!)
 
-        symbols.filterIsInstance<KSClassDeclaration>().forEach { classDeclaration ->
-            // Generate code for each annotated class
-            generateApplTermImpl(classDeclaration)
-        }
+        symbols.filterIsInstance<KSClassDeclaration>()
+            .filter { it.classKind == ClassKind.INTERFACE }
+            .forEach { classDeclaration ->
+                // Generate code for each annotated class
+                generateApplTermImpl(resolver, classDeclaration)
+            }
 
         return emptyList()
     }
 
-    private fun generateApplTermImpl(classDeclaration: KSClassDeclaration) {
-        val fileName = "${classDeclaration.simpleName.asString()}Generated"
-        val packageName = classDeclaration.packageName.asString()
+    private fun generateApplTermImpl(resolver: Resolver, interfaceDecl: KSClassDeclaration) {
+        val annotation = interfaceDecl.getAnnotationsByType(GenerateApplTerm::class).single()
+        val packageName = interfaceDecl.packageName.asString()
+        val interfaceName = interfaceDecl.simpleName.asString()
+        val className = "${interfaceName}Impl"
 
-        // Use the CodeGenerator to create a new Kotlin file
         val file = codeGenerator.createNewFile(
             Dependencies(false),
             packageName,
-            fileName
+            className
         )
 
+        val termType = resolver.typeOf<Term>()
+//        val termDecl = resolver.declOf<Term>()
+        val stringTermType = resolver.typeOf<StringTerm>()
+        val listTermType = resolver.typeOf<ListTerm<*>>()
+
+        val stringType = resolver.typeOf<String>()
+//        val listType = resolver.typeOf<List<*>>()
+        val listType = resolver.getClassDeclarationByName(resolver.getKSNameFromString("kotlin.collections.List"))!!
+//        val termDecl = resolver.getClassDeclarationByName(resolver.getKSNameFromString("net.pelsmaeker.katerm.terms.Term"))!!
+//        val termType = termDecl.asStarProjectedType()
+        val listOfTermType = listType.asType(listOf(resolver.getTypeArgument(resolver.createKSTypeReferenceFromKSType(termType), variance = Variance.COVARIANT)))
+
+        data class TermArgument(
+            val termName: String,
+            val termType: KSType,
+            val convenienceName: String = termName,
+            val convenienceType: KSType = termType,
+            val accessor: (TermArgument) -> String = { it.termName },
+        )
+
+        val termArgs = mutableListOf<TermArgument>()
+        val properties = interfaceDecl.getDeclaredProperties().toList()
+        for (property in properties) {
+            val name = property.simpleName.asString()
+            val type = property.type.resolve()
+            if (termType.isAssignableFrom(type)) {
+                termArgs.add(TermArgument(name, type))
+            } else if (stringType.isAssignableFrom(type)) {
+                termArgs.add(TermArgument("${name}Term", stringTermType, name, type) { "${it.termName}.value" })
+            } else if (listOfTermType.isAssignableFrom(type)) {
+                termArgs.add(TermArgument("${name}Term", listTermType, name, type) { "${it.termName}.elements" })
+            }
+        }
+
+//        val constructorParams = termArgs.joinToString(",\n    ") { "val ${it.name}: ${it.termType.asString()}" }
+
         file.writer().use { writer ->
-            writer.write("package $packageName\n\n")
-            writer.write("class $fileName {\n")
-            writer.write("    override fun toString(): String {\n")
-            writer.write("        return \"Generated toString for ${classDeclaration.simpleName.asString()}\"\n")
-            writer.write("    }\n")
-            writer.write("}\n")
+            writer.write("""
+                // Generated by Katerm-KSP for ${interfaceDecl.simpleName.asString()}
+                package $packageName
+                
+                class $className(
+                    ${termArgs.joinToString("\n    ") {
+                        "private val ${it.termName}: ${it.termType.asString()},"
+                    }}
+                    termAttachments: net.pelsmaeker.katerm.attachments.TermAttachments,
+                ) : ${interfaceName}, net.pelsmaeker.katerm.terms.ApplTerm, net.pelsmaeker.katerm.terms.ApplTermBase(termAttachments) {
+                
+                    companion object {
+                        const val OP: String = "${annotation.op}"
+                        const val ARITY: Int = ${termArgs.size}
+                    }
+                
+                    ${termArgs.joinToString("\n    ") {
+                        "override val ${it.convenienceName}: ${it.convenienceType.asString()} get() = ${it.accessor(it)}"        
+                    }}
+                    
+                    ${termArgs.joinToStringIndexed("\n    ") { i, it -> 
+                        "operator fun component${i + 1}(): ${it.convenienceType.asString()} = ${it.convenienceName}"
+                    }}
+                
+                    override val termOp: String get() = OP
+                
+                    override val termArity: Int get() = ARITY
+                
+                    override val termArgs: List<net.pelsmaeker.katerm.terms.Term> get() = listOf(
+                        ${termArgs.joinToString(",\n    ") { "${it.termName}" }}
+                    )
+                
+                    override fun <R> accept(visitor: net.pelsmaeker.katerm.terms.TermVisitor<R>): R = visitor.visitAppl(this)
+                
+                    override fun <A, R> accept(visitor: net.pelsmaeker.katerm.terms.TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+                
+                //    override fun <R> accept(visitor: JoeTermVisitor<R>): R = visitor.visitUnit(this)
+                //
+                //    override fun <A, R> accept(visitor: JoeTermVisitor1<A, R>, arg: A): R = visitor.visitUnit(this, arg)
+                
+                    override fun equalSubterms(that: net.pelsmaeker.katerm.terms.ApplTerm, compareAttachments: Boolean): Boolean {
+                        if (that !is ${className}) return false
+                
+                        return ${termArgs.joinToString("\n         && ") {
+                            "this.${it.termName}.equals(that.${it.termName}, compareAttachments = compareAttachments)"
+                        }}
+                    }
+                
+                    override val subtermsHashCode: Int = java.util.Objects.hash(
+                        ${termArgs.joinToString(",\n    ") { "${it.termName}" }}
+                    )
+                }
+            """.trimIndent())
+        }
+    }
+
+    inline fun <reified T> Resolver.typeOf(): KSType {
+        return typeOf(T::class.qualifiedName!!)
+    }
+
+    fun Resolver.typeOf(qualifiedName: String): KSType {
+        return declOf(qualifiedName).asStarProjectedType()
+    }
+
+
+    inline fun <reified T> Resolver.declOf(): KSClassDeclaration {
+        return declOf(T::class.qualifiedName!!)
+    }
+
+    fun Resolver.declOf(qualifiedName: String): KSClassDeclaration {
+        return getClassDeclarationByName(getKSNameFromString(qualifiedName))!!
+    }
+
+    fun KSType.asString(): String {
+        val declarationName = declaration.qualifiedName?.asString() ?: declaration.simpleName.asString()
+        val typeArgs = this.arguments
+        return if (typeArgs.isNotEmpty()) {
+            val argsString = typeArgs.joinToString(", ") { arg ->
+                when {
+                    arg.variance == Variance.STAR -> "*"
+                    arg.variance != Variance.INVARIANT -> "${arg.variance.label} ${arg.type!!.resolve().asString()}"
+                    else -> arg.type!!.resolve().asString()
+                }
+            }
+            "$declarationName<$argsString>"
+        } else {
+            declarationName
+        }
+    }
+
+    fun <T, A : Appendable> Iterable<T>.joinToIndexed(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((Int, T) -> CharSequence)? = null): A {
+        buffer.append(prefix)
+        var count = 0
+        for ((index, element) in withIndex()) {
+            if (++count > 1) buffer.append(separator)
+            if (limit < 0 || count <= limit) {
+                buffer.appendElementIndexed(index, element, transform)
+            } else break
+        }
+        if (limit >= 0 && count > limit) buffer.append(truncated)
+        buffer.append(postfix)
+        return buffer
+    }
+
+    fun <T> Iterable<T>.joinToStringIndexed(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", transform: ((Int, T) -> CharSequence)? = null): String {
+        return joinToIndexed(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
+    }
+
+    internal fun <T> Appendable.appendElementIndexed(index: Int, element: T, transform: ((Int, T) -> CharSequence)?) {
+        when {
+            transform != null -> append(transform(index, element))
+            element is CharSequence? -> append(element)
+            element is Char -> append(element)
+            else -> append(element.toString())
         }
     }
 

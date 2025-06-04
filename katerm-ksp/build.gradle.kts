@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     // KSP
+    implementation      (project(":katerm"))
     implementation      (libs.ksp.api)
 
     // Testing

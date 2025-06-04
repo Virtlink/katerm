@@ -20,61 +20,64 @@ interface JoeTerm : Term {
 
 }
 
-@GenerateApplTerm
+@GenerateApplTerm("Unit")
 interface JoeUnit : JoeTerm, ApplTerm {
 
     val modules: List<JoeModule>
 
-
 }
 
-@GenerateApplTerm
+@GenerateApplTerm("Module")
 interface JoeModule : JoeTerm, ApplTerm {
 
     val name: String
-
 }
+
+//@GenerateApplTerm
+//private abstract class JoeModulePrototype(
+//    val name: String,
+//) : JoeTerm, ApplTerm
 
 //operator fun JoeUnit.component1(): List<JoeModule> = modules
 //
-//class JoeUnitImpl internal constructor(
-//    private val modulesTerm: ListTerm<JoeModule>,
-//    termAttachments: TermAttachments,
-//) : JoeTerm, ApplTerm, ApplTermBase(termAttachments) {
-//
-//    companion object {
-//        const val OP: String = "Unit"
-//        const val ARITY: Int = 1
-//    }
-//
-//    val modules: List<JoeModule> get() = modulesTerm.elements
-//
-//    operator fun component1(): List<JoeModule> = modules
-//
-//    override val termOp: String get() = OP
-//
-//    override val termArity: Int get() = ARITY
-//
-//    override val termArgs: List<Term> get() = listOf(modulesTerm)
-//
-//    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
-//
-//    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
-//
+class JoeUnitImpl internal constructor(
+    private val modulesTerm: ListTerm<JoeModule>,
+    termAttachments: TermAttachments,
+) : JoeTerm, ApplTerm, ApplTermBase(termAttachments) {
+
+    companion object {
+        const val OP: String = "Unit"
+        const val ARITY: Int = 1
+    }
+
+    val modules: List<JoeModule> get() = modulesTerm.elements
+
+    operator fun component1(): List<JoeModule> = modules
+
+    override val termOp: String get() = OP
+
+    override val termArity: Int get() = ARITY
+
+    override val termArgs: List<Term> get() = listOf(modulesTerm)
+
+    override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitAppl(this)
+
+    override fun <A, R> accept(visitor: TermVisitor1<A, R>, arg: A): R = visitor.visitAppl(this, arg)
+
 //    override fun <R> accept(visitor: JoeTermVisitor<R>): R = visitor.visitUnit(this)
 //
 //    override fun <A, R> accept(visitor: JoeTermVisitor1<A, R>, arg: A): R = visitor.visitUnit(this, arg)
-//
-//    override fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
-//        if (that !is JoeUnit) return false
-//
-//        return this.modulesTerm.equals(that.modulesTerm, compareAttachments = compareAttachments)
-//    }
-//
-//    override val subtermsHashCode: Int = Objects.hash(
-//        modulesTerm,
-//    )
-//}
+
+    override fun equalSubterms(that: ApplTerm, compareAttachments: Boolean): Boolean {
+        if (that !is JoeUnit) return false
+
+        return this.modulesTerm.equals(that.modulesTerm, compareAttachments = compareAttachments)
+    }
+
+    override val subtermsHashCode: Int = Objects.hash(
+        modulesTerm,
+    )
+}
 
 //
 //class JoeModule internal constructor(
