@@ -5,7 +5,8 @@ import net.pelsmaeker.katerm.attachments.TermAttachments
 /**
  * A constructor application term with no arguments.
  *
- * @property termAttachments The attachments of the term.
+ * @property termOp The constructor name.
+ * @param termAttachments The attachments of the term.
  */
 abstract class ApplTerm0Base protected constructor(
     override val termOp: String,
