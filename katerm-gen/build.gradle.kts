@@ -70,3 +70,7 @@ plugins.withId("idea") {
 kotlin {
     compilerOptions.freeCompilerArgs.add("-Xcontext-parameters")
 }
+
+application {
+    mainClass = "net.pelsmaeker.katerm.generator.CLIKt"
+}
