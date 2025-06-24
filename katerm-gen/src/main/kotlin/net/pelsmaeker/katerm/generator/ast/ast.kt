@@ -1,7 +1,5 @@
 package net.pelsmaeker.katerm.generator.ast
 
-interface KatermAST
-
 data class KatermUnit(
     val languageName: String,
     val rules: List<Rule>,
