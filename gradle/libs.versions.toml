@@ -7,8 +7,14 @@ ben-manes-versions              = "0.52.0"          # https://github.com/ben-man
 nexuspublish                    = "2.0.0"           # https://github.com/gradle-nexus/publish-plugin/
 ksp                             = "2.1.21-2.0.1"    # https://github.com/google/ksp
 
+# Parsing
+antlr                           = "4.13.2"          # https://github.com/antlr/antlr4
+# Kotlin generation
+kotlinpoet                      = "2.2.0"           # https://square.github.io/kotlinpoet/ (https://github.com/square/kotlinpoet)
 # Collections
 kotlinx-immutablecollections    = "0.4.0"           # https://github.com/Kotlin/kotlinx.collections.immutable
+# CLI
+clikt                           = "5.0.3"           # https://ajalt.github.io/clikt/ (https://github.com/ajalt/clikt)
 # Utils
 jsr305                          = "3.0.2"           # https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
 
@@ -32,13 +38,16 @@ google-devtools-ksp             = { id = "com.google.devtools.ksp",             
 # Platform
 kotlin-gradlePlugin             = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin",                   version.ref = "kotlin" }
 ksp-api                         = { module = "com.google.devtools.ksp:symbol-processing-api",               version.ref = "ksp" }
-
+# Parsing
+antlr                           = { module = "org.antlr:antlr4",                                            version.ref = "antlr" }
+# Kotlin generation
+kotlinpoet                      = { module = "com.squareup:kotlinpoet",                                     version.ref = "kotlinpoet" }
 # Collections
 kotlinx-immutablecollections    = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm",     version.ref = "kotlinx-immutablecollections" }
-
+# CLI
+clikt                           = { module = "com.github.ajalt.clikt:clikt",                                version.ref = "clikt" }
 # Utils
 jsr305                          = { module = "com.google.code.findbugs:jsr305",                             version.ref = "jsr305" }
-
 # Testing
 junit                           = { module = "org.junit.jupiter:junit-jupiter",                             version.ref = "junit" }
 kotest                          = { module = "io.kotest:kotest-runner-junit5",                              version.ref = "kotest" }
