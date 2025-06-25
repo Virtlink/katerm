@@ -2,40 +2,40 @@ package net.pelsmaeker.katerm.generator.ast
 
 data class KatermUnit(
     val languageName: String,
-    val rules: List<Rule>,
+    val rules: List<KatermRule>,
 )
 
-data class Rule(
+data class KatermRule(
     val sort: String?,
     val name: String,
-    val symbols: List<Symbol>,
+    val symbols: List<KatermSymbol>,
 )
 
-interface Symbol {
+sealed interface KatermSymbol {
 
     data class StringLit(
         val text: String,
-    ) : Symbol
+    ) : KatermSymbol
 
     data class Named(
         val name: String,
-        val typeSpec: TypeSpec,
-    ) : Symbol
+        val typeSpec: KatermTypeSpec,
+    ) : KatermSymbol
 
 }
 
-interface TypeSpec {
+sealed interface KatermTypeSpec {
 
-    data object Int : TypeSpec
+    data object Int : KatermTypeSpec
 
-    data object String : TypeSpec
+    data object String : KatermTypeSpec
 
     data class Ref(
         val name: kotlin.String,
-    ) : TypeSpec
+    ) : KatermTypeSpec
 
     data class Star(
-        val sortSpec: TypeSpec,
-    ) : TypeSpec
+        val sortSpec: KatermTypeSpec,
+    ) : KatermTypeSpec
 
 }

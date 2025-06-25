@@ -3,7 +3,6 @@ package net.pelsmaeker.katerm.generator
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import net.pelsmaeker.katerm.generator.ast.Symbol
 import net.pelsmaeker.lsputils.diagnostics.Message
 import net.pelsmaeker.lsputils.diagnostics.MessageCollector
 

@@ -18,10 +18,10 @@ class KatermAstBuilder {
         )
     }
 
-    private val ruleVisitor = object: KatermAntlrParserBaseVisitor<Rule>() {
-        override fun visitRule(ctx: KatermAntlrParser.RuleContext): Rule {
+    private val ruleVisitor = object: KatermAntlrParserBaseVisitor<KatermRule>() {
+        override fun visitRule(ctx: KatermAntlrParser.RuleContext): KatermRule {
             val (sort, name) = ctx.ruleName().accept(ruleNameVisitor)
-            return Rule(
+            return KatermRule(
                 sort = sort,
                 name = name,
                 symbols = ctx.ruleSymbol().map { it.accept(ruleSymbolVisitor) },
@@ -37,32 +37,32 @@ class KatermAstBuilder {
             Pair(ctx.ID(0).text, ctx.ID(1).text)
     }
 
-    private val ruleSymbolVisitor = object: KatermAntlrParserBaseVisitor<Symbol>() {
-        override fun visitLiteralSymbol(ctx: KatermAntlrParser.LiteralSymbolContext): Symbol = Symbol.StringLit(
+    private val ruleSymbolVisitor = object: KatermAntlrParserBaseVisitor<KatermSymbol>() {
+        override fun visitLiteralSymbol(ctx: KatermAntlrParser.LiteralSymbolContext): KatermSymbol = KatermSymbol.StringLit(
             text = ctx.STRINGLIT().text.let { it.substring(1, it.length - 1) },
         )
 
-        override fun visitNamedSymbol(ctx: KatermAntlrParser.NamedSymbolContext): Symbol = Symbol.Named(
+        override fun visitNamedSymbol(ctx: KatermAntlrParser.NamedSymbolContext): KatermSymbol = KatermSymbol.Named(
             name = ctx.ID().text,
             typeSpec = ctx.typeSpec().accept(typeSpecVisitor)
         )
     }
 
-    private val typeSpecVisitor: KatermAntlrParserVisitor<TypeSpec> = object: KatermAntlrParserBaseVisitor<TypeSpec>() {
-        override fun visitSimpleTypeSpec(ctx: KatermAntlrParser.SimpleTypeSpecContext): TypeSpec =
+    private val typeSpecVisitor: KatermAntlrParserVisitor<KatermTypeSpec> = object: KatermAntlrParserBaseVisitor<KatermTypeSpec>() {
+        override fun visitSimpleTypeSpec(ctx: KatermAntlrParser.SimpleTypeSpecContext): KatermTypeSpec =
             ctx.type().accept(typeSpecVisitor)
 
-        override fun visitStarTypeSpec(ctx: KatermAntlrParser.StarTypeSpecContext): TypeSpec = TypeSpec.Star(
+        override fun visitStarTypeSpec(ctx: KatermAntlrParser.StarTypeSpecContext): KatermTypeSpec = KatermTypeSpec.Star(
             sortSpec = ctx.type().accept(typeSpecVisitor),
         )
 
-        override fun visitRefType(ctx: KatermAntlrParser.RefTypeContext): TypeSpec = TypeSpec.Ref(
+        override fun visitRefType(ctx: KatermAntlrParser.RefTypeContext): KatermTypeSpec = KatermTypeSpec.Ref(
             name = ctx.ID().text,
         )
 
-        override fun visitIntType(ctx: KatermAntlrParser.IntTypeContext): TypeSpec = TypeSpec.Int
+        override fun visitIntType(ctx: KatermAntlrParser.IntTypeContext): KatermTypeSpec = KatermTypeSpec.Int
 
-        override fun visitStringType(ctx: KatermAntlrParser.StringTypeContext): TypeSpec = TypeSpec.String
+        override fun visitStringType(ctx: KatermAntlrParser.StringTypeContext): KatermTypeSpec = KatermTypeSpec.String
     }
 
 }

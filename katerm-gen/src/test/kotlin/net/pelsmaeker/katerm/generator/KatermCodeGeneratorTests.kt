@@ -39,12 +39,11 @@ class KatermCodeGeneratorTests: FunSpec({
         val generator = KatermCodeGenerator(
             outputDir = Path.of("/Users/daniel/git/virtlink/katerm/tmp"),
             classPrefix = "Joe",
+            ast = result!!,
+            packageName = "net.pelsmaeker.joelang.ast",
         )
 
         // Act
-        generator.generateSort(
-            ast = result!!,
-            sortName = "Unit",
-        )
+        generator.generateAll()
     }
 })
