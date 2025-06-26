@@ -1,11 +1,11 @@
 package net.pelsmaeker.lsputils.diagnostics
 
 /**
- * A [MessageCollector] that stops processing messages after the first error.
+ * A [MessageCollector] that stops processing messages after the first error and throws it.
  *
  * @property collector The underlying message collector.
  */
-class FailFastMessageCollectorWrapper(
+class ThrowingMessageCollectorWrapper(
     val collector: MessageCollector,
 ): MessageCollector {
 
@@ -17,6 +17,11 @@ class FailFastMessageCollectorWrapper(
         if (hasError) return false
         collector.offer(message)
         hasError = hasError || (message.severity >= MessageSeverity.ERROR)
-        return !hasError
+        if (message.severity >= MessageSeverity.FATAL) {
+            throw RuntimeException("Fatal error: ${message.text}")
+        } else if (message.severity >= MessageSeverity.ERROR) {
+            throw RuntimeException("Error: ${message.text}")
+        }
+        return false
     }
 }

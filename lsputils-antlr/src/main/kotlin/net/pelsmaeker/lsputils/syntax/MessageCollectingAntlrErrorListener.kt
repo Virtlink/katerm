@@ -30,7 +30,7 @@ class MessageCollectingAntlrErrorListener(
         // Create a message with the error details
         val message = Message(
             severity = MessageSeverity.ERROR,
-            message = msg,
+            text = msg,
             path = path,
             span = (offendingSymbol as? Token)?.span,
         )
