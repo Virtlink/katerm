@@ -8,9 +8,9 @@ import net.pelsmaeker.katerm.attachments.TermAttachments
  * @property value The string value.
  * @param termAttachments The attachments of the term.
  */
-class StringTerm internal constructor(
+class StringTerm(
     override val value: String,
-    termAttachments: TermAttachments,
+    termAttachments: TermAttachments = TermAttachments.empty(),
 ) : ValueTerm(termAttachments) {
 
     override fun <R> accept(visitor: TermVisitor<R>): R = visitor.visitString(this)
