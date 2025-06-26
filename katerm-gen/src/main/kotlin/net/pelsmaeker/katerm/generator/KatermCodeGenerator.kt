@@ -7,65 +7,64 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
-import net.pelsmaeker.katerm.generator.ast.KatermUnit
-import net.pelsmaeker.katerm.generator.ast.KatermRule
-import net.pelsmaeker.katerm.generator.ast.KatermSymbol
-import net.pelsmaeker.katerm.generator.ast.KatermTypeSpec
+import net.pelsmaeker.katerm.generator.ast.ConstructorClass
+import net.pelsmaeker.katerm.generator.ast.IRFileUnit
+import net.pelsmaeker.katerm.generator.ast.SortInterface
 import java.nio.file.Path
 
 class KatermCodeGenerator(
-    private val ast: KatermUnit,
+    private val ast: IRFileUnit,
+//    private val ast: FileUnit,
     private val outputDir: Path,
-    private val packageName: String,
-    private val classPrefix: String,
+//    private val packageName: String,
+//    private val classPrefix: String,
 ) {
 
-    private val katermPackageName = "net.pelsmaeker.katerm.terms"
-    private val Term = ClassName(katermPackageName, "Term")
-    private val ApplTerm = ClassName(katermPackageName, "ApplTerm")
-    private val IntTerm = ClassName(katermPackageName, "IntTerm")
-    private val StringTerm = ClassName(katermPackageName, "StringTerm")
-//    private val ListTerm = ParameterizedTypeName(katermPackageName, "ListTerm", )
-    private val ListTerm = ClassName(katermPackageName, "ListTerm")
-//    private val ListTerm = ClassName(katermPackageName, "ListTerm").parameterizedBy(TypeVariableName("R"))
-    private val OptionTerm = ClassName(katermPackageName, "OptionTerm")
-    private val ApplTermBase = ClassName(katermPackageName, "ApplTermBase")
-    private val TermAttachments = ClassName(katermPackageName, "TermAttachments")
-    private val TermVisitor = ClassName(katermPackageName, "TermVisitor")
-    private val TermVisitor1 = ClassName(katermPackageName, "TermVisitor1")
+//    private val katermPackageName = "net.pelsmaeker.katerm.terms"
+//    private val Term = ClassName(katermPackageName, "Term")
+//    private val ApplTerm = ClassName(katermPackageName, "ApplTerm")
+//    private val IntTerm = ClassName(katermPackageName, "IntTerm")
+//    private val StringTerm = ClassName(katermPackageName, "StringTerm")
+////    private val ListTerm = ParameterizedTypeName(katermPackageName, "ListTerm", )
+//    private val ListTerm = ClassName(katermPackageName, "ListTerm")
+////    private val ListTerm = ClassName(katermPackageName, "ListTerm").parameterizedBy(TypeVariableName("R"))
+//    private val OptionTerm = ClassName(katermPackageName, "OptionTerm")
+//    private val ApplTermBase = ClassName(katermPackageName, "ApplTermBase")
+//    private val TermAttachments = ClassName(katermPackageName, "TermAttachments")
+//    private val TermVisitor = ClassName(katermPackageName, "TermVisitor")
+//    private val TermVisitor1 = ClassName(katermPackageName, "TermVisitor1")
 
-    private val LangTerm = ClassName(packageName, "${classPrefix}Term")
-    private val LangTermVisitor = ClassName(packageName, "${classPrefix}TermVisitor")
-    private val LangTermVisitor1 = ClassName(packageName, "${classPrefix}TermVisitor1")
+    private val LangTerm = ClassName(ast.packageName, "Term") //"${classPrefix}Term")
+    private val LangTermVisitor = ClassName(ast.packageName, "TermVisitor") //"${classPrefix}TermVisitor")
+    private val LangTermVisitor1 = ClassName(ast.packageName, "TermVisitor1") //"${classPrefix}TermVisitor1")
 
-    private val sortTypes = ast.rules.mapNotNull { r -> r.sort?.let { it to r } }.associate { (s, r) ->
-        s to ClassName(packageName, "${classPrefix}${s}Term")
-    }
-
-    private val applClasses = ast.rules.associate { r ->
-        val cls = if (r.sort != null) {
-            ClassName(packageName, "${classPrefix}${r.name}Term")
-//            sortInterfaces[r.sort]!!.nestedClass(r.name)
-        } else {
-            ClassName(packageName, "${classPrefix}${r.name}Term")
-        }
-        r.name to cls
-    }
+//    private val sortTypes = ast.rules.mapNotNull { r -> r.sort?.let { it to r } }.associate { (s, r) ->
+//        s to ClassName(packageName, "${classPrefix}${s}Term")
+//    }
+//
+//    private val applClasses = ast.rules.associate { r ->
+//        val cls = if (r.sort != null) {
+//            ClassName(packageName, "${classPrefix}${r.name}Term")
+////            sortInterfaces[r.sort]!!.nestedClass(r.name)
+//        } else {
+//            ClassName(packageName, "${classPrefix}${r.name}Term")
+//        }
+//        r.name to cls
+//    }
 
     fun generateAll() {
         generateLangTerm()
         generateLangTermVisitor()
         generateLangTermVisitor1()
 
-        for (sortName in sortTypes.keys) {
-            generateSortTerm(sortName)
+        for (sort in ast.sorts) {
+            generateSortInterface(sort)
         }
 
-        for (rule in ast.rules) {
-            generateApplTerm(rule)
+        for (constructor in ast.constructors) {
+            generateConstructorClass(constructor)
         }
     }
 
@@ -74,7 +73,7 @@ class KatermCodeGenerator(
             addType(TypeSpec.interfaceBuilder(LangTerm).apply {
                 addModifiers(KModifier.PUBLIC)
                 addModifiers(KModifier.SEALED)
-                addSuperinterface(Term)
+                addSuperinterface(Katerm.Term)
 
                 addFunction(FunSpec.builder("accept").apply {
                     val R = TypeVariableName("R")
@@ -111,18 +110,16 @@ class KatermCodeGenerator(
                 addModifiers(KModifier.PUBLIC)
                 addTypeVariable(TypeVariableName(R.name, variance = KModifier.OUT))
 
-                for (rule in ast.rules) {
-                    val applClass = applClasses[rule.name]!!
-
-                    addFunction(FunSpec.builder("visit${applClass.simpleName}").apply {
+                for (constructor in ast.constructors) {
+                    addFunction(FunSpec.builder("visit${constructor.type.simpleName}").apply {
                         addModifiers(KModifier.ABSTRACT)
-                        addParameter(ParameterSpec.builder("term", applClass).build())
+                        addParameter(ParameterSpec.builder("term", constructor.type).build())
                         returns(R)
                     }.build())
                 }
 
                 addKdoc("""
-                    Visitor for ${ast.languageName} terms.
+                    Visitor for terms.
                     
                     @param R The return type of the visitor methods.
                 """.trimIndent())
@@ -142,19 +139,17 @@ class KatermCodeGenerator(
                 addTypeVariable(TypeVariableName(A.name, variance = KModifier.IN))
                 addTypeVariable(TypeVariableName(R.name, variance = KModifier.OUT))
 
-                for (rule in ast.rules) {
-                    val applClass = applClasses[rule.name]!!
-
-                    addFunction(FunSpec.builder("visit${applClass.simpleName}").apply {
+                for (constructor in ast.constructors) {
+                    addFunction(FunSpec.builder("visit${constructor.type.simpleName}").apply {
                         addModifiers(KModifier.ABSTRACT)
-                        addParameter(ParameterSpec.builder("term", applClass).build())
+                        addParameter(ParameterSpec.builder("term", constructor.type).build())
                         addParameter(ParameterSpec.builder("arg", A).build())
                         returns(R)
                     }.build())
                 }
 
                 addKdoc("""
-                    Visitor for ${ast.languageName} terms.
+                    Visitor for terms.
                     
                     @param A The type of the argument passed to the visitor methods.
                     @param R The return type of the visitor methods.
@@ -165,83 +160,80 @@ class KatermCodeGenerator(
         file.writeTo(outputDir)
     }
 
-    fun generateSortTerm(
-        sortName: String,
-    ) {
-        val sortInterface = sortTypes[sortName] ?: error("No interface found for sort: $sortName")
-
-        val file = FileSpec.builder(sortInterface).apply {
-            addType(TypeSpec.interfaceBuilder(sortInterface).apply {
+    fun generateSortInterface(sort: SortInterface) {
+        val file = FileSpec.builder(sort.type).apply {
+            addType(TypeSpec.interfaceBuilder(sort.type).apply {
                 addModifiers(KModifier.PUBLIC)
                 addModifiers(KModifier.SEALED)
-                addSuperinterface(LangTerm)
-                addSuperinterface(Term)
+                if (sort.superSort != null) {
+                    addSuperinterface(sort.superSort.type)
+                }
+                addSuperinterface(Katerm.Term)
             }.build())
         }.build()
 
         file.writeTo(outputDir)
     }
 
-    private fun getTypeSpecType(typeSpec: KatermTypeSpec): TypeName = when (typeSpec) {
-        is KatermTypeSpec.Int -> IntTerm
-        is KatermTypeSpec.String -> StringTerm
-        is KatermTypeSpec.Ref -> sortTypes[typeSpec.name] ?: applClasses[typeSpec.name] ?: error("No interface/class found for sort/constructor: $typeSpec")
-        is KatermTypeSpec.Star -> ListTerm.parameterizedBy(getTypeSpecType(typeSpec.sortSpec))
-    }
+//    private fun getTypeSpecType(typeSpec: Type): TypeName = when (typeSpec) {
+//        is Type.Int -> IntTerm
+//        is Type.String -> StringTerm
+//        is Type.Ref -> sortTypes[typeSpec.name] ?: applClasses[typeSpec.name] ?: error("No interface/class found for sort/constructor: $typeSpec")
+//        is Type.Star -> ListTerm.parameterizedBy(getTypeSpecType(typeSpec.sortSpec))
+//    }
 
-    fun generateApplTerm(
-        rule: KatermRule,
+    fun generateConstructorClass(
+        constructor: ConstructorClass,
     ) {
-        val applClass = applClasses[rule.name] ?: error("No class found for rule: ${rule.name}")
+//        val applClass = applClasses[rule.name] ?: error("No class found for rule: ${rule.name}")
 
-        val symbols = rule.symbols.filterIsInstance<KatermSymbol.Named>().associateWith { s ->
-            getTypeSpecType(s.typeSpec)
-        }
+//        val symbols = rule.symbols.filterIsInstance<Symbol.Named>().associateWith { s ->
+//            getTypeSpecType(s.typeSpec)
+//        }
 
-        val file = FileSpec.builder(applClass).apply {
-            addType(TypeSpec.classBuilder(applClass).apply {
+        val file = FileSpec.builder(constructor.type).apply {
+            addType(TypeSpec.classBuilder(constructor.type).apply {
                 addModifiers(KModifier.PUBLIC)
                 addModifiers(KModifier.FINAL)
-                if (rule.sort != null) {
-                    addSuperinterface(sortTypes[rule.sort]!!)
+                if (constructor.superSort != null) {
+                    addSuperinterface(constructor.superSort.type)
                 }
-                addSuperinterface(LangTerm)
-                addSuperinterface(Term)
-                superclass(ApplTermBase)
+                addSuperinterface(Katerm.Term)
+                superclass(Katerm.ApplTermBase)
                 addSuperclassConstructorParameter("termAttachments")
 
                 primaryConstructor(FunSpec.constructorBuilder().apply {
                     addModifiers(KModifier.INTERNAL)
-                    for ((symbol, type) in symbols) {
-                        addParameter(symbol.name, type)
+                    for ((name, type) in constructor.parameters) {
+                        addParameter(name, type)
                     }
-                    addParameter("termAttachments", TermAttachments)
+                    addParameter("termAttachments", Katerm.TermAttachments)
                 }.build())
 
                 addType(TypeSpec.companionObjectBuilder().apply {
                     addModifiers(KModifier.PUBLIC)
                     addProperty(PropertySpec.builder("OP", String::class).apply {
                         addModifiers(KModifier.CONST)
-                        initializer("%S", rule.name)
+                        initializer("%S", constructor.decl.name)
                     }.build())
                     addProperty(PropertySpec.builder("ARITY", Int::class).apply {
                         addModifiers(KModifier.CONST)
-                        initializer(symbols.size.toString())
+                        initializer(constructor.parameters.size.toString())
                     }.build())
                 }.build())
 
-                symbols.onEachIndexed { index, pair ->
-                    val (symbol, type) = pair
+                constructor.parameters.onEachIndexed { index, pair ->
+                    val (name, type) = pair
 
-                    addProperty(PropertySpec.builder(symbol.name, type).apply {
-                        initializer(symbol.name)
+                    addProperty(PropertySpec.builder(name, type).apply {
+                        initializer(name)
                     }.build())
 
                     addFunction(FunSpec.builder("component${index + 1}").apply {
                         addModifiers(KModifier.OVERRIDE)
                         addModifiers(KModifier.OPERATOR)
                         returns(type)
-                        addStatement("return %N", symbol.name)
+                        addStatement("return %N", name)
                     }.build())
                 }
 
@@ -255,11 +247,11 @@ class KatermCodeGenerator(
                     initializer("ARITY")
                 }.build())
 
-                addProperty(PropertySpec.builder("termArgs", ListTerm.parameterizedBy(Term)).apply {
+                addProperty(PropertySpec.builder("termArgs", Katerm.ListTerm(Katerm.Term)).apply {
                     addModifiers(KModifier.OVERRIDE)
                     initializer(
                         "listOf(%L)",
-                        symbols.keys.joinToString(", ") { it.name }
+                        constructor.parameters.joinToString(", ") { it.name }
                     )
                 }.build())
 
@@ -268,7 +260,7 @@ class KatermCodeGenerator(
 
                     addModifiers(KModifier.OVERRIDE)
                     addTypeVariable(R)
-                    addParameter("visitor", TermVisitor.parameterizedBy(R))
+                    addParameter("visitor", Katerm.TermVisitor(R))
                     returns(R)
 
                     addStatement("return visitor.visitAppl(this)")
@@ -281,7 +273,7 @@ class KatermCodeGenerator(
                     addModifiers(KModifier.OVERRIDE)
                     addTypeVariable(A)
                     addTypeVariable(R)
-                    addParameter("visitor", TermVisitor1.parameterizedBy(A, R))
+                    addParameter("visitor", Katerm.TermVisitor1(A, R))
                     addParameter("arg", A)
                     returns(R)
 
@@ -296,7 +288,7 @@ class KatermCodeGenerator(
                     addParameter("visitor", LangTermVisitor.parameterizedBy(R))
                     returns(R)
 
-                    addStatement("return visitor.visit${applClass.simpleName}(this)")
+                    addStatement("return visitor.visit${constructor.type.simpleName}(this)")
                 }.build())
 
                 addFunction(FunSpec.builder("accept").apply {
@@ -310,18 +302,18 @@ class KatermCodeGenerator(
                     addParameter("arg", A)
                     returns(R)
 
-                    addStatement("return visitor.visit${applClass.simpleName}(this, arg)")
+                    addStatement("return visitor.visit${constructor.type.simpleName}(this, arg)")
                 }.build())
 
                 addFunction(FunSpec.builder("equalSubterms").apply {
                     addModifiers(KModifier.OVERRIDE)
-                    addParameter("that", ApplTerm)
+                    addParameter("that", Katerm.ApplTerm)
                     addParameter("compareAttachments", Boolean::class)
                     returns(Boolean::class)
 
-                    addStatement("if (that !is %T) return false", applClass)
-                    symbols.forEach { (symbol, _) ->
-                        addStatement("if (!this.%N.equals(that.%N, compareAttachments = compareAttachments)) return false", symbol.name, symbol.name)
+                    addStatement("if (that !is %T) return false", constructor.type)
+                    constructor.parameters.forEach { (name, _) ->
+                        addStatement("if (!this.%N.equals(that.%N, compareAttachments = compareAttachments)) return false", name, name)
                     }
                     addStatement("return true")
                 }.build())
@@ -330,7 +322,7 @@ class KatermCodeGenerator(
                     addModifiers(KModifier.OVERRIDE)
                     initializer(
                         "Objects.hash(%L)",
-                        symbols.keys.joinToString(", ") { it.name }
+                        constructor.parameters.joinToString(", ") { it.name }
                     )
                 }.build())
 

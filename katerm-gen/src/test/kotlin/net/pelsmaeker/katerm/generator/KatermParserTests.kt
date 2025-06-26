@@ -10,26 +10,35 @@ class KatermParserTests: FunSpec({
     test("x") {
         // Arrange
         val program = """
-            language Joe;
+            package net.pelsmaeker.joelang.ast;
 
             Unit = <modules: Module*>;
             
             Module = "mod" <name: string> "{" <declarations: Decl*> "}";
             
-            Decl.Def = "def" <name: string> ":" <type: Type> "=" <body: Expr> ";" ;
+            sort Decl {
+              Def = "def" <name: string> ":" <type: Type> "=" <body: Expr> ";" ;
+            }
             
-            Type.Int = "int";
+            sort Type {
+              Int = "int";
+            }
             
-            Expr.IntLiteral = <value: int>;
-            Expr.Ref = <name: string>;
+            sort Expr {
+              IntLiteral = <value: int>;
+              Ref = <name: string>;
+            }
             
+            sort AnalyzerType {
+              INT = "INT";
+              ERROR = "ERROR";
+            }
             
-            AnalyzerType.INT = "INT";
-            AnalyzerType.ERROR = "ERROR";
-            
-            Label.MOD = "MOD" "(" <name: string> ")";
-            Label.DEF = <name: string> ":" <type: AnalyzerType>;
-            Label.LEX = "LEX";
+            sort Label {
+              MOD = "MOD" "(" <name: string> ")";
+              DEF = <name: string> ":" <type: AnalyzerType>;
+              LEX = "LEX";
+            }
         """.trimIndent()
         val messages = mutableListOf<Message>()
         val collector = MessageCollector { msg -> messages.add(msg); true }

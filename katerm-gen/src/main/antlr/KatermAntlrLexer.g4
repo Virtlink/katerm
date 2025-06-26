@@ -4,9 +4,12 @@ lexer grammar KatermAntlrLexer;
 LANGUAGE      : 'language';
 STRING        : 'string';
 INT           : 'int';
+SORT          : 'sort';
+PACKAGE       : 'package';
 
 // Literals and Identifiers
 ID            : [a-zA-Z_][a-zA-Z0-9_]*;
+QID           : ID ( '.' ID )*;
 INTLIT        : [0-9]+;
 STRINGLIT     : '"' ( StringEscapeSeq | ~( '\\' | '"' | '\r' | '\n' ) )* '"';
 fragment StringEscapeSeq : '\\' ( 't' | 'n' | 'r' | '"' | '\\' );
@@ -19,6 +22,12 @@ SEMICOLON     : ';';
 EQUALS        : '=';
 ANGLE_OPEN    : '<';
 ANGLE_CLOSE   : '>';
+CURLY_OPEN    : '{';
+CURLY_CLOSE   : '}';
+PAREN_OPEN    : '(';
+PAREN_CLOSE   : ')';
+SQUARE_OPEN   : '[';
+SQUARE_CLOSE  : ']';
 DOT           : '.';
 
 // Layout

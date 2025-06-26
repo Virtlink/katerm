@@ -1,41 +1,56 @@
 package net.pelsmaeker.katerm.generator.ast
 
-data class KatermUnit(
-    val languageName: String,
-    val rules: List<KatermRule>,
-)
+import com.squareup.kotlinpoet.ClassName
 
-data class KatermRule(
-    val sort: String?,
+data class FileUnit(
+    val packageName: String,
+    override val declarations: List<Decl>,
+) : DeclContainer
+
+sealed interface DeclContainer {
+    val declarations: List<Decl>
+}
+
+sealed interface Decl {
+    val name: String
+}
+
+data class SortDecl(
+    override val name: String,
+    override val declarations: List<Decl>,
+) : Decl, DeclContainer
+
+data class RuleDecl(
+    override val name: String,
+    val symbols: List<Symbol>,
+) : Decl
+
+sealed interface Symbol
+
+data class StringLitSymbol(
+    val text: String,
+) : Symbol
+
+data class NamedSymbol(
     val name: String,
-    val symbols: List<KatermSymbol>,
-)
+    val typeSpec: Type,
+) : Symbol
 
-sealed interface KatermSymbol {
+sealed interface Type
 
-    data class StringLit(
-        val text: String,
-    ) : KatermSymbol
+data object IntType : Type
 
-    data class Named(
-        val name: String,
-        val typeSpec: KatermTypeSpec,
-    ) : KatermSymbol
+data object StringType : Type
 
-}
+data class RefType(
+    val name: String,
+) : Type
 
-sealed interface KatermTypeSpec {
+data class ResolvedRefType(
+    val declType: ClassName,
+//    val decl: Decl,
+) : Type
 
-    data object Int : KatermTypeSpec
-
-    data object String : KatermTypeSpec
-
-    data class Ref(
-        val name: kotlin.String,
-    ) : KatermTypeSpec
-
-    data class Star(
-        val sortSpec: KatermTypeSpec,
-    ) : KatermTypeSpec
-
-}
+data class StarType(
+    val sortSpec: Type,
+) : Type

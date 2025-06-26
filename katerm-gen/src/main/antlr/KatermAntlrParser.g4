@@ -5,16 +5,20 @@ options {
 }
 
 unit
-  : LANGUAGE ID SEMICOLON rule* EOF
+  : PACKAGE QID SEMICOLON decl* EOF
   ;
 
-rule
-  : ruleName EQUALS ruleSymbol* SEMICOLON
+decl
+  : sortDecl
+  | ruleDecl
   ;
 
-ruleName
-  : ID                                              # simpleRuleName
-  | ID DOT ID                                       # qualifiedRuleName
+sortDecl
+  : SORT ID CURLY_OPEN decl* CURLY_CLOSE
+  ;
+
+ruleDecl
+  : ID EQUALS ruleSymbol* SEMICOLON
   ;
 
 ruleSymbol

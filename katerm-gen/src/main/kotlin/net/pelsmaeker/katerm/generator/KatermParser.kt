@@ -1,7 +1,7 @@
 package net.pelsmaeker.katerm.generator
 
 import net.pelsmaeker.katerm.generator.ast.KatermAstBuilder
-import net.pelsmaeker.katerm.generator.ast.KatermUnit
+import net.pelsmaeker.katerm.generator.ast.FileUnit
 import net.pelsmaeker.lsputils.diagnostics.FailFastMessageCollectorWrapper
 import net.pelsmaeker.lsputils.diagnostics.MessageCollector
 import net.pelsmaeker.lsputils.syntax.MessageCollectingAntlrErrorListener
@@ -29,7 +29,7 @@ class KatermParser(
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, str: String, messageCollector: MessageCollector): KatermUnit?
+    fun parse(path: String, str: String, messageCollector: MessageCollector): FileUnit?
             = StringReader(str).use { parse(path, it, messageCollector) }
 
     /**
@@ -40,7 +40,7 @@ class KatermParser(
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, stream: InputStream, messageCollector: MessageCollector): KatermUnit?
+    fun parse(path: String, stream: InputStream, messageCollector: MessageCollector): FileUnit?
             = InputStreamReader(stream).use { parse(path, it, messageCollector) }
 
     /**
@@ -51,7 +51,7 @@ class KatermParser(
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, reader: Reader, messageCollector: MessageCollector): KatermUnit? {
+    fun parse(path: String, reader: Reader, messageCollector: MessageCollector): FileUnit? {
         val charStream = CharStreams.fromReader(reader)
 
         val errorListener = MessageCollectingAntlrErrorListener(
