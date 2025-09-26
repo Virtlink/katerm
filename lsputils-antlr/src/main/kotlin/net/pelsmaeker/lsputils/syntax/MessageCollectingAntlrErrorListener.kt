@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.misc.ParseCancellationException
 
 /**
  * Error listener that collects parse errors as messages.
@@ -34,6 +35,7 @@ class MessageCollectingAntlrErrorListener(
             path = path,
             span = (offendingSymbol as? Token)?.span,
         )
-        collector.offer(message)
+        val cont = collector.offer(message)
+        if (!cont) throw ParseCancellationException("line $line:$charPositionInLine $msg")
     }
 }
