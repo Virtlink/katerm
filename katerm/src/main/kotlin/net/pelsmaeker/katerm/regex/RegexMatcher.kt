@@ -1,28 +1,57 @@
 package net.pelsmaeker.katerm.regex
 
 import net.pelsmaeker.katerm.substitutions.Substitution
-import net.pelsmaeker.katerm.terms.Term
 
-interface RegexMatcher {
+/**
+ * A matcher for regular expressions.
+ *
+ * @param T The type of input tokens to match against.
+ * @param M The type of metadata associated with each state.
+ */
+interface RegexMatcher<T, M> {
 
-    val substitution: Substitution
+    /**
+     * Gets the metadata associated with an accepting state.
+     *
+     * @return The metadata associated with an accepting state;
+     * otherwise, `null` if the matcher is not in an accepting state.
+     */
+    fun getAcceptingMetadata(): M?
 
-    fun match(input: Term): RegexMatcher?
+    /**
+     * Matches against the specified input token.
+     *
+     * @param input The token to match against.
+     * @return A matcher representing the state after matching the token,
+     * which is empty if the match failed.
+     */
+    fun match(input: T): RegexMatcher<T, M>
 
-    fun matchAll(inputs: Iterable<Term>): RegexMatcher? {
+    /**
+     * Matches against the specified sequence of input tokens.
+     *
+     * @param inputs The tokens to match against.
+     * @return A matcher representing the state after matching the tokens,
+     * which is empty if any of the matches failed.
+     */
+    fun matchAll(inputs: Iterable<T>): RegexMatcher<T, M> {
         var currentMatcher = this
         for (input in inputs) {
-            val newMatcher = currentMatcher.match(input) ?: return null
+            val newMatcher = currentMatcher.match(input)
+            if (newMatcher.isEmpty()) return newMatcher
             currentMatcher = newMatcher
         }
         return currentMatcher
     }
 
+    /**
+     * Whether the matcher is in any accepting state.
+     */
     fun isAccepting(): Boolean
-    fun isFinal(): Boolean
-    fun isEmpty(): Boolean = !isAccepting() && !isFinal()
-    fun isNotAccepting(): Boolean = !isAccepting()
-    fun isNotFinal(): Boolean = !isFinal()
-    fun isNotEmpty(): Boolean = !isEmpty()
+
+    /**
+     * Whether the matcher is empty.
+     */
+    fun isEmpty(): Boolean
 
 }
