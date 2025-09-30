@@ -18,5 +18,6 @@ interface Regex<T, M> {
      * @return A new regex matcher for this regular expression.
      */
     fun buildMatcher(initialMetadata: M): RegexMatcher<T, M>
+
 }
 

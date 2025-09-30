@@ -53,7 +53,7 @@ sealed class RegexAst: Regex<String, Unit> {
 
         override fun star(pattern: RegexAst): RegexAst = Star(pattern)
 
-        override fun starLazy(pattern: RegexAst): RegexAst = Star(pattern)
+        override fun starLazy(pattern: RegexAst): RegexAst = StarLazy(pattern)
 
         override fun plus(pattern: RegexAst): RegexAst = Plus(pattern)
 

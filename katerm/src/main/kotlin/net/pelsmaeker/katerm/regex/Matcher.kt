@@ -4,7 +4,7 @@ import net.pelsmaeker.katerm.substitutions.Substitution
 import net.pelsmaeker.katerm.substitutions.unify
 import net.pelsmaeker.katerm.terms.Term
 
-fun interface Matcher<T, M> {
+fun interface Matcher<in T, M> {
     /**
      * Tries to match the given input token.
      *

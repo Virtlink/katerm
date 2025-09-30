@@ -8,15 +8,6 @@ package net.pelsmaeker.katerm.regex
 @Suppress("PropertyName", "DANGEROUS_CHARACTERS")
 interface RegexBuilder<R : Regex<T, M>, T, M> {
 
-//    /**
-//     * Creates a regular expression pattern matching the given term.
-//     *
-//     * @param term The term to match.
-//     * @return The built regular expression.
-//     */
-//    @Suppress("FunctionName")
-//    fun T(term: Term): R = atom(UnifyingMatcher(term))
-
     /**
      * Creates a regular expression pattern matching any term.
      *

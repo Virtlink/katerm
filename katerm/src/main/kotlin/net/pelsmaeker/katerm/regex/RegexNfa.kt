@@ -24,6 +24,8 @@ interface RegexNfa<T, M> : Regex<T, M> {
      */
     fun getTransitions(state: State): List<Transition<T, M>>
 
+    val transitions: Map<State, List<RegexNfa.Transition<T, M>>>
+
     /**
      * A state in the NFA.
      */
