@@ -5,6 +5,23 @@ import kotlin.collections.plus
 
 class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
 
+    override fun epsilon(): RegexNfa<T, M> =
+        Epsilon()
+
+    private class Epsilon<T, M>(): RegexNfaImpl<T, M>() {
+        override val initialState: State = State("ε_0")
+        override val acceptingState: State = State("ε_1")
+        override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = mapOf(
+            initialState to listOf(
+                // Transition to the accepting state without matching anything
+                RegexNfa.Transition<T, M>(acceptingState, null),
+            ),
+            acceptingState to emptyList(),
+        )
+
+        override fun toString(): String = "ε"
+    }
+
     override fun atom(matcher: Matcher<T, M>): RegexNfa<T, M> =
         Atom(matcher)
 

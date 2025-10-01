@@ -1,5 +1,7 @@
 package net.pelsmaeker.katerm.regex
 
+import net.pelsmaeker.katerm.regex.RegexNfaBuilder.Epsilon
+
 /**
  * A builder for regular expressions.
  *
@@ -50,7 +52,14 @@ interface RegexBuilder<R : Regex<T, M>, T, M> {
     val R.`+?`: R get() = plusLazy(this)
     /** Creates a regular expression pattern matching a sequence of zero or one of the given pattern (lazy). */
     val R.`??`: R get() = questionLazy(this)
-    
+
+    /**
+     * Creates a regular expression pattern matching the empty sequence (epsilon).
+     *
+     * @return The built regular expression.
+     */
+    fun epsilon(): R
+
     /**
      * Creates a regular expression pattern matching using the given matcher.
      *

@@ -8,6 +8,10 @@ sealed class RegexAst: Regex<String, Unit> {
         throw NotImplementedError("TestRegex does not implement buildMatcher")
     }
 
+    data object Epsilon: RegexAst() {
+        override fun toString(): String = "ε"
+    }
+
     data class Atom(val matcher: Matcher<String, Unit>): RegexAst() {
         override fun toString(): String = "$matcher"
     }
@@ -38,6 +42,8 @@ sealed class RegexAst: Regex<String, Unit> {
 
     object Builder: RegexBuilder<RegexAst, String, Unit> {
         operator fun String.invoke(): RegexAst = atom(EqualityMatcher(this))
+
+        override fun epsilon(): RegexAst = Epsilon
 
         override fun atom(matcher: Matcher<String, Unit>): RegexAst = Atom(matcher)
 

@@ -11,6 +11,10 @@ import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.orNull
 import io.kotest.property.arbitrary.string
 import io.kotest.property.resolution.GlobalArbResolver
+import net.pelsmaeker.katerm.regex.RegexNfa
+import net.pelsmaeker.katerm.regex.RegexNfaBuilder
+import net.pelsmaeker.katerm.regex.TermRegexBuilder
+import net.pelsmaeker.katerm.substitutions.Substitution
 import net.pelsmaeker.katerm.terms.ApplTerm
 import net.pelsmaeker.katerm.terms.ConcatListTerm
 import net.pelsmaeker.katerm.terms.ConsListTerm
@@ -29,7 +33,10 @@ import kotlin.random.Random
 import kotlin.reflect.typeOf
 
 /** The term builder used in tests. */
-val testTermBuilder = SimpleTermBuilder()
+val testTermBuilder = TermRegexBuilder(
+    termBuilder = SimpleTermBuilder(),
+    regexBuilder = RegexNfaBuilder(),
+)
 
 /** A generator for arbitrary [TermVar] instances. */
 fun Arb.Companion.termVar(): Arb<TermVar> = arbitrary(
