@@ -28,8 +28,12 @@ interface RegexNfa<T, M> : Regex<T, M> {
 
     /**
      * A state in the NFA.
+     *
+     * @property debugName A debug name for the state; or `null` to not specify one.
      */
-    class State {
+    data class State(
+        val debugName: String? = null,
+    ) {
         override fun equals(other: Any?): Boolean {
             return this === other
         }
@@ -39,7 +43,7 @@ interface RegexNfa<T, M> : Regex<T, M> {
         }
 
         override fun toString(): String {
-            return "State@${Integer.toHexString(hashCode())}"
+            return debugName ?: "State@${Integer.toHexString(hashCode())}"
         }
     }
 
@@ -93,11 +97,9 @@ interface RegexNfa<T, M> : Regex<T, M> {
             val newStates = LinkedHashMap<State, M>()
             for ((state, metadata) in states) {
                 for (transition in nfa.getTransitions(state)) {
-                    val matcher = transition.matcher
-                    val newMetadata = if (matcher != null) matcher.matches(input, metadata) else metadata
-                    if (newMetadata != null) {
-                        newStates[transition.toState] = newMetadata
-                    }
+                    val matcher = transition.matcher ?: continue
+                    val newMetadata = matcher.matches(input, metadata) ?: continue
+                    newStates[transition.toState] = newMetadata
                 }
             }
             // Close over epsilon transitions again.

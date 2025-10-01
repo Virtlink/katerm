@@ -27,9 +27,7 @@ data class EqualityMatcher<T, M>(
         return if (input == expected) metadata else null
     }
 
-    override fun toString(): String {
-        return "$expected"
-    }
+    override fun toString(): String = "$expected"
 }
 
 /**
@@ -57,6 +55,8 @@ data class UnifyingMatcher(
     override fun matches(input: Term, substitution: Substitution): Substitution? {
         return substitution.unify(expected, input)
     }
+
+    override fun toString(): String = "$expected"
 }
 
 /**
@@ -66,4 +66,6 @@ class WildcardMatcher<T, M> : Matcher<T, M> {
     override fun matches(input: T, metadata: M): M? {
         return metadata
     }
+
+    override fun toString(): String = "_"
 }

@@ -9,8 +9,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Atom(matcher)
 
     private class Atom<T, M>(val matcher: Matcher<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${matcher}_0")
+        override val acceptingState: State = State("${matcher}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = mapOf(
             initialState to listOf(
                 // Transition to the accepting state on the given matcher
@@ -26,8 +26,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Concat(first, second)
 
     private class Concat<T, M>(val first: RegexNfa<T, M>, val second: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = first.transitions + second.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the initial state of the first NFA
@@ -52,8 +52,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Union(first, second)
 
     private class Union<T, M>(val first: RegexNfa<T, M>, val second: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = first.transitions + second.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the initial state of the first NFA
@@ -79,8 +79,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Star(pattern)
 
     private class Star<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the NFA's initial state (for one or more repetitions)
@@ -104,8 +104,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         StarLazy(pattern)
 
     private class StarLazy<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the accepting state (for zero repetitions)
@@ -129,8 +129,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Plus(pattern)
 
     private class Plus<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the NFA's initial state (for one or more repetitions)
@@ -152,8 +152,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         PlusLazy(pattern)
 
     private class PlusLazy<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the NFA's initial state (for one or more repetitions)
@@ -175,8 +175,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         Question(pattern)
 
     private class Question<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the NFA's initial state (for one occurrence)
@@ -198,8 +198,8 @@ class RegexNfaBuilder<T, M> : RegexBuilder<RegexNfa<T, M>, T, M> {
         QuestionLazy(pattern)
 
     private class QuestionLazy<T, M>(val pattern: RegexNfa<T, M>): RegexNfaImpl<T, M>() {
-        override val initialState: State = State()
-        override val acceptingState: State = State()
+        override val initialState: State = State("${this}_0")
+        override val acceptingState: State = State("${this}_1")
         override val transitions: Map<State, List<RegexNfa.Transition<T, M>>> = pattern.transitions + mapOf(
             initialState to listOf(
                 // Epsilon transition to the accepting state (for zero occurrences)
