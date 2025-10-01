@@ -11,10 +11,8 @@ import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.orNull
 import io.kotest.property.arbitrary.string
 import io.kotest.property.resolution.GlobalArbResolver
-import net.pelsmaeker.katerm.regex.RegexNfa
 import net.pelsmaeker.katerm.regex.RegexNfaBuilder
 import net.pelsmaeker.katerm.regex.TermRegexBuilder
-import net.pelsmaeker.katerm.substitutions.Substitution
 import net.pelsmaeker.katerm.terms.ApplTerm
 import net.pelsmaeker.katerm.terms.ConcatListTerm
 import net.pelsmaeker.katerm.terms.ConsListTerm
@@ -33,8 +31,11 @@ import kotlin.random.Random
 import kotlin.reflect.typeOf
 
 /** The term builder used in tests. */
-val testTermBuilder = TermRegexBuilder(
-    termBuilder = SimpleTermBuilder(),
+val testTermBuilder = SimpleTermBuilder()
+
+/** The regex builder used in tests. */
+val testRegexBuilder = TermRegexBuilder(
+    termBuilder = testTermBuilder,
     regexBuilder = RegexNfaBuilder(),
 )
 

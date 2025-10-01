@@ -6,14 +6,14 @@ import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermVar
 import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class UnifyOperationTests: FunSpec({
 
     context("unification") {
         withData<Pair<Pair<Term, Term>, Map<Set<TermVar>, Term>?>>(
             nameFn = { (pair, substitution) -> "unify(${pair.first}, ${pair.second}) -> " + (substitution?.let { "$it" } ?: "⊥") },
-            withTermBuilder(testTermBuilder) {
+            withTermBuilder(testRegexBuilder) {
                 listOf(
                     /////////////
                     // IntTerm //
@@ -1583,7 +1583,7 @@ class UnifyOperationTests: FunSpec({
             val (left, right) = pair
 
             // Act
-            val result = testTermBuilder.unify(left, right)
+            val result = testRegexBuilder.unify(left, right)
 
             // Assert
             result?.toMap() shouldBe substitution
@@ -1591,7 +1591,7 @@ class UnifyOperationTests: FunSpec({
     }
 
     test("test 1") {
-        withTermBuilder(testTermBuilder) {
+        withTermBuilder(testRegexBuilder) {
             // Arrange
             val (left, right) = Pair(
                 int(42),
@@ -1602,7 +1602,7 @@ class UnifyOperationTests: FunSpec({
             )
 
             // Act
-            val result = testTermBuilder.unify(left, right)
+            val result = testRegexBuilder.unify(left, right)
 
             // Assert
             result?.toMap() shouldBe substitution

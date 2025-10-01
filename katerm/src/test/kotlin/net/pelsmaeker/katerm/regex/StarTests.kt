@@ -3,15 +3,14 @@ package net.pelsmaeker.katerm.regex
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
-import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class StarTests : FunSpec({
 
     context("deriveAndUnify()") {
 
         test("should derive and unify with a single term matching the pattern") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val subPattern = T(string("Foo"))
                 val regex = star(subPattern)
@@ -29,7 +28,7 @@ class StarTests : FunSpec({
         }
 
         test("should derive and unify with a multiple terms matching the pattern") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val subPattern = T(string("Foo"))
                 val regex = star(subPattern)
@@ -49,7 +48,7 @@ class StarTests : FunSpec({
         }
 
         test("should derive and unify with no terms matching the pattern in a concat") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val subPattern = T(string("Foo"))
                 val followPattern = T(string("Bar"))
@@ -68,7 +67,7 @@ class StarTests : FunSpec({
         }
 
         test("should derive and unify with a single term matching the pattern in a concat") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val subPattern = T(string("Foo"))
                 val followPattern = T(string("Bar"))
@@ -88,7 +87,7 @@ class StarTests : FunSpec({
         }
 
         test("should derive and unify with a multiple terms matching the pattern in a concat") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val subPattern = T(string("Foo"))
                 val followPattern = T(string("Bar"))

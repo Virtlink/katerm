@@ -3,13 +3,13 @@ package net.pelsmaeker.katerm.regex
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class UnionRegexTests : FunSpec({
 
     context("deriveAndUnify()") {
         test("should derive and unify with a term matching the left term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -29,7 +29,7 @@ class UnionRegexTests : FunSpec({
         }
 
         test("should derive and unify with a term matching the right term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -48,7 +48,7 @@ class UnionRegexTests : FunSpec({
         }
 
         test("should derive and unify with a term matching both terms") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Foo"))
@@ -67,7 +67,7 @@ class UnionRegexTests : FunSpec({
         }
 
         test("should not derive and unify with a term matching neither term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -84,7 +84,7 @@ class UnionRegexTests : FunSpec({
         }
 
         test("should handle nullable first pattern correctly") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = star(T(string("Foo")))
                 val secondPattern = T(string("Foo"))
@@ -103,7 +103,7 @@ class UnionRegexTests : FunSpec({
         }
 
         test("should handle nullable second pattern correctly") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = star(T(string("Foo")))

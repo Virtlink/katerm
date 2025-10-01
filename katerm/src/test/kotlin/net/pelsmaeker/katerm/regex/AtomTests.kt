@@ -4,14 +4,13 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
-import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class AtomTests : FunSpec({
 
     context("match()") {
         test("should derive and unify with a matching term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val regex = T(string("Foo"))
                 val substitution = emptySubstitution()
@@ -29,7 +28,7 @@ class AtomTests : FunSpec({
         }
 
         test("should not derive and unify with a non-matching term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val regex = T(string("Foo"))
                 val substitution = emptySubstitution()
@@ -45,7 +44,7 @@ class AtomTests : FunSpec({
         }
 
         test("should unify a term variable with a term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val regex = T(!"X")
                 val substitution = emptySubstitution()
@@ -65,7 +64,7 @@ class AtomTests : FunSpec({
         }
 
         test("should unify a term variable with another term variable") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val regex = T(!"X")
                 val substitution = emptySubstitution()

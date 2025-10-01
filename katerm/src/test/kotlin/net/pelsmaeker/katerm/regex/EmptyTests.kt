@@ -2,16 +2,14 @@ package net.pelsmaeker.katerm.regex
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
-import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class EmptyTests : FunSpec({
 
     context("deriveAndUnify()") {
         test("should always return null") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val regex = epsilon()
                 val substitution = emptySubstitution()

@@ -3,14 +3,13 @@ package net.pelsmaeker.katerm.regex
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
-import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 class ConcatTests : FunSpec({
 
     context("deriveAndUnify()") {
         test("should derive and unify with a matching term for both patterns") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -30,7 +29,7 @@ class ConcatTests : FunSpec({
         }
 
         test("should not derive and unify with a non-matching first term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -47,7 +46,7 @@ class ConcatTests : FunSpec({
         }
 
         test("should not derive and unify with a non-matching second term") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val firstPattern = T(string("Foo"))
                 val secondPattern = T(string("Bar"))
@@ -66,7 +65,7 @@ class ConcatTests : FunSpec({
         }
 
         test("should handle nullable first pattern correctly") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // TODO
             }
         }

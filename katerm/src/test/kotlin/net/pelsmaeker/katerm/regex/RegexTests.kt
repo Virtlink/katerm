@@ -8,8 +8,7 @@ import net.pelsmaeker.katerm.substitutions.Substitution
 import net.pelsmaeker.katerm.substitutions.emptySubstitution
 import net.pelsmaeker.katerm.terms.Term
 import net.pelsmaeker.katerm.terms.TermVar
-import net.pelsmaeker.katerm.terms.withTermBuilder
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 typealias SubstMap = Map<Set<TermVar>, Term>
 
@@ -17,7 +16,7 @@ class RegexTests : FunSpec({
 
     withData<Pair<Pair<Regex<Term, Substitution>, List<Term>>, SubstMap?>>(
         nameFn = { (rt: Pair<Regex<Term, Substitution>, List<Term>>, s: SubstMap?) -> "should ${if (s == null) "not" else ""} derive and unify ${rt.first} when applied to ${rt.second}" },
-        with(testTermBuilder) { listOf<Pair<Pair<Regex<Term, Substitution>, List<Term>>, SubstMap?>>(
+        with(testRegexBuilder) { listOf<Pair<Pair<Regex<Term, Substitution>, List<Term>>, SubstMap?>>(
             // Atom
             Pair(
                 // Foo
@@ -147,7 +146,7 @@ class RegexTests : FunSpec({
         ) }
     ) { (regexTerms: Pair<Regex<Term, Substitution>, List<Term>>, expectedSubstitution: SubstMap?) ->
         val (regex: Regex<Term, Substitution>, terms: List<Term>) = regexTerms
-        with(testTermBuilder) {
+        with(testRegexBuilder) {
             // Act
             var m = regex.buildMatcher(emptySubstitution())
             for (term in terms) {

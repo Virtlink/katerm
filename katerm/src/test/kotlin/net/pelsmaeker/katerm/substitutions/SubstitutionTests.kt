@@ -9,7 +9,7 @@ import io.kotest.core.test.TestScope
 import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.property.assume
 import net.pelsmaeker.katerm.registerTermArbs
-import net.pelsmaeker.katerm.testTermBuilder
+import net.pelsmaeker.katerm.testRegexBuilder
 
 /**
  * Tests the implementation of the [Substitution] interface.
@@ -35,7 +35,7 @@ fun testSubstitution(
         }
 
         test("should return false, when the substitution is not empty") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newVar("y"),
@@ -60,7 +60,7 @@ fun testSubstitution(
 
     context("isNotEmpty()") {
         test("should return true, when the substitution is not empty") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newVar("y"),
@@ -94,7 +94,7 @@ fun testSubstitution(
 
     context("variables") {
         test("should return the set of variables in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -108,7 +108,7 @@ fun testSubstitution(
         }
 
         test("should also return variables that have the same value in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("a") to newString("X"),
@@ -137,7 +137,7 @@ fun testSubstitution(
 
     context("get()") {
         test("should return the term the variable is mapped to, when the variable is in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -152,7 +152,7 @@ fun testSubstitution(
         }
 
         test("should return the variable itself, when the variable is not in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -180,7 +180,7 @@ fun testSubstitution(
 
     context("find()") {
         test("should return the variable, when the variable is alone in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -195,7 +195,7 @@ fun testSubstitution(
         }
 
         test("should return the representative variable for the given variable, when the variable is in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newVar("y"),
@@ -222,7 +222,7 @@ fun testSubstitution(
         }
 
         test("should return null, when the variable is not in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -238,7 +238,7 @@ fun testSubstitution(
 
     context("contains()") {
         test("should return true, when the variable is alone in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
@@ -253,7 +253,7 @@ fun testSubstitution(
         }
 
         test("should return true, when the variable has a representative in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newVar("y"),
@@ -280,7 +280,7 @@ fun testSubstitution(
         }
 
         test("should return false, when the variable is not in the substitution") {
-            with(testTermBuilder) {
+            with(testRegexBuilder) {
                 // Arrange
                 val pairs = listOf<Pair<TermVar, Term>>(
                     newVar("x") to newString("Y"),
