@@ -47,7 +47,7 @@ class KatermCodeGeneratorTests: FunSpec({
         val result = parser.parse("test.katerm", program, collector)
         val processedAst = KatermPreprocessor().preprocess(result!!)
         val generator = KatermCodeGenerator(
-            outputDir = Path.of("/Users/daniel/git/virtlink/katerm/tmp"),
+            outputDir = Path.of("tmp/"),
             ast = processedAst,
         )
 
