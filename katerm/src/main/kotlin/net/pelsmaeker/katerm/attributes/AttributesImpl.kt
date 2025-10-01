@@ -3,9 +3,9 @@ package net.pelsmaeker.katerm.attributes
 import java.util.WeakHashMap
 
 /**
- * Implementation of [MutableAttributes] using a weak hash map.
+ * Implementation of [Attributes] using a weak hash map.
  */
-class MutableAttributesImpl : MutableAttributes {
+class AttributesImpl : Attributes {
 
     // We use a WeakHashMap which doesn't keep a pointer to the key object,
     // so that the attributes don't prevent the object from being garbage collected.
