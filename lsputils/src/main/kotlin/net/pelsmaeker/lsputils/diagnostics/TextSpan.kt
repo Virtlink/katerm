@@ -55,4 +55,9 @@ data class TextSpan(
     val end: TextLocation get() = TextLocation(endOffset, endLine, endColumn)
 
     override fun toString(): String = "$start-$end"
+
+    companion object {
+        /** An empty span at the start of the text. */
+        val ZERO = TextSpan(TextLocation.ZERO, TextLocation.ZERO)
+    }
 }

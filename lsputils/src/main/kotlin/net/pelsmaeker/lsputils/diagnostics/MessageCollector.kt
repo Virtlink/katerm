@@ -11,19 +11,19 @@ fun interface MessageCollector {
      */
     fun offer(message: Message): Boolean
 
+    fun fatal(message: String, resource: ResourceID? = null, span: TextSpan? = null) =
+        offer(Message(MessageSeverity.FATAL, message, resource, span, null))
+
+    fun error(message: String, resource: ResourceID? = null, span: TextSpan? = null) =
+        offer(Message(MessageSeverity.ERROR, message, resource, span, null))
+
+    fun warning(message: String, resource: ResourceID? = null, span: TextSpan? = null) =
+        offer(Message(MessageSeverity.WARNING, message, resource, span, null))
+
+    fun info(message: String, resource: ResourceID? = null, span: TextSpan? = null) =
+        offer(Message(MessageSeverity.INFO, message, resource, span, null))
+
+    fun hint(message: String, resource: ResourceID? = null, span: TextSpan? = null) =
+        offer(Message(MessageSeverity.HINT, message, resource, span, null))
+
 }
-
-fun MessageCollector.fatal(message: String, path: String? = null, span: TextSpan? = null) =
-    offer(Message(MessageSeverity.FATAL, message, path, span))
-
-fun MessageCollector.error(message: String, path: String? = null, span: TextSpan? = null) =
-    offer(Message(MessageSeverity.ERROR, message, path, span))
-
-fun MessageCollector.warning(message: String, path: String? = null, span: TextSpan? = null) =
-    offer(Message(MessageSeverity.WARNING, message, path, span))
-
-fun MessageCollector.info(message: String, path: String? = null, span: TextSpan? = null) =
-    offer(Message(MessageSeverity.INFO, message, path, span))
-
-fun MessageCollector.hint(message: String, path: String? = null, span: TextSpan? = null) =
-    offer(Message(MessageSeverity.HINT, message, path, span))

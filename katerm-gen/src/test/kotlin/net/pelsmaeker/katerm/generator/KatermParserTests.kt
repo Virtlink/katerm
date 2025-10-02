@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.pelsmaeker.lsputils.diagnostics.Message
 import net.pelsmaeker.lsputils.diagnostics.MessageCollector
+import net.pelsmaeker.lsputils.diagnostics.ResourceID
 
 class KatermParserTests: FunSpec({
     test("x") {
@@ -45,7 +46,7 @@ class KatermParserTests: FunSpec({
 
         // Act
         val parser = KatermParser()
-        val result = parser.parse("test.katerm", program, collector)
+        val result = parser.parse(ResourceID.fromPath("test.katerm"), program, collector)
 
         // Assert
         messages.isEmpty() shouldBe true

@@ -4,6 +4,7 @@ import net.pelsmaeker.katerm.generator.ast.KatermAstBuilder
 import net.pelsmaeker.katerm.generator.ast.FileUnit
 import net.pelsmaeker.lsputils.diagnostics.FailFastMessageCollectorWrapper
 import net.pelsmaeker.lsputils.diagnostics.MessageCollector
+import net.pelsmaeker.lsputils.diagnostics.ResourceID
 import net.pelsmaeker.lsputils.syntax.MessageCollectingAntlrErrorListener
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
@@ -24,39 +25,40 @@ class KatermParser(
     /**
      * Parses the specified string into an AST.
      *
-     * @param path The path of the file being parsed.
+     * @param resource The resource ID of the file being parsed.
      * @param str The string to parse.
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, str: String, messageCollector: MessageCollector): FileUnit?
-            = StringReader(str).use { parse(path, it, messageCollector) }
+    fun parse(resource: ResourceID, str: String, messageCollector: MessageCollector): FileUnit?
+            = StringReader(str).use { parse(resource, it, messageCollector) }
 
     /**
      * Parses the content from the specified input stream into an AST.
      *
-     * @param path The path of the file being parsed.
+     * @param resource The resource ID of the file being parsed.
      * @param stream The input stream to read from.
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, stream: InputStream, messageCollector: MessageCollector): FileUnit?
-            = InputStreamReader(stream).use { parse(path, it, messageCollector) }
+    fun parse(resource: ResourceID, stream: InputStream, messageCollector: MessageCollector): FileUnit?
+            = InputStreamReader(stream).use { parse(resource, it, messageCollector) }
 
     /**
      * Parses the given text and returns the AST.
      *
-     * @param path The path of the file being parsed.
+     * @param resource The resource ID of the file being parsed.
      * @param reader The reader to read from.
      * @param messageCollector The message collector to use.
      * @return The AST if the input was successfully parsed or recovered; otherwise, `null`.
      */
-    fun parse(path: String, reader: Reader, messageCollector: MessageCollector): FileUnit? {
+    fun parse(resource: ResourceID, reader: Reader, messageCollector: MessageCollector): FileUnit? {
         val charStream = CharStreams.fromReader(reader)
 
         val errorListener = MessageCollectingAntlrErrorListener(
-            path = path,
-            collector = if (failFast) FailFastMessageCollectorWrapper(messageCollector) else messageCollector
+            resource = resource,
+            collector = if (failFast) FailFastMessageCollectorWrapper(messageCollector) else messageCollector,
+            sourceName = "Katerm Parser",
         )
 
         val lexer = KatermAntlrLexer(charStream)

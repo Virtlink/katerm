@@ -32,8 +32,8 @@ val Token.span: TextSpan? get() {
  * @return The span of the parser rule context, or `null` if the rule context has no span.
  */
 val ParserRuleContext.span: TextSpan? get() {
-    val startSpan = this.start.span
-    val endSpan = this.stop.span
+    val startSpan = this.start?.span
+    val endSpan = this.stop?.span
     if (startSpan == null || endSpan == null) return null
     return TextSpan(startSpan.start, endSpan.end)
 }

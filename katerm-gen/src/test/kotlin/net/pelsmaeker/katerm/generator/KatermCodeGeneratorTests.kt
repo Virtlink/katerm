@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.pelsmaeker.lsputils.diagnostics.Message
 import net.pelsmaeker.lsputils.diagnostics.MessageCollector
+import net.pelsmaeker.lsputils.diagnostics.ResourceID
 import java.nio.file.Path
 
 class KatermCodeGeneratorTests: FunSpec({
@@ -44,7 +45,7 @@ class KatermCodeGeneratorTests: FunSpec({
         val messages = mutableListOf<Message>()
         val collector = MessageCollector { msg -> messages.add(msg); true }
         val parser = KatermParser()
-        val result = parser.parse("test.katerm", program, collector)
+        val result = parser.parse(ResourceID.fromPath("test.katerm"), program, collector)
         val processedAst = KatermPreprocessor().preprocess(result!!)
         val generator = KatermCodeGenerator(
             outputDir = Path.of("tmp/"),

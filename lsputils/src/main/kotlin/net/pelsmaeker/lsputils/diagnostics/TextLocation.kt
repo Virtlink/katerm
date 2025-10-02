@@ -30,4 +30,9 @@ data class TextLocation(
     }
 
     override fun toString(): String = "$line:$column(@$offset)"
+
+    companion object {
+        /** An empty location at the start of the text. */
+        val ZERO = TextLocation(0, 1, 1)
+    }
 }

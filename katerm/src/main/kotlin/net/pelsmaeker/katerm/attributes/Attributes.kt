@@ -1,9 +1,15 @@
 package net.pelsmaeker.katerm.attributes
 
+import java.util.WeakHashMap
+
 /**
- * Associates attributes with objects.
+ * Associates attributes with objects using a weak hash map.
  */
-interface Attributes {
+class Attributes {
+
+    // We use a WeakHashMap which doesn't keep a pointer to the key object,
+    // so that the attributes don't prevent the object from being garbage collected.
+    private val map = WeakHashMap<Any, MutableMap<Attribute<*>, Any?>>()
 
     /**
      * Gets the value of the specified attribute for the specified object.
@@ -12,7 +18,11 @@ interface Attributes {
      * @param attribute The attribute to get.
      * @return The value of the attribute, or null if the attribute is not set or set to `null`.
      */
-    fun <T> getAttribute(obj: Any, attribute: Attribute<T>): T?
+    fun <T> getAttribute(obj: Any, attribute: Attribute<T>): T? {
+        val attrMap = map[obj] ?: return null
+        @Suppress("UNCHECKED_CAST")
+        return attrMap[attribute] as T?
+    }
 
     /**
      * Gets the value of the specified attribute for the specified object,
@@ -39,7 +49,13 @@ interface Attributes {
      * @param attribute The attribute to check.
      * @return `true` if the attribute is set (even if set to `null`); otherwise, `false`.
      */
-    fun <T> hasAttribute(obj: Any, attribute: Attribute<T>): Boolean
+    fun <T> hasAttribute(
+        obj: Any,
+        attribute: Attribute<T>,
+    ): Boolean {
+        val attrMap = map[obj] ?: return false
+        return attrMap.containsKey(attribute)
+    }
 
     /**
      * Sets the value of the specified attribute for the specified object.
@@ -49,7 +65,15 @@ interface Attributes {
      * @param value The value to set the attribute to, or `null` to clear the attribute.
      * @return The previous value of the attribute, or `null` if the attribute was not set or set to `null`.
      */
-    fun <T> setAttribute(obj: Any, attribute: Attribute<T>, value: T?): T?
+    fun <T> setAttribute(
+        obj: Any,
+        attribute: Attribute<T>,
+        value: T?,
+    ): T? {
+        val attrMap = map.getOrPut(obj) { mutableMapOf() }
+        @Suppress("UNCHECKED_CAST")
+        return attrMap.put(attribute, value) as T?
+    }
 
     /**
      * Clears the specified attribute for the specified object.
@@ -59,4 +83,19 @@ interface Attributes {
      * @return The previous value of the attribute, or `null` if the attribute was not set or set to `null`.
      */
     fun <T> clearAttribute(obj: Any, attribute: Attribute<T>): T? = setAttribute(obj, attribute, null)
+
+    /**
+     * Merges the attributes from the specified [other] attributes into these attributes,
+     * overwriting any existing attributes with the same key.
+     *
+     * @param other The other attributes to merge from.
+     */
+    fun addAttributes(other: Attributes) {
+        for ((obj, attrMap) in other.map) {
+            for ((attribute, value) in attrMap) {
+                this.setAttribute(obj, attribute, value)
+            }
+        }
+    }
+
 }
