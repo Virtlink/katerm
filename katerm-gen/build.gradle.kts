@@ -17,8 +17,8 @@ dependencies {
 
     // Parsing
     antlr               (libs.antlr)
-    implementation      (project(":lsputils"))
-    implementation      (project(":lsputils-antlr"))
+    implementation      (libs.lsp4k)
+    implementation      (libs.lsp4k.antlr)
 
     // Testing
     testImplementation  (libs.kotest)

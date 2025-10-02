@@ -7,6 +7,8 @@ ben-manes-versions              = "0.52.0"          # https://github.com/ben-man
 nexuspublish                    = "2.0.0"           # https://github.com/gradle-nexus/publish-plugin/
 ksp                             = "2.1.21-2.0.1"    # https://github.com/google/ksp
 
+# LSP
+lsp4k                           = "0.0.0"           # https://github.com/virtlink/lsp4k
 # Parsing
 antlr                           = "4.13.2"          # https://github.com/antlr/antlr4
 # Kotlin generation
@@ -38,6 +40,11 @@ google-devtools-ksp             = { id = "com.google.devtools.ksp",             
 # Platform
 kotlin-gradlePlugin             = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin",                   version.ref = "kotlin" }
 ksp-api                         = { module = "com.google.devtools.ksp:symbol-processing-api",               version.ref = "ksp" }
+
+# LSP
+lsp4k                           = { module = "net.pelsmaeker:lsp4k",                                        version.ref = "lsp4k" }
+lsp4k-antlr                     = { module = "net.pelsmaeker:lsp4k-antlr",                                  version.ref = "lsp4k" }
+
 # Parsing
 antlr                           = { module = "org.antlr:antlr4",                                            version.ref = "antlr" }
 # Kotlin generation
