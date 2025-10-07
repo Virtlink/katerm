@@ -8,7 +8,7 @@ nexuspublish                    = "2.0.0"           # https://github.com/gradle-
 ksp                             = "2.1.21-2.0.1"    # https://github.com/google/ksp
 
 # LSP
-lsp4k                           = "0.0.0"           # https://github.com/virtlink/lsp4k
+pidxin                          = "0.0.0"           # https://github.com/virtlink/pidxin
 # Parsing
 antlr                           = "4.13.2"          # https://github.com/antlr/antlr4
 # Kotlin generation
@@ -42,8 +42,8 @@ kotlin-gradlePlugin             = { module = "org.jetbrains.kotlin:kotlin-gradle
 ksp-api                         = { module = "com.google.devtools.ksp:symbol-processing-api",               version.ref = "ksp" }
 
 # LSP
-lsp4k                           = { module = "net.pelsmaeker:lsp4k",                                        version.ref = "lsp4k" }
-lsp4k-antlr                     = { module = "net.pelsmaeker:lsp4k-antlr",                                  version.ref = "lsp4k" }
+pidxin                          = { module = "net.pelsmaeker:pidxin",                                       version.ref = "pidxin" }
+pidxin-antlr                    = { module = "net.pelsmaeker:pidxin-antlr",                                 version.ref = "pidxin" }
 
 # Parsing
 antlr                           = { module = "org.antlr:antlr4",                                            version.ref = "antlr" }

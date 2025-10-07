@@ -17,8 +17,8 @@ dependencies {
 
     // Parsing
     antlr               (libs.antlr)
-    implementation      (libs.lsp4k)
-    implementation      (libs.lsp4k.antlr)
+    implementation      (libs.pidxin)
+    implementation      (libs.pidxin.antlr)
 
     // Testing
     testImplementation  (libs.kotest)

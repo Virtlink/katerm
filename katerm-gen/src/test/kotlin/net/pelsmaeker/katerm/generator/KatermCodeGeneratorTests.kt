@@ -1,11 +1,9 @@
 package net.pelsmaeker.katerm.generator
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import net.pelsmaeker.lsp4k.diagnostics.Message
-import net.pelsmaeker.lsp4k.diagnostics.MessageCollector
-import net.pelsmaeker.lsp4k.ResourceID
+import net.pelsmaeker.pidxin.diagnostics.Message
+import net.pelsmaeker.pidxin.diagnostics.MessageCollector
+import net.pelsmaeker.pidxin.ResourceID
 import java.nio.file.Path
 
 class KatermCodeGeneratorTests: FunSpec({

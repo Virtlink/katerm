@@ -2,10 +2,10 @@ package net.pelsmaeker.katerm.generator
 
 import net.pelsmaeker.katerm.generator.ast.KatermAstBuilder
 import net.pelsmaeker.katerm.generator.ast.FileUnit
-import net.pelsmaeker.lsp4k.diagnostics.FailFastMessageCollectorWrapper
-import net.pelsmaeker.lsp4k.diagnostics.MessageCollector
-import net.pelsmaeker.lsp4k.ResourceID
-import net.pelsmaeker.lsp4k.syntax.MessageCollectingAntlrErrorListener
+import net.pelsmaeker.pidxin.diagnostics.FailFastMessageCollectorWrapper
+import net.pelsmaeker.pidxin.diagnostics.MessageCollector
+import net.pelsmaeker.pidxin.ResourceID
+import net.pelsmaeker.pidxin.syntax.MessageCollectingAntlrErrorListener
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.InputStream
