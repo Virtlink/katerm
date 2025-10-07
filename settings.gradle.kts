@@ -1,7 +1,6 @@
 rootProject.name = "katerm-project"
 
 include(":katerm")
-include(":katerm-ksp")
-include(":katerm-gen")
-include(":example")
+//include(":katerm-ksp")
+//include(":katerm-gen")
 
