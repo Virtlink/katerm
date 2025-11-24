@@ -6,42 +6,145 @@ import net.pelsmaeker.katerm.generator.diagnostics.MessageCollector
 import java.nio.file.Path
 
 class KatermCodeGeneratorTests: FunSpec({
-    test("y") {
+    test("test") {
         // Arrange
         val program = """
-            package net.pelsmaeker.joelang.ast;
+            package net.pelsmaeker.l1lang.ast;
 
-            Unit = <modules: Module*>;
+            sort HasDecls(
+              imports: Import*,
+              declarations: Decl*,
+            );
             
-            Module = "mod" <name: string> "{" <declarations: Decl*> "}";
+            sort HasId(
+              id: Id,
+            );
             
-            sort Decl {
-              Def = "def" <name: string> ":" <type: Type> "=" <body: Expr> ";" ;
-            }
+            cons Unit(
+              imports: Import*,
+              declarations: Decl*,
+              mainExpression: Expr,
+            ) : HasDecls;
             
-            sort Type {
-              Int = "int";
-            }
+            template Unit = ${"\"\"\""}
+              {% for import in imports %}
+              {{ import }}
+              {% endfor %}
+        
+              {% for declaration in declarations %}
+              {{ declaration }}
+              {% endfor %}
+        
+              return {{ mainExpression }};
+            ${"\"\"\""};
             
-            sort Expr {
-              IntLiteral = <value: int>;
-              Ref = <name: string>;
-            }
+            cons Import(
+              id: Id,
+            ) : HasId;
             
-            sort AnalyzerType {
-              INT = "INT";
-              ERROR = "ERROR";
-            }
+            template Import = "import {{ id }};";
             
-            sort Label {
-              MOD = "MOD" "(" <name: string> ")";
-              DEF = <name: string> ":" <type: AnalyzerType>;
-              LEX = "LEX";
-            }
+            sort Decl(
+              name: Name,
+            );
+            
+            cons ModuleDecl(
+              name: string,
+              imports: Import*,
+              declarations: Decl*,
+            ) : Decl, HasDecls;
+            
+            template Module = ${"\"\"\""}
+              mod {{ name }} {
+                {% for import in imports %}
+                {{ import }}
+                {% endfor %}
+        
+                {% for declaration in declarations %}
+                {{ declaration }}
+                {% endfor %}
+              }
+            ${"\"\"\""};
+            
+            cons VarDecl(
+              name: Name,
+              type: Type,
+              body: Expr,
+            ) : Decl;
+            
+            template VarDecl = "var {{ name }}: {{ type }} = {{ body }};";
+            
+            sort Id;
+            
+            cons SimpleId(
+              name: Name,
+            ) : Id;
+            
+            template SimpleId = "{{ name }}";
+            
+            cons RootId(
+              name: Name,
+            ) : Id;
+            
+            template RootId = "::{{ name }}";
+            
+            cons QualifiedId(
+              id: Id,
+              name: Name,
+            ) : Id;
+            
+            template QualifiedId = "{{ id }}::{{ name }}";
+            
+            cons Name(
+              text: string,
+            );
+            
+            template Name = "{{ text }}";
+            
+            sort Expr;
+            
+            cons IntLit(
+              value: int,
+            ) : Expr;
+            
+            template IntLit = "{{ value }}";
+            
+            cons Ref(
+              id: Id,
+            ) : Expr, HasId;
+            
+            template Ref = "{{ id }}";
+            
+            cons Assign(
+              id: Id,
+              expr: Expr,
+            ) : Expr, HasId;
+            
+            template Assign = "{{ id }} := {{ expr }}";
+            
+            cons Add(
+              left: Expr,
+              right: Expr,
+            ) : Expr;
+            
+            template Add = "({{ left }} + {{ right }})";
+            
+            cons Seq(
+              first: Expr,
+              second: Expr,
+            ) : Expr;
+            
+            template Seq = "{{ first }}, {{ second }}";
+            
+            sort Type;
+            
+            cons IntType() : Type;
+            
+            template IntType = "Int";
         """.trimIndent()
         val messages = mutableListOf<Message>()
         val collector = MessageCollector { msg -> messages.add(msg); true }
-        val parser = KatermParser()
+        val parser = KatermParser(failFast = true)
         val result = parser.parse(ResourceID.fromPath("test.katerm"), program, collector)
         val processedAst = KatermPreprocessor().preprocess(result!!)
         val generator = KatermCodeGenerator(

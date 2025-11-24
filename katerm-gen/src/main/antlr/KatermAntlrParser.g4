@@ -10,25 +10,37 @@ unit
 
 decl
   : sortDecl
-  | ruleDecl
+  | consDecl
+  | templateDecl
   ;
 
 sortDecl
-  : SORT ID CURLY_OPEN decl* CURLY_CLOSE
+  : SORT ID (PAREN_OPEN varSpecList? PAREN_CLOSE)? (COLON typeList)? SEMICOLON
   ;
 
-ruleDecl
-  : ID EQUALS ruleSymbol* SEMICOLON
+consDecl
+  : CONS ID (PAREN_OPEN varSpecList? PAREN_CLOSE)? (COLON typeList)? SEMICOLON
   ;
 
-ruleSymbol
-  : STRINGLIT                                       # literalSymbol
-  | ANGLE_OPEN ID COLON typeSpec ANGLE_CLOSE        # namedSymbol
+templateDecl
+  : TEMPLATE ID EQUALS STRINGLIT SEMICOLON
+  ;
+
+varSpecList
+  : varSpec (COMMA varSpecList?)?
+  ;
+
+varSpec
+  : ID COLON typeSpec
   ;
 
 typeSpec
   : type STAR                                       # starTypeSpec
   | type                                            # simpleTypeSpec
+  ;
+
+typeList
+  : type (COMMA typeList?)?
   ;
 
 type

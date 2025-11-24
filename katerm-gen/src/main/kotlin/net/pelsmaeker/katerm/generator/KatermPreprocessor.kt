@@ -29,7 +29,7 @@ class KatermPreprocessor {
     fun preprocess(ast: FileUnit): IRFileUnit {
         // First, for each sort and constructor declaration
         // we assign a unique class name.
-        assignAllUniqueNames(ast.declarations, parents = listOf(ast), packageName = ast.packageName)
+        ast.declarations.forEach { decl -> assignUniqueName(decl, ast.packageName) }
 
         // Next, we resolve each reference (RefType) to a sort or constructor declaration.
         // We take lexical scoping into account.
@@ -42,34 +42,15 @@ class KatermPreprocessor {
     }
 
     /**
-     * Recursively assigns unique names to all declarations,
-     *
-     * @param decls The list of declarations to assign unique names to.
-     * @param parents The list of parent sorts of the declarations in [decls], used to construct unique names.
-     * @param packageName The name of the package into which the classes are generated.
-     */
-    private fun assignAllUniqueNames(decls: List<Decl>, parents: List<DeclContainer>, packageName: String) {
-        for (decl in decls) {
-            when (decl) {
-                is SortDecl -> {
-                    assignUniqueName(decl, parents, packageName)
-                    assignAllUniqueNames(decl.declarations, parents + decl, packageName)
-                }
-                is RuleDecl -> assignUniqueName(decl, parents, packageName)
-            }
-        }
-    }
-
-    /**
      * Assigns a unique class name to the given declaration with the given parent sorts.
      *
      * @param decl The declaration to assign a unique name to.
-     * @param parents The list of parent sorts.
      * @param packageName The name of the package into which the classes are generated.
      * @return The generated unique name for the declaration.
      */
-    private fun assignUniqueName(decl: Decl, parents: List<DeclContainer>, packageName: String): String {
-        val baseName = parents.joinToString(separator = "") { if (it is Decl) it.name else "" } + decl.name
+    private fun assignUniqueName(decl: Decl, packageName: String): String {
+        // TODO: We can be more creative here if we want by using the sort names.
+        val baseName = decl.name
 
         // Find a unique name for the declaration.
         var name = baseName

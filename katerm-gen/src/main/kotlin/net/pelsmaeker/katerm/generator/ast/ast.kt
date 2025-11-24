@@ -1,15 +1,9 @@
 package net.pelsmaeker.katerm.generator.ast
 
-import com.squareup.kotlinpoet.ClassName
-
 data class FileUnit(
     val packageName: String,
-    override val declarations: List<Decl>,
-) : DeclContainer
-
-sealed interface DeclContainer {
-    val declarations: List<Decl>
-}
+    val declarations: List<Decl>,
+)
 
 sealed interface Decl {
     val name: String
@@ -17,40 +11,47 @@ sealed interface Decl {
 
 data class SortDecl(
     override val name: String,
-    override val declarations: List<Decl>,
-) : Decl, DeclContainer
-
-data class RuleDecl(
-    override val name: String,
-    val symbols: List<Symbol>,
+    val varSpecs: List<VarSpec>,
+    var types: List<Type>,
 ) : Decl
 
-sealed interface Symbol
+data class ConsDecl(
+    override val name: String,
+    val varSpecs: List<VarSpec>,
+    var types: List<Type>,
+) : Decl
 
-data class StringLitSymbol(
-    val text: String,
-) : Symbol
+data class TemplateDecl(
+    override val name: String,
+    val templateText: String,
+) : Decl
 
-data class NamedSymbol(
+data class VarSpec(
     val name: String,
-    val typeSpec: Type,
-) : Symbol
+    val typeSpec: TypeSpec,
+)
+
+sealed interface TypeSpec
+
+data class StarTypeSpec(
+    val type: Type,
+) : TypeSpec
+
+data class SimpleTypeSpec(
+    val type: Type,
+) : TypeSpec
 
 sealed interface Type
-
-data object IntType : Type
-
-data object StringType : Type
 
 data class RefType(
     val name: String,
 ) : Type
 
-data class ResolvedRefType(
-    val declType: ClassName,
-//    val decl: Decl,
-) : Type
+data object IntType : Type
 
-data class StarType(
-    val sortSpec: Type,
-) : Type
+data object StringType : Type
+
+//data class ResolvedRefType(
+//    val declType: ClassName,
+////    val decl: Decl,
+//) : Type
