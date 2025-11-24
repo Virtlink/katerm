@@ -3,9 +3,8 @@ package net.pelsmaeker.katerm.generator
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import net.pelsmaeker.pidxin.diagnostics.Message
-import net.pelsmaeker.pidxin.diagnostics.MessageCollector
-import net.pelsmaeker.pidxin.ResourceID
+import net.pelsmaeker.katerm.generator.diagnostics.Message
+import net.pelsmaeker.katerm.generator.diagnostics.MessageCollector
 
 class KatermParserTests: FunSpec({
     test("x") {

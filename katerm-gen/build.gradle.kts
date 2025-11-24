@@ -10,19 +10,20 @@ plugins {
 
 dependencies {
     // Kotlin generation
-    implementation      (libs.kotlinpoet)
+    implementation(libs.kotlinpoet)
 
     // CLI
-    implementation      (libs.clikt)
+    implementation(libs.clikt)
 
     // Parsing
-    antlr               (libs.antlr)
-    implementation      (libs.pidxin)
-    implementation      (libs.pidxin.antlr)
+    antlr(libs.antlr)
+
+    // Logging
+    implementation(libs.logback)
 
     // Testing
-    testImplementation  (libs.kotest)
-    testImplementation  (libs.kotest.property)
+    testImplementation(libs.kotest)
+    testImplementation(libs.kotest.property)
 }
 
 tasks.named("compileKotlin") {
