@@ -10,6 +10,7 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.orNull
 import io.kotest.property.arbitrary.string
+import io.kotest.property.asSample
 import io.kotest.property.resolution.GlobalArbResolver
 import net.pelsmaeker.katerm.regex.RegexNfaBuilder
 import net.pelsmaeker.katerm.regex.TermRegexBuilder
@@ -42,8 +43,8 @@ val testRegexBuilder = TermRegexBuilder(
 /** A generator for arbitrary [TermVar] instances. */
 fun Arb.Companion.termVar(): Arb<TermVar> = arbitrary(
     edgecaseFn = { rs: RandomSource ->
-        val name = Arb.string().edgecase(rs) ?: "x"
-        testTermBuilder.newVar(name)
+        val name = Arb.string().edgecase(rs)?.value ?: "x"
+        testTermBuilder.newVar(name).asSample()
     },
     sampleFn = { rs: RandomSource ->
         val name = Arb.string().next(rs)
@@ -54,8 +55,8 @@ fun Arb.Companion.termVar(): Arb<TermVar> = arbitrary(
 /** A generator for arbitrary [IntTerm] instances. */
 fun Arb.Companion.intTerm(): Arb<IntTerm> = arbitrary(
     edgecaseFn = { rs: RandomSource ->
-        val value = Arb.int().edgecase(rs) ?: 0
-        testTermBuilder.newInt(value)
+        val value = Arb.int().edgecase(rs)?.value ?: 0
+        testTermBuilder.newInt(value).asSample()
     },
     sampleFn = { rs: RandomSource ->
         val value = Arb.int().next(rs)
@@ -66,8 +67,8 @@ fun Arb.Companion.intTerm(): Arb<IntTerm> = arbitrary(
 /** A generator for arbitrary [RealTerm] instances. */
 fun Arb.Companion.realTerm(): Arb<RealTerm> = arbitrary(
     edgecaseFn = { rs: RandomSource ->
-        val value = Arb.double().edgecase(rs) ?: 0.0
-        testTermBuilder.newReal(value)
+        val value = Arb.double().edgecase(rs)?.value ?: 0.0
+        testTermBuilder.newReal(value).asSample()
     },
     sampleFn = { rs: RandomSource ->
         val value = Arb.double().next(rs)
@@ -78,8 +79,8 @@ fun Arb.Companion.realTerm(): Arb<RealTerm> = arbitrary(
 /** A generator for arbitrary [StringTerm] instances. */
 fun Arb.Companion.stringTerm(): Arb<StringTerm> = arbitrary(
     edgecaseFn = { rs: RandomSource ->
-        val value = Arb.string().edgecase(rs) ?: "Foo"
-        testTermBuilder.newString(value)
+        val value = Arb.string().edgecase(rs)?.value ?: "Foo"
+        testTermBuilder.newString(value).asSample()
     },
     sampleFn = { rs: RandomSource ->
         val value = Arb.string().next(rs)
@@ -97,9 +98,9 @@ fun Arb.Companion.applTerm(maxDepth: Int = 3): Arb<ApplTerm> {
 
     return arbitrary(
         edgecaseFn = { rs: RandomSource ->
-            val op = Arb.string().edgecase(rs) ?: "Appl"
-            val args = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).edgecase(rs) ?: emptyList() else emptyList()
-            testTermBuilder.newAppl(op, args)
+            val op = Arb.string().edgecase(rs)?.value ?: "Appl"
+            val args = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).edgecase(rs)?.value ?: emptyList() else emptyList()
+            testTermBuilder.newAppl(op, args).asSample()
         },
         sampleFn = { rs: RandomSource ->
             val op = Arb.string().next(rs)
@@ -120,8 +121,8 @@ fun Arb.Companion.optionTerm(maxDepth: Int = 3): Arb<OptionTerm<Term>> {
 
     return arbitrary(
         edgecaseFn = { rs: RandomSource ->
-            val element = if (maxDepth > 0) Arb.term(maxDepth - 1).orNull().edgecase(rs) else null
-            testTermBuilder.newOption(element)
+            val element = if (maxDepth > 0) Arb.term(maxDepth - 1).orNull().edgecase(rs)?.value else null
+            testTermBuilder.newOption(element).asSample()
         },
         sampleFn = { rs: RandomSource ->
             val element = if (maxDepth > 0) Arb.term(maxDepth - 1).orNull().next(rs) else null
@@ -140,8 +141,8 @@ fun Arb.Companion.listTerm(maxDepth: Int = 3): Arb<ListTerm<Term>> {
 
     return arbitrary(
         edgecaseFn = { rs: RandomSource ->
-            val elements = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).edgecase(rs) ?: emptyList() else emptyList()
-            testTermBuilder.newListOf(elements)
+            val elements = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).edgecase(rs)?.value ?: emptyList() else emptyList()
+            testTermBuilder.newListOf(elements).asSample()
         },
         sampleFn = { rs: RandomSource ->
             val elements = if (maxDepth > 0) Arb.list(Arb.term(maxDepth - 1), 0..3).next(rs) else emptyList()
