@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]   # Just one
-        java: [11]            # Just one
+        java: [21]            # Just one
         gradle: [wrapper]     # Just one
     runs-on: ${{ matrix.os }}
     steps:

@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        java: [11]
+        java: [21]
         gradle: [wrapper]
     runs-on: ${{ matrix.os }}
     steps:

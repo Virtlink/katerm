@@ -56,7 +56,7 @@ subprojects {
     }
 
     configure<JavaPluginExtension> {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
         withSourcesJar()
         withJavadocJar()
     }
@@ -64,7 +64,7 @@ subprojects {
     tasks.withType<UsesKotlinJavaToolchain>().configureEach {
         val service = project.extensions.getByType<JavaToolchainService>()
         val customLauncher = service.launcherFor {
-            languageVersion.set(JavaLanguageVersion.of("11"))
+            languageVersion.set(JavaLanguageVersion.of(21))
         }
         kotlinJavaToolchain.toolchain.use(customLauncher)
     }
